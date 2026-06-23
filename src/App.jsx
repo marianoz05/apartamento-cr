@@ -579,7 +579,7 @@ function ContenidoEditor({ content, onSave }) {
           <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14, marginBottom: 12 }}>
             <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#1B4332" }}>🌿 Bienvenida + link del portal</p>
             <textarea
-              value={local.mensajes?.bienvenida || ""}
+              value={local.mensajes?.bienvenida || "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!"}
               onChange={e => setLocal(prev => ({ ...prev, mensajes: { ...prev.mensajes, bienvenida: e.target.value } }))}
               rows={8}
               style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "vertical", lineHeight: 1.6 }}
@@ -588,7 +588,7 @@ function ContenidoEditor({ content, onSave }) {
           <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14 }}>
             <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#D97706" }}>💰 Recordatorio de pago</p>
             <textarea
-              value={local.mensajes?.pago || ""}
+              value={local.mensajes?.pago || "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in."}
               onChange={e => setLocal(prev => ({ ...prev, mensajes: { ...prev.mensajes, pago: e.target.value } }))}
               rows={6}
               style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "vertical", lineHeight: 1.6 }}
@@ -652,7 +652,6 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [editReserva, setEditReserva] = useState(null);
   const [copiedToken, setCopiedToken] = useState(null);
   const [waMenu, setWaMenu] = useState(null);
-  const [dashboardDetail, setDashboardDetail] = useState(null);
   const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "CRC", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
@@ -820,46 +819,50 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     await sb.updateReserva(onLogoutToken, id, { limpieza_hecha: !r.limpieza_hecha });
     setReservas(prev => prev.map(r => r.id === id ? { ...r, limpieza_hecha: !r.limpieza_hecha } : r));
   }
-  const [confirmDelete, setConfirmDelete] = useState(null);
-
   async function deleteReserva(id) {
     await sb.deleteReserva(onLogoutToken, id);
     setReservas(prev => prev.filter(r => r.id !== id));
-    setConfirmDelete(null);
-  }
-
-  async function cancelarReserva(id) {
-    await sb.updateReserva(onLogoutToken, id, { estado: "cancelada" });
-    setReservas(prev => prev.map(r => r.id === id ? { ...r, estado: "cancelada" } : r));
-    setConfirmDelete(null);
   }
   function copyGuestLink(token) { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${token}`); setCopiedToken(token); setTimeout(() => setCopiedToken(null), 2000); }
 
   function sendWhatsApp(r, tipo) {
     const nombre = r.huesped_nombre.split(" ")[0];
-    const link = `https://apartamento-cr.vercel.app/g/${r.token}`;
+    const portalLink = `https://apartamento-cr.vercel.app/g/${r.token}`;
     const sym = MONEDAS[r.moneda] || "₡";
-    let msg = "";
+    const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/[^0-9]/g,"")}`;
 
-    if (tipo === "bienvenida") {
-      msg = `Hola ${nombre} 👋, te comparto toda la información para tu estadía en Apartamento CR.
-
-📅 Check-in: ${formatDate(r.check_in)} a partir de las 3:00 PM
-📅 Check-out: ${formatDate(r.check_out)} antes de las 12:00 PM
-
-Aquí tu guía con todo lo que necesitas saber:
-${link}
-
-¡Nos vemos pronto! 🌿`;
-    } else if (tipo === "pago") {
-      msg = `Hola ${nombre} 👋, te recordamos que tienes un saldo pendiente de ${sym}${Number(r.saldo||0).toLocaleString()} para tu reserva del ${formatDate(r.check_in)}.
-
-Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu disposición. 🙏`;
+    if (tipo === "link") {
+      const msg = `Hola ${nombre}, aqui tu guia de Apartamento CR: ${portalLink}`;
+      window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
+      return;
     }
 
-    const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`;
-    const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
-    window.open(url, "_blank");
+    const defaultBienvenida = `Hola ${nombre}, te comparto toda la informacion para tu estadia en Apartamento CR.
+
+Check-in: ${formatDate(r.check_in)} a partir de las 3:00 PM
+Check-out: ${formatDate(r.check_out)} antes de las 12:00 PM
+
+Aqui tu guia:
+${portalLink}
+
+Nos vemos pronto!`;
+    const defaultPago = `Hola ${nombre}, tienes un saldo pendiente de ${sym}${Number(r.saldo||0).toLocaleString()} para tu reserva del ${formatDate(r.check_in)}.
+
+Por favor coordina el pago antes del check-in.`;
+
+    const plantilla = tipo === "bienvenida"
+      ? (content?.mensajes?.bienvenida || defaultBienvenida)
+      : (content?.mensajes?.pago || defaultPago);
+
+    const msg = plantilla
+      .replace(/\[nombre\]/g, nombre)
+      .replace(/\[checkin\]/g, formatDate(r.check_in))
+      .replace(/\[checkout\]/g, formatDate(r.check_out))
+      .replace(/\[link\]/g, portalLink)
+      .replace(/\[saldo\]/g, Number(r.saldo||0).toLocaleString())
+      .replace(/\[moneda\]/g, sym);
+
+    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
   }
 
   const navItems = [["dashboard","📊","Resumen"],["calendario","📅","Calendario"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
@@ -923,32 +926,12 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
             <div style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
               <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 12px", color: "#374151" }}>Reservas recientes</p>
               {reservas.slice(0, 3).map((r) => (
-                <div key={r.id} onClick={() => { setDashboardDetail(dashboardDetail?.id === r.id ? null : r); }}
-                  style={{ padding: "10px 0", borderBottom: "1px solid #F3F4F6", cursor: "pointer" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{r.huesped_nombre}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{formatDate(r.check_in)} → {formatDate(r.check_out)}</p>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      {estadoBadge(r.estado)}
-                      <span style={{ fontSize: 12, color: "#9CA3AF" }}>{dashboardDetail?.id === r.id ? "▲" : "▼"}</span>
-                    </div>
+                <div key={r.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: "1px solid #F3F4F6" }}>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{r.huesped_nombre}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{formatDate(r.check_in)} → {formatDate(r.check_out)}</p>
                   </div>
-                  {dashboardDetail?.id === r.id && (
-                    <div style={{ marginTop: 10, background: "#F9FAFB", borderRadius: 10, padding: 12 }}>
-                      {r.cantidad_huespedes && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>👥 {r.cantidad_huespedes} huéspedes</p>}
-                      {r.telefono && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>📱 {r.codigo_pais} {r.telefono}</p>}
-                      {r.noches > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>🌙 {r.noches} noches</p>}
-                      {r.monto_total > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>💰 Total: {fmt(r.monto_total, r.moneda)}</p>}
-                      {Number(r.saldo||0) > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#D97706", fontWeight: 700 }}>⚠️ Saldo: {fmt(r.saldo, r.moneda)}</p>}
-                      {r.llave_entregada && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#166534" }}>🔑 Llave entregada</p>}
-                      <button onClick={e => { e.stopPropagation(); openEditReserva(r); setView("reservas"); setDashboardDetail(null); }}
-                        style={{ marginTop: 8, background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                        ✏️ Editar reserva
-                      </button>
-                    </div>
-                  )}
+                  {estadoBadge(r.estado)}
                 </div>
               ))}
             </div>
@@ -991,12 +974,10 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
 
         {view === "reservas" && (
           <div>
-            {!showForm && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Reservas</p>
-                <button onClick={openNewReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
-              </div>
-            )}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Reservas</p>
+              <button onClick={openNewReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
+            </div>
             {showForm && (
               <div style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}>
                 <p style={{ fontWeight: 700, fontSize: 15, margin: "0 0 14px" }}>{editReserva ? "Editar reserva" : "Nueva reserva"}</p>
@@ -1130,7 +1111,7 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                 </div>
               </div>
             )}
-            {!showForm && <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {reservas.map(r => (
                 <div key={r.id} style={{ background: "#fff", borderRadius: 16, padding: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
@@ -1159,10 +1140,12 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                         <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
                         <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{fmt(Number(r.pago1_monto||0) + Number(r.pago2_monto||0), r.moneda)}</p>
                       </div>
-                      <div style={{ background: Number(r.saldo) > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: Number(r.saldo) > 0 ? "#D97706" : "#166534" }}>{fmt(r.saldo, r.moneda)}</p>
-                      </div>
+                      {Number(r.saldo||0) > 0 && (
+                        <div style={{ background: "#FEF3C7", borderRadius: 8, padding: "5px 10px" }}>
+                          <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
+                          <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#D97706" }}>{fmt(r.saldo, r.moneda)}</p>
+                        </div>
+                      )}
                       {r.llave_entregada && (
                         <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
                           <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>🔑 Llave entregada</p>
@@ -1171,26 +1154,6 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                     </div>
                   )}
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => copyGuestLink(r.token)} style={{ background: copiedToken === r.token ? "#DCFCE7" : "#EFF6FF", color: copiedToken === r.token ? "#16A34A" : "#2563EB", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                      {copiedToken === r.token ? "✓ Copiado" : "🔗 Link huésped"}
-                    </button>
-                    {r.telefono && (
-                      <div style={{ display: "flex", gap: 6, position: "relative" }}>
-                        <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                          💬 WhatsApp ▾
-                        </button>
-                        {waMenu === r.id && (
-                          <div style={{ position: "absolute", top: 32, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 220, overflow: "hidden" }}>
-                            <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
-                              🌿 Bienvenida + link del portal
-                            </button>
-                            <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#D97706" }}>
-                              💰 Recordatorio de pago
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
                     <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
                     {r.telefono && (
                       <div style={{ position: "relative" }}>
@@ -1237,7 +1200,7 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                   )}
                 </div>
               ))}
-            </div>}
+            </div>
           </div>
         )}
 
