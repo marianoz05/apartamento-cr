@@ -611,7 +611,44 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [showForm, setShowForm] = useState(false);
   const [editReserva, setEditReserva] = useState(null);
   const [copiedToken, setCopiedToken] = useState(null);
-  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", check_in: "", check_out: "", noches: 0, monto_noche: 0, monto_total: 0, pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, estado: "pendiente" };
+  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "CRC", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
+
+  const PAISES = [
+    { code: "+506", label: "🇨🇷 CR +506" },
+    { code: "+502", label: "🇬🇹 GT +502" },
+    { code: "+503", label: "🇸🇻 SV +503" },
+    { code: "+504", label: "🇭🇳 HN +504" },
+    { code: "+505", label: "🇳🇮 NI +505" },
+    { code: "+507", label: "🇵🇦 PA +507" },
+    { code: "+52",  label: "🇲🇽 MX +52"  },
+    { code: "+1",   label: "🇺🇸 US +1"   },
+    { code: "+57",  label: "🇨🇴 CO +57"  },
+  ];
+
+  const MONEDAS = { CRC: "₡", USD: "$" };
+
+  function fmt(amount, moneda) {
+    const sym = MONEDAS[moneda] || "₡";
+    return sym + Number(amount || 0).toLocaleString();
+  }
+
+  function checkTraslape(checkIn, checkOut, excludeId = null) {
+    if (!checkIn || !checkOut) return { traslape: false, tipo: null };
+    return reservas.reduce((acc, r) => {
+      if (excludeId && r.id === excludeId) return acc;
+      if (r.estado === "cancelada" || r.estado === "completada") return acc;
+      const rIn = r.check_in, rOut = r.check_out;
+      // Full overlap
+      if (checkIn < rOut && checkOut > rIn) {
+        // Check if it's just checkout=checkin (limpieza)
+        if (checkIn === rOut || checkOut === rIn) {
+          return { traslape: true, tipo: "limpieza", nombre: r.huesped_nombre };
+        }
+        return { traslape: true, tipo: "total", nombre: r.huesped_nombre };
+      }
+      return acc;
+    }, { traslape: false, tipo: null });
+  }
   const [form, setForm] = useState(emptyForm);
 
   function calcularNoches(ci, co) {
@@ -665,19 +702,33 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     setEditReserva(r);
     setForm({
       huesped_nombre: r.huesped_nombre || "", huesped_email: r.huesped_email || "",
-      telefono: r.telefono || "", check_in: r.check_in || "", check_out: r.check_out || "",
-      noches: r.noches || 0, monto_noche: r.monto_noche || 0, monto_total: r.monto_total || 0,
+      telefono: r.telefono || "", codigo_pais: r.codigo_pais || "+506",
+      check_in: r.check_in || "", check_out: r.check_out || "",
+      noches: r.noches || 0, cantidad_huespedes: r.cantidad_huespedes || 1,
+      monto_noche: r.monto_noche || 0, monto_total: r.monto_total || 0,
+      moneda: r.moneda || "CRC",
       pago1_monto: r.pago1_monto || 0, pago1_fecha: r.pago1_fecha || "",
       pago2_monto: r.pago2_monto || 0, pago2_fecha: r.pago2_fecha || "",
-      saldo: r.saldo || 0, llave_entregada: r.llave_entregada || false, estado: r.estado || "pendiente",
+      saldo: r.saldo || 0, llave_entregada: r.llave_entregada || false,
+      traslape_autorizado: r.traslape_autorizado || false, estado: r.estado || "pendiente",
     });
     setShowForm(true);
   }
   async function saveReserva() {
     if (!form.huesped_nombre || !form.check_in || !form.check_out) return;
+    const traslape = checkTraslape(form.check_in, form.check_out, editReserva?.id);
+    if (traslape.traslape && traslape.tipo === "total") {
+      alert(`❌ Conflicto de fechas con la reserva de ${traslape.nombre}. No se puede guardar.`);
+      return;
+    }
+    if (traslape.traslape && traslape.tipo === "limpieza" && !form.traslape_autorizado) {
+      alert(`⚠️ El check-in/out coincide con la reserva de ${traslape.nombre}. Activa "Autorizar traslape de limpieza" para continuar.`);
+      return;
+    }
     const payload = {
       ...form,
       noches: Number(form.noches),
+      cantidad_huespedes: Number(form.cantidad_huespedes),
       monto_noche: Number(form.monto_noche),
       monto_total: Number(form.monto_total),
       pago1_monto: Number(form.pago1_monto),
@@ -824,12 +875,26 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 <p style={{ fontWeight: 700, fontSize: 15, margin: "0 0 14px" }}>{editReserva ? "Editar reserva" : "Nueva reserva"}</p>
 
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Huésped</p>
-                {[["huesped_nombre","Nombre completo","text"],["huesped_email","Email","email"],["telefono","Teléfono","tel"]].map(([key, label, type]) => (
-                  <div key={key} style={{ marginBottom: 10 }}>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>{label}</label>
-                    <input type={type} value={form[key]} onChange={e => updForm(key, e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                <div style={{ marginBottom: 10 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Nombre completo</label>
+                  <input type="text" value={form.huesped_nombre} onChange={e => updForm("huesped_nombre", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                </div>
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ width: 130 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>País</label>
+                    <select value={form.codigo_pais} onChange={e => updForm("codigo_pais", e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 12, outline: "none", background: "#fff" }}>
+                      {PAISES.map(p => <option key={p.code} value={p.code}>{p.label}</option>)}
+                    </select>
                   </div>
-                ))}
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Teléfono</label>
+                    <input type="tel" value={form.telefono} onChange={e => updForm("telefono", e.target.value)} placeholder="8891-1513" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cantidad de huéspedes</label>
+                  <input type="number" min="1" max="10" value={form.cantidad_huespedes} onChange={e => updForm("cantidad_huespedes", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                </div>
 
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Fechas</p>
                 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
@@ -846,6 +911,37 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   <span style={{ fontSize: 13, color: "#166534" }}>🌙 <strong>{form.noches}</strong> noches</span>
                 </div>
 
+                {/* Traslape warning */}
+                {(() => {
+                  const t = checkTraslape(form.check_in, form.check_out, editReserva?.id);
+                  if (!t.traslape) return null;
+                  if (t.tipo === "total") return (
+                    <div style={{ background: "#FEE2E2", border: "1px solid #FECACA", borderRadius: 10, padding: 12, marginBottom: 10 }}>
+                      <p style={{ margin: 0, fontSize: 13, color: "#991B1B", fontWeight: 600 }}>❌ Conflicto con reserva de {t.nombre}</p>
+                    </div>
+                  );
+                  return (
+                    <div style={{ background: "#FEF3C7", border: "1px solid #FDE68A", borderRadius: 10, padding: 12, marginBottom: 10 }}>
+                      <p style={{ margin: "0 0 8px", fontSize: 13, color: "#92400E", fontWeight: 600 }}>⚠️ Check-in/out coincide con {t.nombre}</p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <button onClick={() => updForm("traslape_autorizado", !form.traslape_autorizado)} style={{ width: 24, height: 24, borderRadius: 6, border: form.traslape_autorizado ? "none" : "2px solid #D97706", background: form.traslape_autorizado ? "#D97706" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          {form.traslape_autorizado && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
+                        </button>
+                        <span style={{ fontSize: 12, color: "#92400E", fontWeight: 600 }}>Autorizar traslape de limpieza</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Moneda</p>
+                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                  {Object.entries(MONEDAS).map(([key, sym]) => (
+                    <button key={key} onClick={() => updForm("moneda", key)} style={{ flex: 1, background: form.moneda === key ? "#1B4332" : "#F3F4F6", color: form.moneda === key ? "#fff" : "#374151", border: "none", borderRadius: 10, padding: "8px 0", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                      {sym} {key}
+                    </button>
+                  ))}
+                </div>
+
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Montos</p>
                 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
                   <div style={{ flex: 1 }}>
@@ -854,7 +950,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Total</label>
-                    <div style={{ padding: "8px 12px", borderRadius: 8, background: "#F9FAFB", border: "1px solid #E5E7EB", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>{Number(form.monto_total).toLocaleString()}</div>
+                    <div style={{ padding: "8px 12px", borderRadius: 8, background: "#F9FAFB", border: "1px solid #E5E7EB", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>{fmt(form.monto_total, form.moneda)}</div>
                   </div>
                 </div>
 
@@ -880,7 +976,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 </div>
                 <div style={{ background: Number(form.saldo) > 0 ? "#FEF3C7" : "#DCFCE7", borderRadius: 10, padding: "8px 12px", marginBottom: 12 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: Number(form.saldo) > 0 ? "#D97706" : "#166534" }}>
-                    Saldo pendiente: {Number(form.saldo).toLocaleString()}
+                    Saldo pendiente: {fmt(form.saldo, form.moneda)}
                   </span>
                 </div>
 
@@ -910,7 +1006,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                     <div>
                       <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.huesped_email}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.cantidad_huespedes ? `👥 ${r.cantidad_huespedes} huéspedes` : ""}{r.telefono ? ` · ${r.codigo_pais||""} ${r.telefono}` : ""}</p>
                     </div>
                     {estadoBadge(r.estado)}
                   </div>
@@ -927,15 +1023,15 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                       <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
                         <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{Number(r.monto_total).toLocaleString()}</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{fmt(r.monto_total, r.moneda)}</p>
                       </div>
                       <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "5px 10px" }}>
                         <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{(Number(r.pago1_monto||0) + Number(r.pago2_monto||0)).toLocaleString()}</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{fmt(Number(r.pago1_monto||0) + Number(r.pago2_monto||0), r.moneda)}</p>
                       </div>
                       <div style={{ background: Number(r.saldo) > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
                         <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: Number(r.saldo) > 0 ? "#D97706" : "#166534" }}>{Number(r.saldo||0).toLocaleString()}</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: Number(r.saldo) > 0 ? "#D97706" : "#166534" }}>{fmt(r.saldo, r.moneda)}</p>
                       </div>
                       {r.llave_entregada && (
                         <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
@@ -949,7 +1045,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       {copiedToken === r.token ? "✓ Copiado" : "🔗 Link huésped"}
                     </button>
                     {r.telefono && (
-                      <a href={`https://wa.me/${r.telefono.replace(/[\s\-+]/g, "")}`} target="_blank" rel="noopener noreferrer" style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+                      <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer" style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
                         💬 WhatsApp
                       </a>
                     )}
