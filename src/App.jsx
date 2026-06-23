@@ -908,13 +908,17 @@ export default function App() {
         sb.getContenido(null),
       ]).then(([r, savedContent]) => {
         console.log("Setting guestReservaData:", r);
-        if (r && r.id) setGuestReservaData(r);
-        if (savedContent && typeof savedContent === "object" && Object.keys(savedContent).length > 0) setContent(savedContent);
+        const reservaValida = r && r.id ? r : null;
+        const contenidoValido = savedContent && typeof savedContent === "object" && Object.keys(savedContent).length > 0 ? savedContent : null;
+        if (contenidoValido) setContent(contenidoValido);
+        setGuestReservaData(reservaValida);
         setGuestLoading(false);
       }).catch(e => {
         console.error("Portal load error:", e);
         setGuestLoading(false);
       });
+    } else {
+      setGuestLoading(false);
     }
   }, []);
 
@@ -964,15 +968,17 @@ export default function App() {
       {screen === "guest" && (
         guestLoading
           ? <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif" }}><p style={{ color: "#6B7280" }}>Cargando...</p></div>
-          : (guestReservaData && guestReservaData.id)
-            ? <GuestPortal reserva={guestReservaData} content={content} />
-            : <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
-                <div style={{ textAlign: "center", padding: 32 }}>
-                  <p style={{ fontSize: 48, margin: "0 0 16px" }}>🔒</p>
-                  <p style={{ fontWeight: 800, fontSize: 20, color: "#111827", margin: "0 0 8px" }}>Link no válido</p>
-                  <p style={{ color: "#6B7280", fontSize: 14 }}>Este link no existe o ya expiró.</p>
+          : guestReservaData !== undefined
+            ? guestReservaData !== null
+              ? <GuestPortal reserva={guestReservaData} content={content} />
+              : <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
+                  <div style={{ textAlign: "center", padding: 32 }}>
+                    <p style={{ fontSize: 48, margin: "0 0 16px" }}>🔒</p>
+                    <p style={{ fontWeight: 800, fontSize: 20, color: "#111827", margin: "0 0 8px" }}>Link no válido</p>
+                    <p style={{ color: "#6B7280", fontSize: 14 }}>Este link no existe o ya expiró.</p>
+                  </div>
                 </div>
-              </div>
+            : <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif" }}><p style={{ color: "#6B7280" }}>Cargando...</p></div>
       )}
     </div>
   );
