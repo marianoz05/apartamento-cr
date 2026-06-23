@@ -948,21 +948,28 @@ export default function App() {
   const guestMatch = path.match(/^\/g\/(.+)$/);
   const guestToken = guestMatch ? guestMatch[1] : null;
 
-  const [screen, setScreen] = useState(guestToken ? "guest" : "login");
+  const savedToken = localStorage.getItem("cr_token");
+  const [screen, setScreen] = useState(guestToken ? "guest" : savedToken ? "admin" : "login");
   const [content, setContent] = useState(INITIAL_CONTENT);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(savedToken);
+
+  useEffect(() => {
+    if (savedToken && !guestToken) {
+      sb.getContenido(savedToken).then(c => {
+        if (c && Object.keys(c).length > 0) setContent(c);
+      });
+    }
+  }, []);
 
   async function handleLogin(t) {
     setToken(t);
+    localStorage.setItem("cr_token", t);
     const savedContent = await sb.getContenido(t);
     if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
     setScreen("admin");
-    // iOS Safari fix: blur active element and scroll to top after transition
     setTimeout(() => {
       if (document.activeElement) document.activeElement.blur();
       window.scrollTo({ top: 0, behavior: "instant" });
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
     }, 100);
   }
 
@@ -980,7 +987,7 @@ export default function App() {
       )}
       {screen === "admin" && (
         <AdminPanel
-          onLogout={async () => { await sb.signOut(token); setToken(null); setScreen("login"); }}
+          onLogout={async () => { await sb.signOut(token); setToken(null); localStorage.removeItem("cr_token"); setScreen("login"); }}
           onLogoutToken={token}
           content={content}
           onContentSave={async (updated) => { await sb.saveContenido(token, updated); setContent(updated); }}
