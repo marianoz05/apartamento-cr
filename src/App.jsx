@@ -898,51 +898,12 @@ export default function App() {
   const [screen, setScreen] = useState(guestToken ? "guest" : "login");
   const [content, setContent] = useState(INITIAL_CONTENT);
   const [token, setToken] = useState(null);
-  const [guestReservaData, setGuestReservaData] = useState(undefined);
-  const [guestLoading, setGuestLoading] = useState(!!guestToken);
-
-  useEffect(() => {
-    if (guestToken) {
-      Promise.all([
-        sb.getReservaByToken(guestToken),
-        sb.getContenido(null),
-      ]).then(([r, savedContent]) => {
-        console.log("Setting guestReservaData:", r);
-        const reservaValida = r && r.id ? r : null;
-        const contenidoValido = savedContent && typeof savedContent === "object" && Object.keys(savedContent).length > 0 ? savedContent : null;
-        if (contenidoValido) setContent(contenidoValido);
-        setGuestReservaData(reservaValida);
-        setGuestLoading(false);
-      }).catch(e => {
-        console.error("Portal load error:", e);
-        setGuestLoading(false);
-      });
-    } else {
-      setGuestLoading(false);
-    }
-  }, []);
 
   async function handleLogin(t) {
     setToken(t);
     const savedContent = await sb.getContenido(t);
     if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
     setScreen("admin");
-  }
-
-  const guestReserva = guestToken
-    ? DEMO_RESERVAS.find(r => r.token === guestToken) || null
-    : DEMO_RESERVAS[0];
-
-  if (guestToken && !guestReserva) {
-    return (
-      <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
-        <div style={{ textAlign: "center", padding: 32 }}>
-          <p style={{ fontSize: 48, margin: "0 0 16px" }}>🔒</p>
-          <p style={{ fontWeight: 800, fontSize: 20, color: "#111827", margin: "0 0 8px" }}>Link no válido</p>
-          <p style={{ color: "#6B7280", fontSize: 14 }}>Este link no existe o ya expiró.</p>
-        </div>
-      </div>
-    );
   }
 
   return (
