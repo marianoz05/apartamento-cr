@@ -60,7 +60,8 @@ const sb = {
       headers: this.headers(token),
     });
     const rows = await res.json();
-    return rows[0]?.data || null;
+    console.log("getContenido response:", JSON.stringify(rows));
+    return Array.isArray(rows) ? (rows[0]?.data || null) : null;
   },
   async saveContenido(token, data) {
     await fetch(`${SUPABASE_URL}/rest/v1/contenido?id=eq.1`, {
@@ -74,7 +75,8 @@ const sb = {
       headers: this.headers(null),
     });
     const rows = await res.json();
-    return rows[0] || null;
+    console.log("getReservaByToken response:", JSON.stringify(rows));
+    return Array.isArray(rows) ? (rows[0] || null) : null;
   },
 };
 
