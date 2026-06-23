@@ -1004,8 +1004,8 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       const isToday = dateStr === today;
                       const isSelected = selectedDay === dateStr;
                       return (
-                        <div key={day} onClick={() => dayRes.length > 0 && setSelectedDay(isSelected ? null : dateStr)}
-                          style={{ minHeight: 44, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", padding: 3, background: isSelected ? "#DCFCE7" : isToday ? "#F0FDF4" : "#fff", cursor: dayRes.length > 0 ? "pointer" : "default" }}>
+                        <div key={day} onClick={() => setSelectedDay(isSelected ? null : dateStr)}
+                          style={{ minHeight: 44, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", padding: 3, background: isSelected ? "#DCFCE7" : isToday ? "#F0FDF4" : "#fff", cursor: "pointer" }}>
                           <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: isToday ? 800 : 500, color: isSelected ? "#166534" : isToday ? "#16A34A" : "#374151", textAlign: "center" }}>{day}</p>
                           {dayRes.slice(0,1).map(r => <div key={r.id} style={{ background: (statColors[r.estado]||"#9CA3AF")+"20", borderLeft: `2px solid ${statColors[r.estado]||"#9CA3AF"}`, borderRadius: 3, padding: "1px 3px", fontSize: 9, fontWeight: 700, color: statColors[r.estado]||"#6B7280", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{r.huesped_nombre.split(" ")[0]}</div>)}
                           {dayRes.length > 1 && <p style={{ margin: "1px 0 0", fontSize: 9, color: "#9CA3AF", textAlign: "center" }}>+{dayRes.length-1}</p>}
