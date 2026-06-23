@@ -1115,7 +1115,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Monto por noche</label>
-                    <input type="number" value={form.monto_noche} onChange={e => updForm("monto_noche", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    <div style={{ display: "flex", alignItems: "center", border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
+                      <span style={{ padding: "8px 10px", background: "#F9FAFB", fontSize: 13, fontWeight: 700, color: "#374151", borderRight: "1px solid #E5E7EB" }}>{MONEDAS[form.moneda]||"$"}</span>
+                      <input type="number" value={form.monto_noche} onChange={e => updForm("monto_noche", e.target.value)} style={{ flex: 1, padding: "8px 12px", border: "none", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    </div>
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Total</label>
@@ -1126,18 +1129,24 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Pago 1</label>
-                    <input type="number" value={form.pago1_monto} onChange={e => updForm("pago1_monto", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    <div style={{ display: "flex", alignItems: "center", border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
+                      <span style={{ padding: "8px 10px", background: "#F9FAFB", fontSize: 13, fontWeight: 700, color: "#374151", borderRight: "1px solid #E5E7EB" }}>{MONEDAS[form.moneda]||"$"}</span>
+                      <input type="number" value={form.pago1_monto} onChange={e => updForm("pago1_monto", e.target.value)} style={{ flex: 1, padding: "8px 12px", border: "none", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    </div>
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha pago 1</label>
                     <input type="date" value={form.pago1_fecha} onChange={e => updForm("pago1_fecha", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
                 </div>
-                {Number(form.pago1_monto) > 0 && (
+                {Number(form.pago1_monto) > 0 && form.pago1_fecha && Number(form.saldo) > 0 && (
                   <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
                     <div style={{ flex: 1 }}>
                       <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Pago 2</label>
-                      <input type="number" value={form.pago2_monto} onChange={e => updForm("pago2_monto", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                      <div style={{ display: "flex", alignItems: "center", border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
+                        <span style={{ padding: "8px 10px", background: "#F9FAFB", fontSize: 13, fontWeight: 700, color: "#374151", borderRight: "1px solid #E5E7EB" }}>{MONEDAS[form.moneda]||"$"}</span>
+                        <input type="number" value={form.pago2_monto} onChange={e => updForm("pago2_monto", e.target.value)} style={{ flex: 1, padding: "8px 12px", border: "none", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                      </div>
                     </div>
                     <div style={{ flex: 1 }}>
                       <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha pago 2</label>
@@ -1217,11 +1226,15 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                           <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#D97706" }}>{fmt(r.saldo, r.moneda)}</p>
                         </div>
                       )}
-                      {r.llave_entregada && (
+                      {r.llave_entregada ? (
                         <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
                           <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>🔑 Llave entregada</p>
                         </div>
-                      )}
+                      ) : ["pendiente","confirmada"].includes(r.estado) ? (
+                        <div style={{ background: "#FEE2E2", borderRadius: 8, padding: "5px 10px" }}>
+                          <p style={{ margin: 0, fontSize: 11, color: "#991B1B", fontWeight: 700 }}>🔑 Llave pendiente</p>
+                        </div>
+                      ) : null}
                     </div>
                   )}
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
