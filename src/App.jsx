@@ -898,7 +898,7 @@ export default function App() {
   const [screen, setScreen] = useState(guestToken ? "guest" : "login");
   const [content, setContent] = useState(INITIAL_CONTENT);
   const [token, setToken] = useState(null);
-  const [guestReservaData, setGuestReservaData] = useState(null);
+  const [guestReservaData, setGuestReservaData] = useState(undefined);
   const [guestLoading, setGuestLoading] = useState(!!guestToken);
 
   useEffect(() => {
@@ -907,8 +907,12 @@ export default function App() {
         sb.getReservaByToken(guestToken),
         sb.getContenido(null),
       ]).then(([r, savedContent]) => {
-        setGuestReservaData(r);
-        if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
+        console.log("Setting guestReservaData:", r);
+        if (r && r.id) setGuestReservaData(r);
+        if (savedContent && typeof savedContent === "object" && Object.keys(savedContent).length > 0) setContent(savedContent);
+        setGuestLoading(false);
+      }).catch(e => {
+        console.error("Portal load error:", e);
         setGuestLoading(false);
       });
     }
@@ -960,7 +964,7 @@ export default function App() {
       {screen === "guest" && (
         guestLoading
           ? <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif" }}><p style={{ color: "#6B7280" }}>Cargando...</p></div>
-          : guestReservaData
+          : (guestReservaData && guestReservaData.id)
             ? <GuestPortal reserva={guestReservaData} content={content} />
             : <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
                 <div style={{ textAlign: "center", padding: 32 }}>
