@@ -768,7 +768,13 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     return reservas.filter(r => r.estado !== "completada" && isDateInRange(dateStr, r.check_in, r.check_out));
   }
-  function openNewReserva() { setEditReserva(null); setForm(emptyForm); setShowForm(true); }
+  function openNewReserva() {
+    setEditReserva(null);
+    const base = { ...emptyForm };
+    if (selectedDay) base.check_in = selectedDay;
+    setForm(base);
+    setShowForm(true);
+  }
   function openEditReserva(r) {
     setEditReserva(r);
     setForm({
@@ -1210,7 +1216,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                         💬 WhatsApp ▾
                       </button>
                       {waMenu === r.id && (
-                        <div style={{ position: "absolute", top: 32, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
+                        <div style={{ position: "absolute", bottom: 36, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
                           {r.telefono && (
                             <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer"
                               onClick={() => setWaMenu(null)}
