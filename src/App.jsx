@@ -394,7 +394,10 @@ function ContenidoEditor({ content, onSave }) {
       const next = JSON.parse(JSON.stringify(prev));
       const keys = path.split(".");
       let obj = next;
-      for (let i = 0; i < keys.length - 1; i++) obj = obj[keys[i]];
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!obj[keys[i]]) obj[keys[i]] = {};
+        obj = obj[keys[i]];
+      }
       obj[keys[keys.length - 1]] = value;
       return next;
     });
