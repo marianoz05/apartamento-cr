@@ -6,11 +6,12 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = {
   headers(token) {
-    return {
+    const h = {
       "Content-Type": "application/json",
       "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${token || SUPABASE_ANON_KEY}`,
     };
+    if (token) h["Authorization"] = `Bearer ${token}`;
+    return h;
   },
   async signIn(email, password) {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
