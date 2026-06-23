@@ -148,6 +148,8 @@ const INITIAL_CONTENT = {
   ],
   ubicacion: {
     direccion: "Laureles, Medellín, Colombia",
+    edificio: "",
+    numero: "",
     maps_link: "",
   },
   mensajes: {
@@ -225,6 +227,8 @@ function GuestPortal({ reserva, content }) {
             <div style={{ background: "#EFF6FF", borderRadius: 14, padding: 14, marginBottom: 10 }}>
               <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.1em" }}>Dirección</p>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1E3A5F" }}>{c.ubicacion.direccion}</p>
+              {c.ubicacion?.edificio && <p style={{ margin: "6px 0 0", fontSize: 13, color: "#374151" }}>🏢 {c.ubicacion.edificio}</p>}
+              {c.ubicacion?.numero && <p style={{ margin: "4px 0 0", fontSize: 13, color: "#374151" }}>🚪 Apto. {c.ubicacion.numero}</p>}
             </div>
           )}
           {c.ubicacion?.maps_link && (
@@ -479,6 +483,8 @@ function ContenidoEditor({ content, onSave }) {
         <div style={cardStyle}>
           <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 12px" }}>Ubicación del apartamento</p>
           <FieldInput label="Dirección" value={local.ubicacion?.direccion || ""} onChange={v => upd("ubicacion.direccion", v)} />
+          <FieldInput label="Edificio" value={local.ubicacion?.edificio || ""} onChange={v => upd("ubicacion.edificio", v)} />
+          <FieldInput label="Número de departamento" value={local.ubicacion?.numero || ""} onChange={v => upd("ubicacion.numero", v)} />
           <FieldInput label="Link de Google Maps" value={local.ubicacion?.maps_link || ""} onChange={v => upd("ubicacion.maps_link", v)} />
           {local.ubicacion?.maps_link && (
             <a href={local.ubicacion.maps_link} target="_blank" rel="noopener noreferrer"
