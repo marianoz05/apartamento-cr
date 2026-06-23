@@ -657,7 +657,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F8FAFC", minHeight: "100vh" }}>
-      <div style={{ background: "#1B4332", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ background: "#1B4332", padding: "env(safe-area-inset-top, 14px) 20px 14px", paddingTop: "max(env(safe-area-inset-top), 14px)", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 50 }}>
         <div>
           <p style={{ color: "#95D5B2", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.15em" }}>Panel Admin</p>
           <p style={{ color: "#fff", fontSize: 16, fontWeight: 800, margin: 0 }}>Apartamento CR</p>
@@ -666,7 +666,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       </div>
 
       {/* Top nav - desktop */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", display: "flex", overflowX: "auto", padding: "0 8px" }}>
+      <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", display: "flex", overflowX: "auto", padding: "0 8px", position: "sticky", top: 0, zIndex: 49 }}>
         {navItems.map(([id, icon, label]) => (
           <button key={id} onClick={() => setView(id)} style={{ background: "none", border: "none", borderBottom: view === id ? "2px solid #1B4332" : "2px solid transparent", padding: "12px 10px", cursor: "pointer", fontSize: 12, fontWeight: view === id ? 700 : 500, color: view === id ? "#1B4332" : "#6B7280", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", flexShrink: 0 }}>
             {icon} {label}
@@ -909,7 +909,7 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 100%)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px 20px" }}>
       <div style={{ background: "#fff", borderRadius: 24, padding: 32, width: "100%", maxWidth: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <p style={{ fontSize: 36, margin: "0 0 8px" }}>🌿</p>
