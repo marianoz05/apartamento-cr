@@ -86,6 +86,34 @@ const sb = {
     });
     return res.json();
   },
+  async getLimpiezas(token) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?order=fecha.asc`, {
+      headers: this.headers(token),
+    });
+    return res.json();
+  },
+  async createLimpieza(token, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/limpiezas`, {
+      method: "POST",
+      headers: { ...this.headers(token), "Prefer": "return=representation" },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  async updateLimpieza(token, id, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...this.headers(token), "Prefer": "return=representation" },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  async deleteLimpieza(token, id) {
+    await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?id=eq.${id}`, {
+      method: "DELETE",
+      headers: this.headers(token),
+    });
+  },
   async getReservaByToken(guestToken) {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?token=eq.${guestToken}&select=*`, {
@@ -1345,31 +1373,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
           </div>
         )}
         {view === "limpieza" && (
-          <div>
-            <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Checklist de limpieza</p>
-            {reservas.filter(r => r.estado !== "confirmada").length === 0 && (
-              <div style={{ background: "#fff", borderRadius: 16, padding: 32, textAlign: "center", color: "#9CA3AF" }}>
-                <p style={{ fontSize: 32, margin: "0 0 8px" }}>✨</p>
-                <p style={{ margin: 0, fontWeight: 600 }}>No hay estadías que requieran limpieza</p>
-              </div>
-            )}
-            {reservas.filter(r => r.estado !== "confirmada").map(r => (
-              <div key={r.id} style={{ background: "#fff", borderRadius: 16, padding: 14, marginBottom: 10, boxShadow: "0 1px 6px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                  <button onClick={() => toggleLimpieza(r.id)} style={{ width: 28, height: 28, borderRadius: 8, border: r.limpieza_hecha ? "none" : "2px solid #D1D5DB", background: r.limpieza_hecha ? "#16A34A" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {r.limpieza_hecha && <span style={{ color: "#fff", fontSize: 14, fontWeight: 800 }}>✓</span>}
-                  </button>
-                  <div>
-                    <p style={{ margin: 0, fontWeight: 700, fontSize: 14, textDecoration: r.limpieza_hecha ? "line-through" : "none", color: r.limpieza_hecha ? "#9CA3AF" : "#111827" }}>{r.huesped_nombre}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>Check-out: {formatDate(r.check_out)}</p>
-                  </div>
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: r.limpieza_hecha ? "#16A34A" : "#D97706", background: r.limpieza_hecha ? "#DCFCE7" : "#FEF3C7", padding: "3px 10px", borderRadius: 20 }}>
-                  {r.limpieza_hecha ? "Limpia ✓" : "Pendiente"}
-                </span>
-              </div>
-            ))}
-          </div>
+          <LimpiezaView token={onLogoutToken} reservas={reservas} />
         )}
 
         {view === "contenido" && (
@@ -1384,6 +1388,185 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   );
 }
 
+
+
+// ─── LIMPIEZA VIEW ────────────────────────────────────────────────
+function LimpiezaView({ token, reservas }) {
+  const [limpiezas, setLimpiezas] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editLimpieza, setEditLimpieza] = useState(null);
+  const emptyForm = { fecha: "", reserva_id: "", costo: 0, coordinado: false, pagado: false, notas: "" };
+  const [form, setForm] = useState(emptyForm);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    sb.getLimpiezas(token).then(data => {
+      if (Array.isArray(data)) setLimpiezas(data);
+      setLoading(false);
+    });
+  }, []);
+
+  function openNew(reservaId = "") {
+    setEditLimpieza(null);
+    setForm({ ...emptyForm, reserva_id: reservaId });
+    setShowForm(true);
+  }
+
+  function openEdit(l) {
+    setEditLimpieza(l);
+    setForm({ fecha: l.fecha || "", reserva_id: l.reserva_id || "", costo: l.costo || 0, coordinado: l.coordinado || false, pagado: l.pagado || false, notas: l.notas || "" });
+    setShowForm(true);
+  }
+
+  async function save() {
+    if (!form.fecha) return;
+    const payload = { ...form, costo: Number(form.costo), reserva_id: form.reserva_id || null };
+    if (editLimpieza) {
+      await sb.updateLimpieza(token, editLimpieza.id, payload);
+      setLimpiezas(prev => prev.map(l => l.id === editLimpieza.id ? { ...l, ...payload } : l));
+    } else {
+      const created = await sb.createLimpieza(token, payload);
+      if (Array.isArray(created) && created[0]) setLimpiezas(prev => [...prev, created[0]]);
+    }
+    setShowForm(false);
+  }
+
+  async function deleteLimpieza(id) {
+    await sb.deleteLimpieza(token, id);
+    setLimpiezas(prev => prev.filter(l => l.id !== id));
+  }
+
+  async function toggle(id, field) {
+    const l = limpiezas.find(l => l.id === id);
+    const val = !l[field];
+    await sb.updateLimpieza(token, id, { [field]: val });
+    setLimpiezas(prev => prev.map(l => l.id === id ? { ...l, [field]: val } : l));
+  }
+
+  function getReserva(id) { return reservas.find(r => r.id === id); }
+
+  const inputStyle = { width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
+  const reservasActivas = reservas.filter(r => ["pendiente","confirmada","activa"].includes(r.estado));
+
+  return (
+    <div>
+      {!showForm && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Limpiezas</p>
+          <button onClick={() => openNew()} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
+        </div>
+      )}
+
+      {showForm && (
+        <div style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}>
+          <p style={{ fontWeight: 700, fontSize: 15, margin: "0 0 14px" }}>{editLimpieza ? "Editar limpieza" : "Nueva limpieza"}</p>
+
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha de limpieza</label>
+            <input type="date" value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} style={inputStyle} />
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Asociar a reserva (opcional)</label>
+            <select value={form.reserva_id} onChange={e => setForm(f => ({ ...f, reserva_id: e.target.value }))}
+              style={{ ...inputStyle, background: "#fff" }}>
+              <option value="">— Limpieza independiente —</option>
+              {reservasActivas.map(r => (
+                <option key={r.id} value={r.id}>{r.huesped_nombre} · {formatDate(r.check_in)} → {formatDate(r.check_out)}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Costo (COP)</label>
+            <div style={{ display: "flex", alignItems: "center", border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
+              <span style={{ padding: "8px 10px", background: "#F9FAFB", fontSize: 13, fontWeight: 700, color: "#374151", borderRight: "1px solid #E5E7EB" }}>$</span>
+              <input type="number" value={form.costo} onChange={e => setForm(f => ({ ...f, costo: e.target.value }))}
+                style={{ flex: 1, padding: "8px 12px", border: "none", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 10 }}>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Notas</label>
+            <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} rows={2}
+              style={{ ...inputStyle, resize: "vertical" }} />
+          </div>
+
+          <div style={{ display: "flex", gap: 16, marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button onClick={() => setForm(f => ({ ...f, coordinado: !f.coordinado }))}
+                style={{ width: 24, height: 24, borderRadius: 6, border: form.coordinado ? "none" : "2px solid #D1D5DB", background: form.coordinado ? "#2563EB" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {form.coordinado && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
+              </button>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>📋 Coordinada</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button onClick={() => setForm(f => ({ ...f, pagado: !f.pagado }))}
+                style={{ width: 24, height: 24, borderRadius: 6, border: form.pagado ? "none" : "2px solid #D1D5DB", background: form.pagado ? "#16A34A" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {form.pagado && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
+              </button>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>💰 Pagada</span>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={save} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", flex: 1 }}>Guardar</button>
+            <button onClick={() => setShowForm(false)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
+          </div>
+        </div>
+      )}
+
+      {!showForm && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {limpiezas.length === 0 && !loading && (
+            <div style={{ background: "#fff", borderRadius: 16, padding: 32, textAlign: "center", color: "#9CA3AF" }}>
+              <p style={{ fontSize: 32, margin: "0 0 8px" }}>🧹</p>
+              <p style={{ margin: 0, fontWeight: 600 }}>No hay limpiezas registradas</p>
+            </div>
+          )}
+          {limpiezas.map(l => {
+            const reserva = l.reserva_id ? getReserva(l.reserva_id) : null;
+            return (
+              <div key={l.id} style={{ background: "#fff", borderRadius: 16, padding: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>🧹 {formatDate(l.fecha)}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>
+                      {reserva ? `📋 ${reserva.huesped_nombre} · Check-in ${formatDate(reserva.check_in)}` : "Limpieza independiente"}
+                    </p>
+                    {l.notas && <p style={{ margin: "4px 0 0", fontSize: 12, color: "#9CA3AF", fontStyle: "italic" }}>{l.notas}</p>}
+                  </div>
+                  {l.costo > 0 && (
+                    <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "4px 10px", textAlign: "right" }}>
+                      <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>COP</p>
+                      <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>${Number(l.costo).toLocaleString()}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                  <button onClick={() => toggle(l.id, "coordinado")}
+                    style={{ display: "flex", alignItems: "center", gap: 5, background: l.coordinado ? "#DBEAFE" : "#F3F4F6", color: l.coordinado ? "#1E40AF" : "#6B7280", border: "none", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                    📋 {l.coordinado ? "Coordinada ✓" : "Coordinar"}
+                  </button>
+                  <button onClick={() => toggle(l.id, "pagado")}
+                    style={{ display: "flex", alignItems: "center", gap: 5, background: l.pagado ? "#DCFCE7" : "#F3F4F6", color: l.pagado ? "#166534" : "#6B7280", border: "none", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                    💰 {l.pagado ? "Pagada ✓" : "Pendiente pago"}
+                  </button>
+                </div>
+
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => openEdit(l)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
+                  <button onClick={() => deleteLimpieza(l.id)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── CUENTA PANEL ────────────────────────────────────────────────
 function CuentaPanel({ token }) {
