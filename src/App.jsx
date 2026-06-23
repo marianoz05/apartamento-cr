@@ -687,15 +687,16 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   function checkTraslape(checkIn, checkOut, excludeId = null) {
     if (!checkIn || !checkOut) return { traslape: false, tipo: null };
     return reservas.reduce((acc, r) => {
+      if (acc.traslape && acc.tipo === "total") return acc; // already found worst case
       if (excludeId && r.id === excludeId) return acc;
       if (r.estado === "cancelada" || r.estado === "completada") return acc;
       const rIn = r.check_in, rOut = r.check_out;
+      // Limpieza: new check-in = existing check-out, or new check-out = existing check-in
+      if (checkIn === rOut || checkOut === rIn) {
+        return { traslape: true, tipo: "limpieza", nombre: r.huesped_nombre };
+      }
       // Full overlap
       if (checkIn < rOut && checkOut > rIn) {
-        // Check if it's just checkout=checkin (limpieza)
-        if (checkIn === rOut || checkOut === rIn) {
-          return { traslape: true, tipo: "limpieza", nombre: r.huesped_nombre };
-        }
         return { traslape: true, tipo: "total", nombre: r.huesped_nombre };
       }
       return acc;
@@ -850,7 +851,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       ? (content?.mensajes?.bienvenida || "Hola [nombre], tu estadia en Apartamento CR.\nCheck-in: [checkin]\nCheck-out: [checkout]\nGuia: [link]")
       : (content?.mensajes?.pago || "Hola [nombre], saldo pendiente: [moneda][saldo] para [checkin].");
 
-    const msg = plantilla
+    let msg = plantilla
       .replace(/\[nombre\]/g, nombre)
       .replace(/\[checkin\]/g, formatDate(r.check_in))
       .replace(/\[checkout\]/g, formatDate(r.check_out))
@@ -858,6 +859,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       .replace(/\[saldo\]/g, Number(r.saldo||0).toLocaleString())
       .replace(/\[moneda\]/g, sym)
       .replace(/\\n/g, "\n");
+
+    if (tipo === "bienvenida" && r.traslape_autorizado) {
+      msg += "\n\n⚠️ Nota: el check-in de ese dia coincide con la salida de otro huesped. La limpieza del apartamento se coordina en la manana, por lo que el acceso estara disponible a partir de las 3:00 PM una vez finalizada.";
+    }
 
     const url = "https://wa.me/" + tel + "?text=" + encodeURIComponent(msg);
     window.open(url, "_blank");
@@ -1189,7 +1194,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                               💬 Contacto directo
                             </a>
                           )}
-                          {r.telefono && r.check_in >= new Date().toISOString().split("T")[0] && (
+                          {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
                             <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
                               🌿 Bienvenida + link del portal
                             </button>
