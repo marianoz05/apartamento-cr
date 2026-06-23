@@ -125,11 +125,11 @@ const INITIAL_CONTENT = {
     { icon: "👥", titulo: "Máximo 4 personas", desc: "No se permiten eventos ni fiestas." },
   ],
   restaurantes: [
-    { nombre: "Mondongo's", tipo: "Comida típica antioqueña", distancia: "5 min", estrellas: "⭐⭐⭐⭐⭐" },
-    { nombre: "Pergamino Café", tipo: "Café de especialidad", distancia: "7 min", estrellas: "⭐⭐⭐⭐⭐" },
-    { nombre: "El Rancho de Jonás", tipo: "Bandeja paisa", distancia: "3 min", estrellas: "⭐⭐⭐⭐⭐" },
-    { nombre: "La Hamburguesería", tipo: "Hamburguesas artesanales", distancia: "2 min", estrellas: "⭐⭐⭐⭐" },
-    { nombre: "El Cielo", tipo: "Cocina colombiana moderna", distancia: "10 min", estrellas: "⭐⭐⭐⭐⭐" },
+    { nombre: "Mondongo's", tipo: "Comida típica antioqueña", distancia: "5 min", precio: "$$" },
+    { nombre: "Pergamino Café", tipo: "Café de especialidad", distancia: "7 min", precio: "$" },
+    { nombre: "El Rancho de Jonás", tipo: "Bandeja paisa", distancia: "3 min", precio: "$$" },
+    { nombre: "La Hamburguesería", tipo: "Hamburguesas artesanales", distancia: "2 min", precio: "$$" },
+    { nombre: "El Cielo", tipo: "Cocina colombiana moderna", distancia: "10 min", precio: "$$$" },
   ],
   transporte: [
     { icon: "🚇", titulo: "Metro — Estación Estadio", desc: "Línea A · 10 min caminando · $2.950" },
@@ -249,7 +249,7 @@ function GuestPortal({ reserva, content }) {
                 <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
                 <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} caminando</p>
               </div>
-              <span style={{ fontSize: 12 }}>{r.estrellas}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "#D97706" }}>{r.precio || r.estrellas}</span>
             </div>
           ))}
         </div>
@@ -390,7 +390,7 @@ function ContenidoEditor({ content, onSave }) {
       const next = JSON.parse(JSON.stringify(prev));
       const templates = {
         normas: { icon: "✅", titulo: "Nueva norma", desc: "Descripción" },
-        restaurantes: { nombre: "Nuevo restaurante", tipo: "Tipo de comida", distancia: "0 min", estrellas: "⭐⭐⭐⭐" },
+        restaurantes: { nombre: "Nuevo restaurante", tipo: "Tipo de comida", distancia: "0 min", precio: "$$" },
         transporte: { icon: "🚗", titulo: "Nuevo medio", desc: "Descripción" },
         laureles: { icon: "📍", lugar: "Nuevo lugar", desc: "Descripción" },
         emergencias: { icon: "📞", label: "Nuevo contacto", num: "000" },
@@ -502,8 +502,22 @@ function ContenidoEditor({ content, onSave }) {
                   <input value={r.distancia} onChange={e => updArr("restaurantes", i, "distancia", e.target.value)} style={inputStyle} placeholder="ej: 5 min" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Estrellas</label>
-                  <input value={r.estrellas} onChange={e => updArr("restaurantes", i, "estrellas", e.target.value)} style={inputStyle} placeholder="⭐⭐⭐⭐" />
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Precio</label>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <button onClick={() => {
+                      const levels = ["$","$$","$$$","$$$$"];
+                      const cur = r.precio || r.estrellas || "$$";
+                      const idx = levels.indexOf(cur);
+                      if (idx > 0) updArr("restaurantes", i, "precio", levels[idx-1]);
+                    }} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E5E7EB", background: "#F9FAFB", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>−</button>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: "#D97706", minWidth: 36, textAlign: "center" }}>{r.precio || r.estrellas || "$$"}</span>
+                    <button onClick={() => {
+                      const levels = ["$","$$","$$$","$$$$"];
+                      const cur = r.precio || r.estrellas || "$$";
+                      const idx = levels.indexOf(cur);
+                      if (idx < levels.length-1) updArr("restaurantes", i, "precio", levels[idx+1]);
+                    }} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E5E7EB", background: "#F9FAFB", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>+</button>
+                  </div>
                 </div>
               </div>
             </div>
