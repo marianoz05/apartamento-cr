@@ -5,6 +5,13 @@ const SUPABASE_URL = "https://cxjumlciielwwhunvmym.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4anVtbGNpaWVsd3dodW52bXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjcxMjUsImV4cCI6MjA5Nzc0MzEyNX0.VNPmOT3NLvdf0RIA53FdR4n6dpcz-SWS_9Nggmc9g2U";
 
 const sb = {
+  headers(token) {
+    return {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${token || SUPABASE_ANON_KEY}`,
+    };
+  },
   async signIn(email, password) {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: "POST",
@@ -16,8 +23,57 @@ const sb = {
   async signOut(token) {
     await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
       method: "POST",
-      headers: { "Authorization": `Bearer ${token}`, "apikey": SUPABASE_ANON_KEY },
+      headers: this.headers(token),
     });
+  },
+  async getReservas(token) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?order=check_in.asc`, {
+      headers: this.headers(token),
+    });
+    return res.json();
+  },
+  async createReserva(token, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas`, {
+      method: "POST",
+      headers: { ...this.headers(token), "Prefer": "return=representation" },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  async updateReserva(token, id, data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...this.headers(token), "Prefer": "return=representation" },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+  async deleteReserva(token, id) {
+    await fetch(`${SUPABASE_URL}/rest/v1/reservas?id=eq.${id}`, {
+      method: "DELETE",
+      headers: this.headers(token),
+    });
+  },
+  async getContenido(token) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/contenido?id=eq.1`, {
+      headers: this.headers(token),
+    });
+    const rows = await res.json();
+    return rows[0]?.data || null;
+  },
+  async saveContenido(token, data) {
+    await fetch(`${SUPABASE_URL}/rest/v1/contenido?id=eq.1`, {
+      method: "PATCH",
+      headers: { ...this.headers(token), "Prefer": "return=representation" },
+      body: JSON.stringify({ data }),
+    });
+  },
+  async getReservaByToken(guestToken) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?token=eq.${guestToken}`, {
+      headers: this.headers(null),
+    });
+    const rows = await res.json();
+    return rows[0] || null;
   },
 };
 
@@ -522,14 +578,22 @@ function ContenidoEditor({ content, onSave }) {
 }
 
 // ─── ADMIN PANEL ─────────────────────────────────────────────────
-function AdminPanel({ onLogout, content, onContentSave }) {
+function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [view, setView] = useState("dashboard");
-  const [reservas, setReservas] = useState(DEMO_RESERVAS);
-  const [calendarDate, setCalendarDate] = useState({ year: 2026, month: 5 });
+  const [reservas, setReservas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [calendarDate, setCalendarDate] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() });
   const [showForm, setShowForm] = useState(false);
   const [editReserva, setEditReserva] = useState(null);
   const [copiedToken, setCopiedToken] = useState(null);
   const [form, setForm] = useState({ huesped_nombre: "", huesped_email: "", check_in: "", check_out: "", noches: "" });
+
+  useEffect(() => {
+    sb.getReservas(onLogoutToken).then(data => {
+      if (Array.isArray(data)) setReservas(data);
+      setLoading(false);
+    });
+  }, []);
 
   const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
   const statColors = { activa: "#16A34A", confirmada: "#2563EB", completada: "#9CA3AF" };
@@ -547,14 +611,27 @@ function AdminPanel({ onLogout, content, onContentSave }) {
   }
   function openNewReserva() { setEditReserva(null); setForm({ huesped_nombre: "", huesped_email: "", check_in: "", check_out: "", noches: "" }); setShowForm(true); }
   function openEditReserva(r) { setEditReserva(r); setForm({ huesped_nombre: r.huesped_nombre, huesped_email: r.huesped_email, check_in: r.check_in, check_out: r.check_out, noches: r.noches }); setShowForm(true); }
-  function saveReserva() {
+  async function saveReserva() {
     if (!form.huesped_nombre || !form.check_in || !form.check_out) return;
-    if (editReserva) setReservas(prev => prev.map(r => r.id === editReserva.id ? { ...r, ...form, noches: Number(form.noches) } : r));
-    else setReservas(prev => [...prev, { id: Date.now(), ...form, noches: Number(form.noches), estado: "confirmada", limpieza_hecha: false, token: generateToken() }]);
+    const payload = { ...form, noches: Number(form.noches) };
+    if (editReserva) {
+      await sb.updateReserva(onLogoutToken, editReserva.id, payload);
+      setReservas(prev => prev.map(r => r.id === editReserva.id ? { ...r, ...payload } : r));
+    } else {
+      const created = await sb.createReserva(onLogoutToken, { ...payload, estado: "confirmada", limpieza_hecha: false });
+      if (Array.isArray(created) && created[0]) setReservas(prev => [...prev, created[0]]);
+    }
     setShowForm(false);
   }
-  function toggleLimpieza(id) { setReservas(prev => prev.map(r => r.id === id ? { ...r, limpieza_hecha: !r.limpieza_hecha } : r)); }
-  function deleteReserva(id) { setReservas(prev => prev.filter(r => r.id !== id)); }
+  async function toggleLimpieza(id) {
+    const r = reservas.find(r => r.id === id);
+    await sb.updateReserva(onLogoutToken, id, { limpieza_hecha: !r.limpieza_hecha });
+    setReservas(prev => prev.map(r => r.id === id ? { ...r, limpieza_hecha: !r.limpieza_hecha } : r));
+  }
+  async function deleteReserva(id) {
+    await sb.deleteReserva(onLogoutToken, id);
+    setReservas(prev => prev.filter(r => r.id !== id));
+  }
   function copyGuestLink(token) { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${token}`); setCopiedToken(token); setTimeout(() => setCopiedToken(null), 2000); }
 
   const navItems = [["dashboard","📊","Resumen"],["calendario","📅","Calendario"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"]];
@@ -786,6 +863,24 @@ export default function App() {
   const [screen, setScreen] = useState(guestToken ? "guest" : "login");
   const [content, setContent] = useState(INITIAL_CONTENT);
   const [token, setToken] = useState(null);
+  const [guestReservaData, setGuestReservaData] = useState(null);
+  const [guestLoading, setGuestLoading] = useState(!!guestToken);
+
+  useEffect(() => {
+    if (guestToken) {
+      sb.getReservaByToken(guestToken).then(r => {
+        setGuestReservaData(r);
+        setGuestLoading(false);
+      });
+    }
+  }, []);
+
+  async function handleLogin(t) {
+    setToken(t);
+    const savedContent = await sb.getContenido(t);
+    if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
+    setScreen("admin");
+  }
 
   const guestReserva = guestToken
     ? DEMO_RESERVAS.find(r => r.token === guestToken) || null
@@ -807,7 +902,7 @@ export default function App() {
     <div>
       {screen === "login" && (
         <div>
-          <Login onLogin={(t) => { setToken(t); setScreen("admin"); }} />
+          <Login onLogin={handleLogin} />
           <div style={{ position: "fixed", bottom: 16, right: 16 }}>
             <button onClick={() => setScreen("guest")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
               👤 Ver portal huésped
@@ -818,12 +913,23 @@ export default function App() {
       {screen === "admin" && (
         <AdminPanel
           onLogout={async () => { await sb.signOut(token); setToken(null); setScreen("login"); }}
+          onLogoutToken={token}
           content={content}
-          onContentSave={(updated) => setContent(updated)}
+          onContentSave={async (updated) => { await sb.saveContenido(token, updated); setContent(updated); }}
         />
       )}
       {screen === "guest" && (
-        <GuestPortal reserva={guestReserva} content={content} />
+        guestLoading
+          ? <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif" }}><p style={{ color: "#6B7280" }}>Cargando...</p></div>
+          : guestReservaData
+            ? <GuestPortal reserva={guestReservaData} content={content} />
+            : <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
+                <div style={{ textAlign: "center", padding: 32 }}>
+                  <p style={{ fontSize: 48, margin: "0 0 16px" }}>🔒</p>
+                  <p style={{ fontWeight: 800, fontSize: 20, color: "#111827", margin: "0 0 8px" }}>Link no válido</p>
+                  <p style={{ color: "#6B7280", fontSize: 14 }}>Este link no existe o ya expiró.</p>
+                </div>
+              </div>
       )}
     </div>
   );
