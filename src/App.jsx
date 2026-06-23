@@ -632,6 +632,15 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     return sym + Number(amount || 0).toLocaleString();
   }
 
+  function calcularEstado(r) {
+    if (r.estado === "cancelada") return "cancelada";
+    const hoy = new Date().toISOString().split("T")[0];
+    if (r.check_out && hoy > r.check_out) return "completada";
+    if (r.check_in && hoy >= r.check_in && hoy <= r.check_out) return "activa";
+    if (Number(r.saldo || 0) <= 0 && Number(r.monto_total || 0) > 0) return "confirmada";
+    return "pendiente";
+  }
+
   function checkTraslape(checkIn, checkOut, excludeId = null) {
     if (!checkIn || !checkOut) return { traslape: false, tipo: null };
     return reservas.reduce((acc, r) => {
@@ -678,7 +687,18 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
   useEffect(() => {
     sb.getReservas(onLogoutToken).then(data => {
-      if (Array.isArray(data)) setReservas(data);
+      if (Array.isArray(data)) {
+        // Auto-update states based on dates and payments
+        const updated = data.map(r => ({ ...r, estado: calcularEstado(r) }));
+        setReservas(updated);
+        // Persist updated states back to Supabase silently
+        updated.forEach(r => {
+          const original = data.find(d => d.id === r.id);
+          if (original && original.estado !== r.estado) {
+            sb.updateReserva(onLogoutToken, r.id, { estado: r.estado });
+          }
+        });
+      }
       setLoading(false);
     });
   }, []);
@@ -725,7 +745,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       alert(`⚠️ El check-in/out coincide con la reserva de ${traslape.nombre}. Activa "Autorizar traslape de limpieza" para continuar.`);
       return;
     }
-    const payload = {
+    const basePayload = {
       ...form,
       noches: Number(form.noches),
       cantidad_huespedes: Number(form.cantidad_huespedes),
@@ -737,6 +757,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       pago1_fecha: form.pago1_fecha || null,
       pago2_fecha: form.pago2_fecha || null,
     };
+    const payload = { ...basePayload, estado: calcularEstado(basePayload) };
     if (editReserva) {
       await sb.updateReserva(onLogoutToken, editReserva.id, payload);
       setReservas(prev => prev.map(r => r.id === editReserva.id ? { ...r, ...payload } : r));
@@ -888,12 +909,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Teléfono</label>
-                    <input type="tel" value={form.telefono} onChange={e => updForm("telefono", e.target.value)} placeholder="8891-1513" style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    <input type="tel" value={form.telefono} onChange={e => updForm("telefono", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
                 </div>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cantidad de huéspedes</label>
-                  <input type="number" min="1" max="10" value={form.cantidad_huespedes} onChange={e => updForm("cantidad_huespedes", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  <input type="number" min="1" max="10" value={form.cantidad_huespedes} onChange={e => updForm("cantidad_huespedes", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                 </div>
 
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Fechas</p>
@@ -980,11 +1001,14 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   </span>
                 </div>
 
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Estado</p>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-                  {["pendiente","confirmada","activa","cancelada","completada"].map(e => (
-                    <button key={e} onClick={() => updForm("estado", e)} style={{ background: form.estado === e ? "#1B4332" : "#F3F4F6", color: form.estado === e ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "5px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", textTransform: "capitalize" }}>{e}</button>
-                  ))}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                  <button onClick={() => updForm("estado", form.estado === "cancelada" ? "pendiente" : "cancelada")} style={{ width: 28, height: 28, borderRadius: 8, border: form.estado === "cancelada" ? "none" : "2px solid #D1D5DB", background: form.estado === "cancelada" ? "#DC2626" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {form.estado === "cancelada" && <span style={{ color: "#fff", fontSize: 14 }}>✓</span>}
+                  </button>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>❌ Marcar como cancelada</span>
+                </div>
+                <div style={{ background: "#F0FDF4", borderRadius: 10, padding: "8px 12px", marginBottom: 12 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: "#166534" }}>El estado se calcula automáticamente según pagos y fechas.</p>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
