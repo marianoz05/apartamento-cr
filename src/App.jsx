@@ -836,28 +836,30 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
   function sendWhatsApp(r, tipo) {
     const nombre = r.huesped_nombre.split(" ")[0];
-    const link = `https://apartamento-cr.vercel.app/g/${r.token}`;
+    const portalLink = `https://apartamento-cr.vercel.app/g/${r.token}`;
     const sym = MONEDAS[r.moneda] || "₡";
-    let msg = "";
+    const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`;
 
-    if (tipo === "bienvenida") {
-      msg = `Hola ${nombre} 👋, te comparto toda la información para tu estadía en Apartamento CR.
-
-📅 Check-in: ${formatDate(r.check_in)} a partir de las 3:00 PM
-📅 Check-out: ${formatDate(r.check_out)} antes de las 12:00 PM
-
-Aquí tu guía con todo lo que necesitas saber:
-${link}
-
-¡Nos vemos pronto! 🌿`;
-    } else if (tipo === "pago") {
-      msg = `Hola ${nombre} 👋, te recordamos que tienes un saldo pendiente de ${sym}${Number(r.saldo||0).toLocaleString()} para tu reserva del ${formatDate(r.check_in)}.
-
-Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu disposición. 🙏`;
+    if (tipo === "link") {
+      const msg = "Hola " + nombre + ", aqui tu guia de Apartamento CR: " + portalLink;
+      window.open("https://wa.me/" + tel + "?text=" + encodeURIComponent(msg), "_blank");
+      return;
     }
 
-    const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`;
-    const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
+    const plantilla = tipo === "bienvenida"
+      ? (content?.mensajes?.bienvenida || "Hola [nombre], tu estadia en Apartamento CR.\nCheck-in: [checkin]\nCheck-out: [checkout]\nGuia: [link]")
+      : (content?.mensajes?.pago || "Hola [nombre], saldo pendiente: [moneda][saldo] para [checkin].");
+
+    const msg = plantilla
+      .replace(/\[nombre\]/g, nombre)
+      .replace(/\[checkin\]/g, formatDate(r.check_in))
+      .replace(/\[checkout\]/g, formatDate(r.check_out))
+      .replace(/\[link\]/g, portalLink)
+      .replace(/\[saldo\]/g, Number(r.saldo||0).toLocaleString())
+      .replace(/\[moneda\]/g, sym)
+      .replace(/\\n/g, "\n");
+
+    const url = "https://wa.me/" + tel + "?text=" + encodeURIComponent(msg);
     window.open(url, "_blank");
   }
 
@@ -1402,4 +1404,71 @@ function Login({ onLogin }) {
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Contraseña</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && handleLogin()} style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 14, outline: "none", boxSizing: "border-bo
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && handleLogin()} style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+        </div>
+        {error && <p style={{ color: "#DC2626", fontSize: 13, margin: "0 0 12px", textAlign: "center" }}>{error}</p>}
+        <button onClick={handleLogin} disabled={loading} style={{ width: "100%", background: loading ? "#6B7280" : "#1B4332", color: "#fff", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer" }}>
+          {loading ? "Ingresando..." : "Ingresar"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── ROOT ─────────────────────────────────────────────────────────
+export default function App() {
+  const path = window.location.pathname;
+  const guestMatch = path.match(/^\/g\/(.+)$/);
+  const guestToken = guestMatch ? guestMatch[1] : null;
+
+  const savedToken = localStorage.getItem("cr_token");
+  const [screen, setScreen] = useState(guestToken ? "guest" : savedToken ? "admin" : "login");
+  const [content, setContent] = useState(INITIAL_CONTENT);
+  const [token, setToken] = useState(savedToken);
+
+  useEffect(() => {
+    if (savedToken && !guestToken) {
+      sb.getContenido(savedToken).then(c => {
+        if (c && Object.keys(c).length > 0) setContent(c);
+      });
+    }
+  }, []);
+
+  async function handleLogin(t) {
+    setToken(t);
+    localStorage.setItem("cr_token", t);
+    const savedContent = await sb.getContenido(t);
+    if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
+    setScreen("admin");
+    setTimeout(() => {
+      if (document.activeElement) document.activeElement.blur();
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }, 100);
+  }
+
+  return (
+    <div>
+      {screen === "login" && (
+        <div>
+          <Login onLogin={handleLogin} />
+          <div style={{ position: "fixed", bottom: 16, right: 16 }}>
+            <button onClick={() => setScreen("guest")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
+              👤 Ver portal huésped
+            </button>
+          </div>
+        </div>
+      )}
+      {screen === "admin" && (
+        <AdminPanel
+          onLogout={async () => { await sb.signOut(token); setToken(null); localStorage.removeItem("cr_token"); setScreen("login"); }}
+          onLogoutToken={token}
+          content={content}
+          onContentSave={async (updated) => { await sb.saveContenido(token, updated); setContent(updated); }}
+        />
+      )}
+      {screen === "guest" && (
+        <GuestScreen token={guestToken} initialContent={INITIAL_CONTENT} />
+      )}
+    </div>
+  );
+}
