@@ -90,7 +90,7 @@ const DEMO_RESERVAS = [
 ];
 
 const INITIAL_CONTENT = {
-  wifi: { nombre: "ApartamentoCR_5G", clave: "laureles2024", nota: "Ante cualquier inconveniente con la conexión, reinicia el router." },
+  wifi: { nombre: "ApartamentoCR_5G", clave: "laureles2024" },
   normas: [
     { icon: "🕙", titulo: "Check-in desde las 3:00 PM", desc: "Check-out antes de las 12:00 PM" },
     { icon: "🚭", titulo: "No fumar adentro", desc: "Puedes hacerlo en el balcón." },
@@ -125,7 +125,6 @@ const INITIAL_CONTENT = {
   contacto: {
     anfitrion_nombre: "Yanina Mora",
     anfitrion_tel: "+506 8891-1513",
-    anfitrion_horario: "Solo por WhatsApp",
     emergencias: [
       { icon: "👮", label: "Policía Nacional", num: "123" },
       { icon: "🚒", label: "Bomberos Medellín", num: "119" },
@@ -186,7 +185,6 @@ function GuestPortal({ reserva, content }) {
         <div>
           <Card label="Red WiFi" value={c.wifi.nombre} accent="#2D6A4F" />
           <Card label="Contraseña" value={c.wifi.clave} accent="#2D6A4F" />
-          <Note>{c.wifi.nota}</Note>
         </div>
       )
     },
@@ -262,7 +260,6 @@ function GuestPortal({ reserva, content }) {
             <a href={`https://wa.me/${c.contacto.anfitrion_tel.replace(/[\s\-+]/g, "")}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#25D366", color: "#fff", padding: "8px 16px", borderRadius: 10, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
               💬 Escribir por WhatsApp
             </a>
-            <p style={{ margin: "8px 0 0", fontSize: 12, color: "#9CA3AF" }}>{c.contacto.anfitrion_horario}</p>
           </div>
           {c.contacto.emergencias.map((e, i) => (
             <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F9FAFB", borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
@@ -421,7 +418,6 @@ function ContenidoEditor({ content, onSave }) {
           <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 12px" }}>WiFi y Acceso</p>
           <FieldInput label="Nombre de la red WiFi" value={local.wifi.nombre} onChange={v => upd("wifi.nombre", v)} />
           <FieldInput label="Contraseña WiFi" value={local.wifi.clave} onChange={v => upd("wifi.clave", v)} />
-          <FieldInput label="Nota adicional" value={local.wifi.nota} onChange={v => upd("wifi.nota", v)} multiline />
         </div>
       )}
 
@@ -653,6 +649,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
         <button onClick={onLogout} style={{ background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 8, padding: "6px 12px", color: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>Salir</button>
       </div>
 
+      {/* Top nav - desktop */}
       <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", display: "flex", overflowX: "auto", padding: "0 8px" }}>
         {navItems.map(([id, icon, label]) => (
           <button key={id} onClick={() => setView(id)} style={{ background: "none", border: "none", borderBottom: view === id ? "2px solid #1B4332" : "2px solid transparent", padding: "12px 10px", cursor: "pointer", fontSize: 12, fontWeight: view === id ? 700 : 500, color: view === id ? "#1B4332" : "#6B7280", display: "flex", alignItems: "center", gap: 4, whiteSpace: "nowrap", flexShrink: 0 }}>
@@ -660,8 +657,23 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
           </button>
         ))}
       </div>
+      {/* Bottom nav - mobile */}
+      <style>{`
+        @media (max-width: 600px) {
+          .admin-bottom-nav { display: flex !important; }
+          .admin-content { padding-bottom: 80px !important; }
+        }
+      `}</style>
+      <div className="admin-bottom-nav" style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, background: "#fff", borderTop: "1px solid #E5E7EB", zIndex: 100, justifyContent: "space-around", padding: "8px 0 12px" }}>
+        {navItems.map(([id, icon, label]) => (
+          <button key={id} onClick={() => setView(id)} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "4px 8px", color: view === id ? "#1B4332" : "#9CA3AF" }}>
+            <span style={{ fontSize: 20 }}>{icon}</span>
+            <span style={{ fontSize: 10, fontWeight: view === id ? 700 : 500 }}>{label}</span>
+          </button>
+        ))}
+      </div>
 
-      <div style={{ padding: 16, maxWidth: 700, margin: "0 auto" }}>
+      <div className="admin-content" style={{ padding: 16, maxWidth: 700, margin: "0 auto" }}>
 
         {view === "dashboard" && (
           <div>
