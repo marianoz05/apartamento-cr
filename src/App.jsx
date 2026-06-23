@@ -149,17 +149,6 @@ const INITIAL_CONTENT = {
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
     pago: "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in.",
-
-📅 Check-in: [checkin] a partir de las 3:00 PM
-📅 Check-out: [checkout] antes de las 12:00 PM
-
-Aquí tu guía con todo lo que necesitas saber:
-[link]
-
-¡Nos vemos pronto! 🌿",
-    pago: "Hola [nombre] 👋, te recordamos que tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].
-
-Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu disposición. 🙏",
   },
   contacto: {
     anfitrion_nombre: "Yanina Mora",
