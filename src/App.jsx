@@ -666,7 +666,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F8FAFC", minHeight: "100vh" }}>
-      <div style={{ background: "#1B4332", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ background: "#1B4332", padding: "14px 20px", paddingTop: "max(14px, env(safe-area-inset-top))", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <p style={{ color: "#95D5B2", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.15em" }}>Panel Admin</p>
           <p style={{ color: "#fff", fontSize: 16, fontWeight: 800, margin: 0 }}>Apartamento CR</p>
