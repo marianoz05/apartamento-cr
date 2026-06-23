@@ -1158,10 +1158,12 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                         <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
                         <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{fmt(Number(r.pago1_monto||0) + Number(r.pago2_monto||0), r.moneda)}</p>
                       </div>
-                      <div style={{ background: Number(r.saldo) > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: Number(r.saldo) > 0 ? "#D97706" : "#166534" }}>{fmt(r.saldo, r.moneda)}</p>
-                      </div>
+                      {Number(r.saldo||0) > 0 && (
+                        <div style={{ background: "#FEF3C7", borderRadius: 8, padding: "5px 10px" }}>
+                          <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
+                          <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#D97706" }}>{fmt(r.saldo, r.moneda)}</p>
+                        </div>
+                      )}
                       {r.llave_entregada && (
                         <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
                           <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>🔑 Llave entregada</p>
