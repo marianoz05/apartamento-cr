@@ -56,12 +56,20 @@ const sb = {
     });
   },
   async getContenido(token) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/contenido?id=eq.1`, {
-      headers: this.headers(token),
-    });
-    const rows = await res.json();
-    console.log("getContenido response:", JSON.stringify(rows));
-    return Array.isArray(rows) ? (rows[0]?.data || null) : null;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/contenido?id=eq.1&select=*`, {
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+      });
+      const rows = await res.json();
+      console.log("getContenido response:", JSON.stringify(rows));
+      return Array.isArray(rows) ? (rows[0]?.data || null) : null;
+    } catch(e) {
+      console.error("getContenido error:", e);
+      return null;
+    }
   },
   async saveContenido(token, data) {
     await fetch(`${SUPABASE_URL}/rest/v1/contenido?id=eq.1`, {
@@ -71,12 +79,20 @@ const sb = {
     });
   },
   async getReservaByToken(guestToken) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?token=eq.${guestToken}`, {
-      headers: this.headers(null),
-    });
-    const rows = await res.json();
-    console.log("getReservaByToken response:", JSON.stringify(rows));
-    return Array.isArray(rows) ? (rows[0] || null) : null;
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?token=eq.${guestToken}&select=*`, {
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+      });
+      const rows = await res.json();
+      console.log("getReservaByToken response:", JSON.stringify(rows));
+      return Array.isArray(rows) ? (rows[0] || null) : null;
+    } catch(e) {
+      console.error("getReservaByToken error:", e);
+      return null;
+    }
   },
 };
 
