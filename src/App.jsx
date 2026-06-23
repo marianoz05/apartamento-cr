@@ -1143,7 +1143,7 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                       {copiedToken === r.token ? "✓ Copiado" : "🔗 Link huésped"}
                     </button>
                     {r.telefono && (
-                      <div style={{ display: "flex", gap: 6", position: "relative" }}>
+                      <div style={{ display: "flex", gap: 6, position: "relative" }}>
                         <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                           💬 WhatsApp ▾
                         </button>
