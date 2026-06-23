@@ -654,6 +654,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [waMenu, setWaMenu] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [dashboardDetail, setDashboardDetail] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null);
   const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "CRC", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
@@ -868,7 +869,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     window.open(url, "_blank");
   }
 
-  const navItems = [["dashboard","📊","Resumen"],["calendario","📅","Calendario"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
+  const navItems = [["dashboard","📊","Resumen"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -962,40 +963,6 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
           </div>
         )}
 
-        {view === "calendario" && (
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Calendario</p>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <button onClick={() => setCalendarDate(d => { const m = d.month === 0 ? 11 : d.month - 1; return { month: m, year: m === 11 ? d.year - 1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", fontSize: 16 }}>‹</button>
-                <span style={{ fontWeight: 700, fontSize: 14, minWidth: 120, textAlign: "center" }}>{monthNames[month]} {year}</span>
-                <button onClick={() => setCalendarDate(d => { const m = d.month === 11 ? 0 : d.month + 1; return { month: m, year: m === 0 ? d.year + 1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", fontSize: 16 }}>›</button>
-              </div>
-            </div>
-            <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
-                {["Do","Lu","Ma","Mi","Ju","Vi","Sa"].map(d => <div key={d} style={{ textAlign: "center", padding: "8px 0", fontSize: 11, fontWeight: 700, color: "#9CA3AF" }}>{d}</div>)}
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
-                {Array.from({ length: firstDay }).map((_, i) => <div key={"e"+i} style={{ minHeight: 52, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6" }} />)}
-                {Array.from({ length: daysInMonth }).map((_, i) => {
-                  const day = i + 1;
-                  const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-                  const dayRes = getCellReservas(day);
-                  const isToday = dateStr === today;
-                  return (
-                    <div key={day} style={{ minHeight: 52, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", padding: 4, background: isToday ? "#F0FDF4" : "#fff" }}>
-                      <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: isToday ? 800 : 500, color: isToday ? "#16A34A" : "#374151", textAlign: "center" }}>{day}</p>
-                      {dayRes.slice(0,1).map(r => <div key={r.id} style={{ background: statColors[r.estado]+"20", borderLeft: `2px solid ${statColors[r.estado]}`, borderRadius: 3, padding: "1px 3px", fontSize: 9, fontWeight: 700, color: statColors[r.estado], overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{r.huesped_nombre.split(" ")[0]}</div>)}
-                      {dayRes.length > 1 && <p style={{ margin: "1px 0 0", fontSize: 9, color: "#9CA3AF", textAlign: "center" }}>+{dayRes.length-1}</p>}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
-
         {view === "reservas" && (
           <div>
             {!showForm && (
@@ -1004,6 +971,54 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 <button onClick={openNewReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
               </div>
             )}
+
+            {/* CALENDARIO */}
+            {!showForm && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <button onClick={() => setCalendarDate(d => { const m = d.month === 0 ? 11 : d.month - 1; return { month: m, year: m === 11 ? d.year - 1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14 }}>‹</button>
+                    <span style={{ fontWeight: 700, fontSize: 13, minWidth: 110, textAlign: "center" }}>{monthNames[month]} {year}</span>
+                    <button onClick={() => setCalendarDate(d => { const m = d.month === 11 ? 0 : d.month + 1; return { month: m, year: m === 0 ? d.year + 1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14 }}>›</button>
+                  </div>
+                  {selectedDay && (
+                    <button onClick={() => setSelectedDay(null)} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, padding: "4px 10px", fontSize: 12, cursor: "pointer", color: "#6B7280" }}>✕ Quitar filtro</button>
+                  )}
+                </div>
+                <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+                    {["Do","Lu","Ma","Mi","Ju","Vi","Sa"].map(d => <div key={d} style={{ textAlign: "center", padding: "6px 0", fontSize: 11, fontWeight: 700, color: "#9CA3AF" }}>{d}</div>)}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+                    {Array.from({ length: firstDay }).map((_, i) => <div key={"e"+i} style={{ minHeight: 44, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6" }} />)}
+                    {Array.from({ length: daysInMonth }).map((_, i) => {
+                      const day = i + 1;
+                      const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                      const dayRes = getCellReservas(day);
+                      const isToday = dateStr === today;
+                      const isSelected = selectedDay === dateStr;
+                      return (
+                        <div key={day} onClick={() => dayRes.length > 0 && setSelectedDay(isSelected ? null : dateStr)}
+                          style={{ minHeight: 44, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", padding: 3, background: isSelected ? "#DCFCE7" : isToday ? "#F0FDF4" : "#fff", cursor: dayRes.length > 0 ? "pointer" : "default" }}>
+                          <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: isToday ? 800 : 500, color: isSelected ? "#166534" : isToday ? "#16A34A" : "#374151", textAlign: "center" }}>{day}</p>
+                          {dayRes.slice(0,1).map(r => <div key={r.id} style={{ background: (statColors[r.estado]||"#9CA3AF")+"20", borderLeft: `2px solid ${statColors[r.estado]||"#9CA3AF"}`, borderRadius: 3, padding: "1px 3px", fontSize: 9, fontWeight: 700, color: statColors[r.estado]||"#6B7280", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{r.huesped_nombre.split(" ")[0]}</div>)}
+                          {dayRes.length > 1 && <p style={{ margin: "1px 0 0", fontSize: 9, color: "#9CA3AF", textAlign: "center" }}>+{dayRes.length-1}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+                  {[["activa","#16A34A","Activa"],["confirmada","#2563EB","Confirmada"],["pendiente","#D97706","Pendiente"]].map(([e,c,l]) => (
+                    <div key={e} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
+                      <span style={{ fontSize: 11, color: "#6B7280" }}>{l}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {showForm && (
               <div style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}>
                 <p style={{ fontWeight: 700, fontSize: 15, margin: "0 0 14px" }}>{editReserva ? "Editar reserva" : "Nueva reserva"}</p>
@@ -1138,8 +1153,17 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
               </div>
             )}
             {!showForm && <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {reservas.map(r => (
-                <div key={r.id} style={{ background: "#fff", borderRadius: 16, padding: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+              {(() => {
+                let list = [...reservas].sort((a, b) => a.check_in > b.check_in ? 1 : -1);
+                if (selectedDay) {
+                  const hit = list.filter(r => isDateInRange(selectedDay, r.check_in, r.check_out));
+                  const rest = list.filter(r => !isDateInRange(selectedDay, r.check_in, r.check_out));
+                  list = [...hit, ...rest];
+                }
+                return list.map(r => {
+                  const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
+                  return (
+                <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                     <div>
                       <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
@@ -1230,10 +1254,13 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   )}
                 </div>
               ))}
+            
+                );
+                });
+              })()}
             </div>}
           </div>
         )}
-
         {view === "limpieza" && (
           <div>
             <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Checklist de limpieza</p>
