@@ -779,9 +779,29 @@ function Login({ onLogin }) {
 
 // ─── ROOT ─────────────────────────────────────────────────────────
 export default function App() {
-  const [screen, setScreen] = useState("login");
+  const path = window.location.pathname;
+  const guestMatch = path.match(/^\/g\/(.+)$/);
+  const guestToken = guestMatch ? guestMatch[1] : null;
+
+  const [screen, setScreen] = useState(guestToken ? "guest" : "login");
   const [content, setContent] = useState(INITIAL_CONTENT);
   const [token, setToken] = useState(null);
+
+  const guestReserva = guestToken
+    ? DEMO_RESERVAS.find(r => r.token === guestToken) || null
+    : DEMO_RESERVAS[0];
+
+  if (guestToken && !guestReserva) {
+    return (
+      <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
+        <div style={{ textAlign: "center", padding: 32 }}>
+          <p style={{ fontSize: 48, margin: "0 0 16px" }}>🔒</p>
+          <p style={{ fontWeight: 800, fontSize: 20, color: "#111827", margin: "0 0 8px" }}>Link no válido</p>
+          <p style={{ color: "#6B7280", fontSize: 14 }}>Este link no existe o ya expiró.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -803,14 +823,7 @@ export default function App() {
         />
       )}
       {screen === "guest" && (
-        <div>
-          <GuestPortal reserva={DEMO_RESERVAS[0]} content={content} />
-          <div style={{ position: "fixed", bottom: 16, right: 16 }}>
-            <button onClick={() => setScreen("login")} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}>
-              ← Volver al admin
-            </button>
-          </div>
-        </div>
+        <GuestPortal reserva={guestReserva} content={content} />
       )}
     </div>
   );
