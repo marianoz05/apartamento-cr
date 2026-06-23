@@ -555,7 +555,7 @@ function AdminPanel({ onLogout, content, onContentSave }) {
   }
   function toggleLimpieza(id) { setReservas(prev => prev.map(r => r.id === id ? { ...r, limpieza_hecha: !r.limpieza_hecha } : r)); }
   function deleteReserva(id) { setReservas(prev => prev.filter(r => r.id !== id)); }
-  function copyGuestLink(token) { navigator.clipboard?.writeText(`https://apartamentocr.vercel.app/g/${token}`); setCopiedToken(token); setTimeout(() => setCopiedToken(null), 2000); }
+  function copyGuestLink(token) { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${token}`); setCopiedToken(token); setTimeout(() => setCopiedToken(null), 2000); }
 
   const navItems = [["dashboard","📊","Resumen"],["calendario","📅","Calendario"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"]];
 
