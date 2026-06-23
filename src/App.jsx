@@ -160,8 +160,14 @@ function formatDate(str) { if (!str) return ""; const [y, m, d] = str.split("-")
 function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
 function isDateInRange(dateStr, checkIn, checkOut) { return dateStr >= checkIn && dateStr <= checkOut; }
 function estadoBadge(estado) {
-  const map = { activa: { bg: "#DCFCE7", color: "#166534", label: "Activa" }, confirmada: { bg: "#DBEAFE", color: "#1E40AF", label: "Confirmada" }, completada: { bg: "#F3F4F6", color: "#6B7280", label: "Completada" } };
-  const s = map[estado] || map.confirmada;
+  const map = {
+    pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "Pendiente" },
+    confirmada: { bg: "#DBEAFE", color: "#1E40AF", label: "Confirmada" },
+    activa:     { bg: "#DCFCE7", color: "#166534", label: "Activa" },
+    cancelada:  { bg: "#FEE2E2", color: "#991B1B", label: "Cancelada" },
+    completada: { bg: "#F3F4F6", color: "#6B7280", label: "Completada" },
+  };
+  const s = map[estado] || map.pendiente;
   return <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>;
 }
 
@@ -605,7 +611,33 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [showForm, setShowForm] = useState(false);
   const [editReserva, setEditReserva] = useState(null);
   const [copiedToken, setCopiedToken] = useState(null);
-  const [form, setForm] = useState({ huesped_nombre: "", huesped_email: "", check_in: "", check_out: "", noches: "" });
+  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", check_in: "", check_out: "", noches: 0, monto_noche: 0, monto_total: 0, pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, estado: "pendiente" };
+  const [form, setForm] = useState(emptyForm);
+
+  function calcularNoches(ci, co) {
+    if (!ci || !co) return 0;
+    const diff = new Date(co) - new Date(ci);
+    return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
+  }
+
+  function updForm(key, value) {
+    setForm(prev => {
+      const next = { ...prev, [key]: value };
+      if (key === "check_in" || key === "check_out") {
+        next.noches = calcularNoches(key === "check_in" ? value : prev.check_in, key === "check_out" ? value : prev.check_out);
+        next.monto_total = next.noches * Number(next.monto_noche || 0);
+        next.saldo = next.monto_total - Number(next.pago1_monto || 0) - Number(next.pago2_monto || 0);
+      }
+      if (key === "monto_noche") {
+        next.monto_total = Number(next.noches || 0) * Number(value || 0);
+        next.saldo = next.monto_total - Number(next.pago1_monto || 0) - Number(next.pago2_monto || 0);
+      }
+      if (key === "pago1_monto" || key === "pago2_monto") {
+        next.saldo = Number(next.monto_total || 0) - Number(key === "pago1_monto" ? value : next.pago1_monto || 0) - Number(key === "pago2_monto" ? value : next.pago2_monto || 0);
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     sb.getReservas(onLogoutToken).then(data => {
@@ -628,16 +660,37 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
     return reservas.filter(r => r.estado !== "completada" && isDateInRange(dateStr, r.check_in, r.check_out));
   }
-  function openNewReserva() { setEditReserva(null); setForm({ huesped_nombre: "", huesped_email: "", check_in: "", check_out: "", noches: "" }); setShowForm(true); }
-  function openEditReserva(r) { setEditReserva(r); setForm({ huesped_nombre: r.huesped_nombre, huesped_email: r.huesped_email, check_in: r.check_in, check_out: r.check_out, noches: r.noches }); setShowForm(true); }
+  function openNewReserva() { setEditReserva(null); setForm(emptyForm); setShowForm(true); }
+  function openEditReserva(r) {
+    setEditReserva(r);
+    setForm({
+      huesped_nombre: r.huesped_nombre || "", huesped_email: r.huesped_email || "",
+      telefono: r.telefono || "", check_in: r.check_in || "", check_out: r.check_out || "",
+      noches: r.noches || 0, monto_noche: r.monto_noche || 0, monto_total: r.monto_total || 0,
+      pago1_monto: r.pago1_monto || 0, pago1_fecha: r.pago1_fecha || "",
+      pago2_monto: r.pago2_monto || 0, pago2_fecha: r.pago2_fecha || "",
+      saldo: r.saldo || 0, llave_entregada: r.llave_entregada || false, estado: r.estado || "pendiente",
+    });
+    setShowForm(true);
+  }
   async function saveReserva() {
     if (!form.huesped_nombre || !form.check_in || !form.check_out) return;
-    const payload = { ...form, noches: Number(form.noches) };
+    const payload = {
+      ...form,
+      noches: Number(form.noches),
+      monto_noche: Number(form.monto_noche),
+      monto_total: Number(form.monto_total),
+      pago1_monto: Number(form.pago1_monto),
+      pago2_monto: Number(form.pago2_monto),
+      saldo: Number(form.saldo),
+      pago1_fecha: form.pago1_fecha || null,
+      pago2_fecha: form.pago2_fecha || null,
+    };
     if (editReserva) {
       await sb.updateReserva(onLogoutToken, editReserva.id, payload);
       setReservas(prev => prev.map(r => r.id === editReserva.id ? { ...r, ...payload } : r));
     } else {
-      const created = await sb.createReserva(onLogoutToken, { ...payload, estado: "confirmada", limpieza_hecha: false });
+      const created = await sb.createReserva(onLogoutToken, { ...payload, limpieza_hecha: false });
       if (Array.isArray(created) && created[0]) setReservas(prev => [...prev, created[0]]);
     }
     setShowForm(false);
@@ -769,15 +822,85 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
             {showForm && (
               <div style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}>
                 <p style={{ fontWeight: 700, fontSize: 15, margin: "0 0 14px" }}>{editReserva ? "Editar reserva" : "Nueva reserva"}</p>
-                {[["huesped_nombre","Nombre del huésped","text"],["huesped_email","Email","email"],["check_in","Check-in","date"],["check_out","Check-out","date"],["noches","Noches","number"]].map(([key, label, type]) => (
+
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Huésped</p>
+                {[["huesped_nombre","Nombre completo","text"],["huesped_email","Email","email"],["telefono","Teléfono","tel"]].map(([key, label, type]) => (
                   <div key={key} style={{ marginBottom: 10 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>{label}</label>
-                    <input type={type} value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    <input type={type} value={form[key]} onChange={e => updForm(key, e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
                 ))}
-                <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                  <button onClick={saveReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", flex: 1 }}>Guardar</button>
-                  <button onClick={() => setShowForm(false)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
+
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Fechas</p>
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Check-in</label>
+                    <input type="date" value={form.check_in} onChange={e => updForm("check_in", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Check-out</label>
+                    <input type="date" value={form.check_out} onChange={e => updForm("check_out", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+                <div style={{ background: "#F0FDF4", borderRadius: 10, padding: "8px 12px", marginBottom: 10, display: "flex", gap: 16 }}>
+                  <span style={{ fontSize: 13, color: "#166534" }}>🌙 <strong>{form.noches}</strong> noches</span>
+                </div>
+
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Montos</p>
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Monto por noche</label>
+                    <input type="number" value={form.monto_noche} onChange={e => updForm("monto_noche", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Total</label>
+                    <div style={{ padding: "8px 12px", borderRadius: 8, background: "#F9FAFB", border: "1px solid #E5E7EB", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>{Number(form.monto_total).toLocaleString()}</div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Pago 1</label>
+                    <input type="number" value={form.pago1_monto} onChange={e => updForm("pago1_monto", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha pago 1</label>
+                    <input type="date" value={form.pago1_fecha} onChange={e => updForm("pago1_fecha", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Pago 2</label>
+                    <input type="number" value={form.pago2_monto} onChange={e => updForm("pago2_monto", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha pago 2</label>
+                    <input type="date" value={form.pago2_fecha} onChange={e => updForm("pago2_fecha", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                </div>
+                <div style={{ background: Number(form.saldo) > 0 ? "#FEF3C7" : "#DCFCE7", borderRadius: 10, padding: "8px 12px", marginBottom: 12 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: Number(form.saldo) > 0 ? "#D97706" : "#166534" }}>
+                    Saldo pendiente: {Number(form.saldo).toLocaleString()}
+                  </span>
+                </div>
+
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Estado</p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+                  {["pendiente","confirmada","activa","cancelada","completada"].map(e => (
+                    <button key={e} onClick={() => updForm("estado", e)} style={{ background: form.estado === e ? "#1B4332" : "#F3F4F6", color: form.estado === e ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "5px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", textTransform: "capitalize" }}>{e}</button>
+                  ))}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                  <button onClick={() => updForm("llave_entregada", !form.llave_entregada)} style={{ width: 28, height: 28, borderRadius: 8, border: form.llave_entregada ? "none" : "2px solid #D1D5DB", background: form.llave_entregada ? "#1B4332" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {form.llave_entregada && <span style={{ color: "#fff", fontSize: 14 }}>✓</span>}
+                  </button>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>🔑 Llave entregada</span>
+                </div>
+
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={saveReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", flex: 1 }}>Guardar</button>
+                  <button onClick={() => setShowForm(false)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
                 </div>
               </div>
             )}
@@ -799,10 +922,37 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       </div>
                     ))}
                   </div>
+                  {/* Financial summary */}
+                  {r.monto_total > 0 && (
+                    <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                      <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
+                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{Number(r.monto_total).toLocaleString()}</p>
+                      </div>
+                      <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "5px 10px" }}>
+                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{(Number(r.pago1_monto||0) + Number(r.pago2_monto||0)).toLocaleString()}</p>
+                      </div>
+                      <div style={{ background: Number(r.saldo) > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
+                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: Number(r.saldo) > 0 ? "#D97706" : "#166534" }}>{Number(r.saldo||0).toLocaleString()}</p>
+                      </div>
+                      {r.llave_entregada && (
+                        <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
+                          <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>🔑 Llave entregada</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button onClick={() => copyGuestLink(r.token)} style={{ background: copiedToken === r.token ? "#DCFCE7" : "#EFF6FF", color: copiedToken === r.token ? "#16A34A" : "#2563EB", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                       {copiedToken === r.token ? "✓ Copiado" : "🔗 Link huésped"}
                     </button>
+                    {r.telefono && (
+                      <a href={`https://wa.me/${r.telefono.replace(/[\s\-+]/g, "")}`} target="_blank" rel="noopener noreferrer" style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+                        💬 WhatsApp
+                      </a>
+                    )}
                     <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
                     <button onClick={() => deleteReserva(r.id)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
                   </div>
