@@ -819,9 +819,18 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     await sb.updateReserva(onLogoutToken, id, { limpieza_hecha: !r.limpieza_hecha });
     setReservas(prev => prev.map(r => r.id === id ? { ...r, limpieza_hecha: !r.limpieza_hecha } : r));
   }
+  const [confirmDelete, setConfirmDelete] = useState(null); // stores reserva object
+
   async function deleteReserva(id) {
     await sb.deleteReserva(onLogoutToken, id);
     setReservas(prev => prev.filter(r => r.id !== id));
+    setConfirmDelete(null);
+  }
+
+  async function cancelarReserva(id) {
+    await sb.updateReserva(onLogoutToken, id, { estado: "cancelada" });
+    setReservas(prev => prev.map(r => r.id === id ? { ...r, estado: "cancelada" } : r));
+    setConfirmDelete(null);
   }
   function copyGuestLink(token) { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${token}`); setCopiedToken(token); setTimeout(() => setCopiedToken(null), 2000); }
 
@@ -1139,29 +1148,71 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                     </div>
                   )}
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => copyGuestLink(r.token)} style={{ background: copiedToken === r.token ? "#DCFCE7" : "#EFF6FF", color: copiedToken === r.token ? "#16A34A" : "#2563EB", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                      {copiedToken === r.token ? "✓ Copiado" : "🔗 Link huésped"}
-                    </button>
+                    {/* Link huésped - solo si activa, confirmada o pendiente */}
+                    {["pendiente","confirmada","activa"].includes(r.estado) && (
+                      <button onClick={() => copyGuestLink(r.token)} style={{ background: copiedToken === r.token ? "#DCFCE7" : "#EFF6FF", color: copiedToken === r.token ? "#16A34A" : "#2563EB", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                        {copiedToken === r.token ? "✓ Copiado" : "🔗 Link huésped"}
+                      </button>
+                    )}
+                    {/* WhatsApp dropdown */}
                     {r.telefono && (
-                      <div style={{ display: "flex", gap: 6, position: "relative" }}>
+                      <div style={{ position: "relative" }}>
                         <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                           💬 WhatsApp ▾
                         </button>
                         {waMenu === r.id && (
-                          <div style={{ position: "absolute", top: 32, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 220, overflow: "hidden" }}>
-                            <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
-                              🌿 Bienvenida + link del portal
-                            </button>
-                            <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#D97706" }}>
-                              💰 Recordatorio de pago
-                            </button>
+                          <div style={{ position: "absolute", top: 32, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
+                            {/* Contacto directo - siempre */}
+                            <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer"
+                              onClick={() => setWaMenu(null)}
+                              style={{ display: "block", width: "100%", background: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#374151", textDecoration: "none" }}>
+                              💬 Contacto directo
+                            </a>
+                            {/* Bienvenida - solo si check-in no ha pasado */}
+                            {r.check_in >= new Date().toISOString().split("T")[0] && (
+                              <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
+                                🌿 Bienvenida + link del portal
+                              </button>
+                            )}
+                            {/* Pago - solo si hay saldo pendiente */}
+                            {Number(r.saldo||0) > 0 && (
+                              <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#D97706" }}>
+                                💰 Recordatorio de pago
+                              </button>
+                            )}
+                            {/* Link portal - solo si pendiente, confirmada o activa */}
+                            {["pendiente","confirmada","activa"].includes(r.estado) && (
+                              <button onClick={() => { sendWhatsApp(r, "link"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#2563EB" }}>
+                                🔗 Enviar link del portal
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
                     )}
                     <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
-                    <button onClick={() => deleteReserva(r.id)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
+                    <button onClick={() => setConfirmDelete(r)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
                   </div>
+
+                  {/* Confirm delete modal */}
+                  {confirmDelete?.id === r.id && (
+                    <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: 14 }}>
+                      <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: 13, color: "#991B1B" }}>
+                        ¿Qué deseas hacer con la reserva de {r.huesped_nombre}?
+                      </p>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button onClick={() => cancelarReserva(r.id)} style={{ background: "#FEF3C7", color: "#92400E", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                          ❌ Cancelar reserva
+                        </button>
+                        <button onClick={() => deleteReserva(r.id)} style={{ background: "#DC2626", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                          🗑️ Eliminar permanentemente
+                        </button>
+                        <button onClick={() => setConfirmDelete(null)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                          Volver
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
