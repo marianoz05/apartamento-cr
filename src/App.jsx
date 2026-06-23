@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────
 const SUPABASE_URL = "https://cxjumlciielwwhunvmym.supabase.co";
@@ -336,8 +336,11 @@ function GuestPortal({ reserva, content }) {
     },
   ];
 
+  const scrollRef = useRef(null);
+  function scrollTop() { if (scrollRef.current) scrollRef.current.scrollTop = 0; }
+
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F7F5F0", minHeight: "100vh", maxWidth: 430, margin: "0 auto" }}>
+    <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F7F5F0", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
       {active === null ? (
         <>
           <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "36px 20px 28px", position: "relative", overflow: "hidden" }}>
@@ -359,7 +362,7 @@ function GuestPortal({ reserva, content }) {
           </div>
           <div style={{ padding: "20px 16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {sections.map((s) => (
-              <button key={s.id} onClick={() => { setActive(s.id); window.scrollTo(0,0); }} style={{ background: "#fff", border: "none", borderRadius: 18, padding: "18px 14px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
+              <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 18, padding: "18px 14px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
                 <span style={{ fontSize: 26 }}>{s.icon}</span>
                 <p style={{ margin: "8px 0 2px", fontWeight: 700, fontSize: 13, color: "#1a1a1a", lineHeight: 1.3 }}>{s.title}</p>
                 <span style={{ fontSize: 16, color: "#d1d5db" }}>›</span>
@@ -373,7 +376,7 @@ function GuestPortal({ reserva, content }) {
         return (
           <>
             <div style={{ background: sec.color, padding: "20px 16px 24px", display: "flex", alignItems: "center", gap: 12 }}>
-              <button onClick={() => { setActive(null); window.scrollTo(0,0); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
+              <button onClick={() => { setActive(null); scrollTop(); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" }}>Apartamento CR</p>
                 <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0 }}>{sec.icon} {sec.title}</h2>
