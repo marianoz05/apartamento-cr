@@ -133,7 +133,11 @@ const INITIAL_CONTENT = {
 };
 
 // ─── HELPERS ─────────────────────────────────────────────────────
-function generateToken() { return "tok_" + Math.random().toString(36).substr(2, 9); }
+function generateToken() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
 function formatDate(str) { if (!str) return ""; const [y, m, d] = str.split("-"); return `${d}/${m}/${y}`; }
 function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
 function isDateInRange(dateStr, checkIn, checkOut) { return dateStr >= checkIn && dateStr <= checkOut; }
@@ -868,8 +872,12 @@ export default function App() {
 
   useEffect(() => {
     if (guestToken) {
-      sb.getReservaByToken(guestToken).then(r => {
+      Promise.all([
+        sb.getReservaByToken(guestToken),
+        sb.getContenido(null),
+      ]).then(([r, savedContent]) => {
         setGuestReservaData(r);
+        if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
         setGuestLoading(false);
       });
     }
