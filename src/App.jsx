@@ -1253,8 +1253,6 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     </div>
                   )}
                 </div>
-              ))}
-            
                 );
                 });
               })()}
