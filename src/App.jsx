@@ -78,6 +78,14 @@ const sb = {
       body: JSON.stringify({ data }),
     });
   },
+  async changePassword(token, newPassword) {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: "PUT",
+      headers: { ...this.headers(token), "Content-Type": "application/json" },
+      body: JSON.stringify({ password: newPassword }),
+    });
+    return res.json();
+  },
   async getReservaByToken(guestToken) {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/reservas?token=eq.${guestToken}&select=*`, {
@@ -138,6 +146,20 @@ const INITIAL_CONTENT = {
     { icon: "🌆", lugar: "El Poblado", desc: "El barrio más turístico. 15 min en Uber. Ideal para la noche." },
     { icon: "🚡", lugar: "Metro Cable", desc: "Sube a los cerros y ve la ciudad entera. Única experiencia." },
   ],
+  mensajes: {
+    bienvenida: "Hola [nombre] 👋, te comparto toda la información para tu estadía en Apartamento CR.
+
+📅 Check-in: [checkin] a partir de las 3:00 PM
+📅 Check-out: [checkout] antes de las 12:00 PM
+
+Aquí tu guía con todo lo que necesitas saber:
+[link]
+
+¡Nos vemos pronto! 🌿",
+    pago: "Hola [nombre] 👋, te recordamos que tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].
+
+Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu disposición. 🙏",
+  },
   contacto: {
     anfitrion_nombre: "Yanina Mora",
     anfitrion_tel: "+506 8891-1513",
@@ -411,6 +433,7 @@ function ContenidoEditor({ content, onSave }) {
     { id: "transporte", label: "🚇 Transporte" },
     { id: "laureles", label: "🌿 Qué hacer" },
     { id: "contacto", label: "📞 Contacto" },
+    { id: "mensajes", label: "💬 Mensajes" },
   ];
 
   const inputStyle = { width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
@@ -557,6 +580,33 @@ function ContenidoEditor({ content, onSave }) {
         </div>
       )}
 
+      {/* Mensajes */}
+      {tab === "mensajes" && (
+        <div>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
+            Edita las plantillas de WhatsApp. Variables disponibles: <strong>[nombre]</strong>, <strong>[checkin]</strong>, <strong>[checkout]</strong>, <strong>[link]</strong>, <strong>[saldo]</strong>, <strong>[moneda]</strong>
+          </p>
+          <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14, marginBottom: 12 }}>
+            <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#1B4332" }}>🌿 Bienvenida + link del portal</p>
+            <textarea
+              value={local.mensajes?.bienvenida || ""}
+              onChange={e => setLocal(prev => ({ ...prev, mensajes: { ...prev.mensajes, bienvenida: e.target.value } }))}
+              rows={8}
+              style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "vertical", lineHeight: 1.6 }}
+            />
+          </div>
+          <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14 }}>
+            <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#D97706" }}>💰 Recordatorio de pago</p>
+            <textarea
+              value={local.mensajes?.pago || ""}
+              onChange={e => setLocal(prev => ({ ...prev, mensajes: { ...prev.mensajes, pago: e.target.value } }))}
+              rows={6}
+              style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "vertical", lineHeight: 1.6 }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Contacto */}
       {tab === "contacto" && (
         <div>
@@ -611,6 +661,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [showForm, setShowForm] = useState(false);
   const [editReserva, setEditReserva] = useState(null);
   const [copiedToken, setCopiedToken] = useState(null);
+  const [waMenu, setWaMenu] = useState(null);
   const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "CRC", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
@@ -684,6 +735,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       return next;
     });
   }
+
+  useEffect(() => {
+    const close = () => setWaMenu(null);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
 
   useEffect(() => {
     sb.getReservas(onLogoutToken).then(data => {
@@ -778,7 +835,34 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   }
   function copyGuestLink(token) { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${token}`); setCopiedToken(token); setTimeout(() => setCopiedToken(null), 2000); }
 
-  const navItems = [["dashboard","📊","Resumen"],["calendario","📅","Calendario"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"]];
+  function sendWhatsApp(r, tipo) {
+    const nombre = r.huesped_nombre.split(" ")[0];
+    const link = `https://apartamento-cr.vercel.app/g/${r.token}`;
+    const sym = MONEDAS[r.moneda] || "₡";
+    let msg = "";
+
+    if (tipo === "bienvenida") {
+      msg = `Hola ${nombre} 👋, te comparto toda la información para tu estadía en Apartamento CR.
+
+📅 Check-in: ${formatDate(r.check_in)} a partir de las 3:00 PM
+📅 Check-out: ${formatDate(r.check_out)} antes de las 12:00 PM
+
+Aquí tu guía con todo lo que necesitas saber:
+${link}
+
+¡Nos vemos pronto! 🌿`;
+    } else if (tipo === "pago") {
+      msg = `Hola ${nombre} 👋, te recordamos que tienes un saldo pendiente de ${sym}${Number(r.saldo||0).toLocaleString()} para tu reserva del ${formatDate(r.check_in)}.
+
+Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu disposición. 🙏`;
+    }
+
+    const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`;
+    const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+  }
+
+  const navItems = [["dashboard","📊","Resumen"],["calendario","📅","Calendario"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -1069,9 +1153,21 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       {copiedToken === r.token ? "✓ Copiado" : "🔗 Link huésped"}
                     </button>
                     {r.telefono && (
-                      <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer" style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
-                        💬 WhatsApp
-                      </a>
+                      <div style={{ display: "flex", gap: 6", position: "relative" }}>
+                        <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                          💬 WhatsApp ▾
+                        </button>
+                        {waMenu === r.id && (
+                          <div style={{ position: "absolute", top: 32, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 220, overflow: "hidden" }}>
+                            <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
+                              🌿 Bienvenida + link del portal
+                            </button>
+                            <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#D97706" }}>
+                              💰 Recordatorio de pago
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     )}
                     <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
                     <button onClick={() => deleteReserva(r.id)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
@@ -1113,11 +1209,67 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
         {view === "contenido" && (
           <ContenidoEditor content={content} onSave={onContentSave} />
         )}
+
+        {view === "cuenta" && (
+          <CuentaPanel token={onLogoutToken} />
+        )}
       </div>
     </div>
   );
 }
 
+
+// ─── CUENTA PANEL ────────────────────────────────────────────────
+function CuentaPanel({ token }) {
+  const [currentPass, setCurrentPass] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [status, setStatus] = useState(null); // null | "loading" | "ok" | "error"
+  const [msg, setMsg] = useState("");
+
+  async function handleChange() {
+    if (!newPass || !confirmPass) { setMsg("Completa todos los campos."); setStatus("error"); return; }
+    if (newPass !== confirmPass) { setMsg("Las contraseñas no coinciden."); setStatus("error"); return; }
+    if (newPass.length < 6) { setMsg("La contraseña debe tener al menos 6 caracteres."); setStatus("error"); return; }
+    setStatus("loading");
+    const res = await sb.changePassword(token, newPass);
+    if (res.id || res.email) {
+      setStatus("ok");
+      setMsg("Contraseña actualizada correctamente.");
+      setCurrentPass(""); setNewPass(""); setConfirmPass("");
+    } else {
+      setStatus("error");
+      setMsg(res.message || "Error al actualizar. Intenta de nuevo.");
+    }
+  }
+
+  const inputStyle = { width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 14, outline: "none", boxSizing: "border-box" };
+
+  return (
+    <div>
+      <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Cuenta</p>
+      <div style={{ background: "#fff", borderRadius: 16, padding: 20, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+        <p style={{ fontWeight: 700, fontSize: 15, margin: "0 0 16px", color: "#374151" }}>🔒 Cambiar contraseña</p>
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Nueva contraseña</label>
+          <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} style={inputStyle} />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Confirmar nueva contraseña</label>
+          <input type="password" value={confirmPass} onChange={e => setConfirmPass(e.target.value)} onKeyDown={e => e.key === "Enter" && handleChange()} style={inputStyle} />
+        </div>
+        {msg && (
+          <div style={{ background: status === "ok" ? "#DCFCE7" : "#FEE2E2", borderRadius: 10, padding: "10px 14px", marginBottom: 14 }}>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: status === "ok" ? "#166534" : "#991B1B" }}>{msg}</p>
+          </div>
+        )}
+        <button onClick={handleChange} disabled={status === "loading"} style={{ width: "100%", background: status === "loading" ? "#6B7280" : "#1B4332", color: "#fff", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 14, fontWeight: 700, cursor: status === "loading" ? "not-allowed" : "pointer" }}>
+          {status === "loading" ? "Actualizando..." : "Actualizar contraseña"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ─── GUEST SCREEN ────────────────────────────────────────────────
 function GuestScreen({ token, initialContent }) {
