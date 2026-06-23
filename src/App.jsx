@@ -966,19 +966,7 @@ export default function App() {
         />
       )}
       {screen === "guest" && (
-        guestLoading
-          ? <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif" }}><p style={{ color: "#6B7280" }}>Cargando...</p></div>
-          : guestReservaData !== undefined
-            ? guestReservaData !== null
-              ? <GuestPortal reserva={guestReservaData} content={content} />
-              : <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
-                  <div style={{ textAlign: "center", padding: 32 }}>
-                    <p style={{ fontSize: 48, margin: "0 0 16px" }}>🔒</p>
-                    <p style={{ fontWeight: 800, fontSize: 20, color: "#111827", margin: "0 0 8px" }}>Link no válido</p>
-                    <p style={{ color: "#6B7280", fontSize: 14 }}>Este link no existe o ya expiró.</p>
-                  </div>
-                </div>
-            : <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif" }}><p style={{ color: "#6B7280" }}>Cargando...</p></div>
+        <GuestScreen token={guestToken} initialContent={INITIAL_CONTENT} />
       )}
     </div>
   );
