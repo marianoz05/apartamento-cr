@@ -655,7 +655,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [dashboardDetail, setDashboardDetail] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
-  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "CRC", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
+  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "USD", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
     { code: "+506", label: "🇨🇷 CR +506" },
@@ -1032,7 +1032,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Huésped</p>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Nombre completo</label>
-                  <input type="text" value={form.huesped_nombre} onChange={e => updForm("huesped_nombre", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  <input type="text" value={form.huesped_nombre} onChange={e => updForm("huesped_nombre", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: !form.huesped_nombre ? "1px solid #FCA5A5" : "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Requerido" required />
                 </div>
                 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
                   <div style={{ width: 130 }}>
@@ -1090,7 +1090,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Moneda</p>
                 <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                  {Object.entries(MONEDAS).map(([key, sym]) => (
+                  {Object.entries(MONEDAS).reverse().map(([key, sym]) => (
                     <button key={key} onClick={() => updForm("moneda", key)} style={{ flex: 1, background: form.moneda === key ? "#1B4332" : "#F3F4F6", color: form.moneda === key ? "#fff" : "#374151", border: "none", borderRadius: 10, padding: "8px 0", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
                       {sym} {key}
                     </button>
@@ -1119,31 +1119,32 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     <input type="date" value={form.pago1_fecha} onChange={e => updForm("pago1_fecha", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Pago 2</label>
-                    <input type="number" value={form.pago2_monto} onChange={e => updForm("pago2_monto", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                {Number(form.pago1_monto) > 0 && (
+                  <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Pago 2</label>
+                      <input type="number" value={form.pago2_monto} onChange={e => updForm("pago2_monto", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha pago 2</label>
+                      <input type="date" value={form.pago2_fecha} onChange={e => updForm("pago2_fecha", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                    </div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha pago 2</label>
-                    <input type="date" value={form.pago2_fecha} onChange={e => updForm("pago2_fecha", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
-                  </div>
-                </div>
+                )}
                 <div style={{ background: Number(form.saldo) > 0 ? "#FEF3C7" : "#DCFCE7", borderRadius: 10, padding: "8px 12px", marginBottom: 12 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: Number(form.saldo) > 0 ? "#D97706" : "#166534" }}>
                     Saldo pendiente: {fmt(form.saldo, form.moneda)}
                   </span>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                  <button onClick={() => updForm("estado", form.estado === "cancelada" ? "pendiente" : "cancelada")} style={{ width: 28, height: 28, borderRadius: 8, border: form.estado === "cancelada" ? "none" : "2px solid #D1D5DB", background: form.estado === "cancelada" ? "#DC2626" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {form.estado === "cancelada" && <span style={{ color: "#fff", fontSize: 14 }}>✓</span>}
-                  </button>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>❌ Marcar como cancelada</span>
-                </div>
-                <div style={{ background: "#F0FDF4", borderRadius: 10, padding: "8px 12px", marginBottom: 12 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: "#166534" }}>El estado se calcula automáticamente según pagos y fechas.</p>
-                </div>
+                {editReserva && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <button onClick={() => updForm("estado", form.estado === "cancelada" ? "pendiente" : "cancelada")} style={{ width: 28, height: 28, borderRadius: 8, border: form.estado === "cancelada" ? "none" : "2px solid #D1D5DB", background: form.estado === "cancelada" ? "#DC2626" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {form.estado === "cancelada" && <span style={{ color: "#fff", fontSize: 14 }}>✓</span>}
+                    </button>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>❌ Marcar como cancelada</span>
+                  </div>
+                )}
 
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
                   <button onClick={() => updForm("llave_entregada", !form.llave_entregada)} style={{ width: 28, height: 28, borderRadius: 8, border: form.llave_entregada ? "none" : "2px solid #D1D5DB", background: form.llave_entregada ? "#1B4332" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
