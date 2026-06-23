@@ -1178,7 +1178,7 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                       {waMenu === r.id && (
                         <div style={{ position: "absolute", top: 32, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
                           {r.telefono && (
-                            <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/[^0-9]/g,"")}`} target="_blank" rel="noopener noreferrer"
+                            <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer"
                               onClick={() => setWaMenu(null)}
                               style={{ display: "block", padding: "12px 16px", fontSize: 13, fontWeight: 600, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F3F4F6" }}>
                               💬 Contacto directo
@@ -1220,7 +1220,7 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                   )}
                 </div>
               ))}
-            </div>
+            </div>}
           </div>
         )}
 
