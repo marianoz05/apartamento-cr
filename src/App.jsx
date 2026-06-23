@@ -146,6 +146,10 @@ const INITIAL_CONTENT = {
     { icon: "🌆", lugar: "El Poblado", desc: "El barrio más turístico. 15 min en Uber. Ideal para la noche." },
     { icon: "🚡", lugar: "Metro Cable", desc: "Sube a los cerros y ve la ciudad entera. Única experiencia." },
   ],
+  ubicacion: {
+    direccion: "Laureles, Medellín, Colombia",
+    maps_link: "",
+  },
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
     pago: "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in.",
@@ -213,6 +217,25 @@ function GuestPortal({ reserva, content }) {
   const c = content;
 
   const sections = [
+    {
+      id: "ubicacion", icon: "📍", title: "Ubicación", color: "#1E3A5F",
+      render: () => (
+        <div>
+          {c.ubicacion?.direccion && (
+            <div style={{ background: "#EFF6FF", borderRadius: 14, padding: 14, marginBottom: 10 }}>
+              <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.1em" }}>Dirección</p>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1E3A5F" }}>{c.ubicacion.direccion}</p>
+            </div>
+          )}
+          {c.ubicacion?.maps_link && (
+            <a href={c.ubicacion.maps_link} target="_blank" rel="noopener noreferrer"
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#2563EB", color: "#fff", padding: "14px 0", borderRadius: 14, fontWeight: 700, fontSize: 15, textDecoration: "none" }}>
+              🗺️ Abrir en Google Maps
+            </a>
+          )}
+        </div>
+      )
+    },
     {
       id: "wifi", icon: "📶", title: "WiFi y Acceso", color: "#1B4332",
       render: () => (
@@ -418,6 +441,7 @@ function ContenidoEditor({ content, onSave }) {
 
   const tabs = [
     { id: "wifi", label: "📶 WiFi" },
+    { id: "ubicacion", label: "📍 Ubicación" },
     { id: "normas", label: "📋 Normas" },
     { id: "restaurantes", label: "🍽️ Restaurantes" },
     { id: "transporte", label: "🚇 Transporte" },
@@ -446,6 +470,21 @@ function ContenidoEditor({ content, onSave }) {
           </button>
         ))}
       </div>
+
+      {/* Ubicación */}
+      {tab === "ubicacion" && (
+        <div style={cardStyle}>
+          <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 12px" }}>Ubicación del apartamento</p>
+          <FieldInput label="Dirección" value={local.ubicacion?.direccion || ""} onChange={v => upd("ubicacion.direccion", v)} />
+          <FieldInput label="Link de Google Maps" value={local.ubicacion?.maps_link || ""} onChange={v => upd("ubicacion.maps_link", v)} />
+          {local.ubicacion?.maps_link && (
+            <a href={local.ubicacion.maps_link} target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#EFF6FF", color: "#2563EB", padding: "8px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: "none", marginTop: 4 }}>
+              🗺️ Ver en Google Maps
+            </a>
+          )}
+        </div>
+      )}
 
       {/* WiFi */}
       {tab === "wifi" && (
