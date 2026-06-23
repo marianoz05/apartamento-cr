@@ -941,6 +941,7 @@ Por favor coordina el pago antes del check-in. Cualquier consulta estamos a tu d
                       {r.noches > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>🌙 {r.noches} noches</p>}
                       {r.monto_total > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>💰 Total: {fmt(r.monto_total, r.moneda)}</p>}
                       {Number(r.saldo||0) > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#D97706", fontWeight: 700 }}>⚠️ Saldo: {fmt(r.saldo, r.moneda)}</p>}
+                      {Number(r.saldo||0) > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#D97706", fontWeight: 700 }}>⚠️ Saldo: {fmt(r.saldo, r.moneda)}</p>}
                       {r.llave_entregada && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#166534" }}>🔑 Llave entregada</p>}
                       <button onClick={e => { e.stopPropagation(); openEditReserva(r); setView("reservas"); setDashboardDetail(null); }}
                         style={{ marginTop: 8, background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
@@ -1401,71 +1402,4 @@ function Login({ onLogin }) {
         </div>
         <div style={{ marginBottom: 20 }}>
           <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6 }}>Contraseña</label>
-          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && handleLogin()} style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
-        </div>
-        {error && <p style={{ color: "#DC2626", fontSize: 13, margin: "0 0 12px", textAlign: "center" }}>{error}</p>}
-        <button onClick={handleLogin} disabled={loading} style={{ width: "100%", background: loading ? "#6B7280" : "#1B4332", color: "#fff", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 15, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer" }}>
-          {loading ? "Ingresando..." : "Ingresar"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── ROOT ─────────────────────────────────────────────────────────
-export default function App() {
-  const path = window.location.pathname;
-  const guestMatch = path.match(/^\/g\/(.+)$/);
-  const guestToken = guestMatch ? guestMatch[1] : null;
-
-  const savedToken = localStorage.getItem("cr_token");
-  const [screen, setScreen] = useState(guestToken ? "guest" : savedToken ? "admin" : "login");
-  const [content, setContent] = useState(INITIAL_CONTENT);
-  const [token, setToken] = useState(savedToken);
-
-  useEffect(() => {
-    if (savedToken && !guestToken) {
-      sb.getContenido(savedToken).then(c => {
-        if (c && Object.keys(c).length > 0) setContent(c);
-      });
-    }
-  }, []);
-
-  async function handleLogin(t) {
-    setToken(t);
-    localStorage.setItem("cr_token", t);
-    const savedContent = await sb.getContenido(t);
-    if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
-    setScreen("admin");
-    setTimeout(() => {
-      if (document.activeElement) document.activeElement.blur();
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
-  }
-
-  return (
-    <div>
-      {screen === "login" && (
-        <div>
-          <Login onLogin={handleLogin} />
-          <div style={{ position: "fixed", bottom: 16, right: 16 }}>
-            <button onClick={() => setScreen("guest")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
-              👤 Ver portal huésped
-            </button>
-          </div>
-        </div>
-      )}
-      {screen === "admin" && (
-        <AdminPanel
-          onLogout={async () => { await sb.signOut(token); setToken(null); localStorage.removeItem("cr_token"); setScreen("login"); }}
-          onLogoutToken={token}
-          content={content}
-          onContentSave={async (updated) => { await sb.saveContenido(token, updated); setContent(updated); }}
-        />
-      )}
-      {screen === "guest" && (
-        <GuestScreen token={guestToken} initialContent={INITIAL_CONTENT} />
-      )}
-    </div>
-  );
-}
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && handleLogin()} style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid #E5E7EB", fontSize: 14, outline: "none", boxSizing: "border-bo
