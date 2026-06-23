@@ -839,6 +839,50 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   );
 }
 
+
+// ─── GUEST SCREEN ────────────────────────────────────────────────
+function GuestScreen({ token, initialContent }) {
+  const [reserva, setReserva] = useState(null);
+  const [content, setContent] = useState(initialContent);
+  const [status, setStatus] = useState("loading");
+
+  useEffect(() => {
+    Promise.all([
+      sb.getReservaByToken(token),
+      sb.getContenido(null),
+    ]).then(([r, c]) => {
+      if (r && r.id) {
+        setReserva(r);
+        if (c && typeof c === "object" && Object.keys(c).length > 0) setContent(c);
+        setStatus("ok");
+      } else {
+        setStatus("error");
+      }
+    }).catch(() => setStatus("error"));
+  }, [token]);
+
+  if (status === "loading") return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif", background: "#F7F5F0" }}>
+      <div style={{ textAlign: "center" }}>
+        <p style={{ fontSize: 32, margin: "0 0 12px" }}>🌿</p>
+        <p style={{ color: "#6B7280", fontSize: 14 }}>Cargando tu guía...</p>
+      </div>
+    </div>
+  );
+
+  if (status === "error") return (
+    <div style={{ fontFamily: "Inter, sans-serif", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0" }}>
+      <div style={{ textAlign: "center", padding: 32 }}>
+        <p style={{ fontSize: 48, margin: "0 0 16px" }}>🔒</p>
+        <p style={{ fontWeight: 800, fontSize: 20, color: "#111827", margin: "0 0 8px" }}>Link no válido</p>
+        <p style={{ color: "#6B7280", fontSize: 14 }}>Este link no existe o ya expiró.</p>
+      </div>
+    </div>
+  );
+
+  return <GuestPortal reserva={reserva} content={content} />;
+}
+
 // ─── LOGIN ────────────────────────────────────────────────────────
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
