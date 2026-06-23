@@ -21,7 +21,6 @@ const sb = {
   },
 };
 
-import { useState } from "react";
 
 // ─── DEMO DATA ────────────────────────────────────────────────────
 const DEMO_RESERVAS = [
