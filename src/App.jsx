@@ -1209,7 +1209,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 </div>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cantidad de huéspedes</label>
-                  <input type="number" min="1" max="10" value={form.cantidad_huespedes} onChange={e => updForm("cantidad_huespedes", Number(e.target.value))} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  <input type="number" min="1" max="10" value={form.cantidad_huespedes || ""} onChange={e => updForm("cantidad_huespedes", e.target.value === "" ? "" : Number(e.target.value))} onBlur={e => { if (!e.target.value) updForm("cantidad_huespedes", 1); }} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                 </div>
 
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "12px 0 8px" }}>Fechas</p>
@@ -2112,6 +2112,8 @@ function ReportesView({ token, reservas }) {
 function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
   const [showForm, setShowForm] = useState(false);
   const [editL, setEditL] = useState(null);
+  const [limpiezasPage, setLimpiezasPage] = useState(5);
+  const LIMP_PAGE = 5;
   const emptyF = { fecha:"", reserva_id:"", costo:0, coordinado:false, realizada:false, pagado:false, notas:"" };
   const [form, setForm] = useState(emptyF);
   function openNew() { setEditL(null); setForm(emptyF); setShowForm(true); }
@@ -2179,7 +2181,14 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
       {!showForm&&(
         <div style={{display:"flex",flexDirection:"column",gap:10}}>
           {limpiezas.length===0&&<div style={{background:"#fff",borderRadius:16,padding:32,textAlign:"center",color:"#9CA3AF"}}><p style={{fontSize:32,margin:"0 0 8px"}}>🧹</p><p style={{margin:0,fontWeight:600}}>No hay limpiezas registradas</p></div>}
-          {limpiezas.map(l=>{
+          {(() => {
+            const sorted = [...limpiezas].sort((a,b) => a.fecha > b.fecha ? 1 : -1);
+            const isPending = l => !(l.coordinado && l.realizada && l.pagado);
+            const pending = sorted.filter(isPending);
+            const done = sorted.filter(l => !isPending(l));
+            const visibleDone = done.slice(0, limpiezasPage);
+            const items = [...pending, ...visibleDone];
+            return <>{items.map(l=>{
             const res=l.reserva_id?getR(l.reserva_id):null;
             return(
               <div key={l.id} style={{background:"#fff",borderRadius:16,padding:14,boxShadow:"0 1px 6px rgba(0,0,0,0.07)"}}>
@@ -2202,7 +2211,17 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
                 </div>
               </div>
             );
-          })}
+          })}</>; })()}
+          {(() => {
+            const sorted2 = [...limpiezas].sort((a,b) => a.fecha > b.fecha ? 1 : -1);
+            const done2 = sorted2.filter(l => l.coordinado && l.realizada && l.pagado);
+            return done2.length > limpiezasPage ? (
+              <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
+                style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", marginTop: 4 }}>
+                Ver {Math.min(LIMP_PAGE, done2.length - limpiezasPage)} limpieza{Math.min(LIMP_PAGE, done2.length - limpiezasPage) !== 1 ? "s" : ""} completadas más ▼
+              </button>
+            ) : null;
+          })()}
         </div>
       )}
     </div>
