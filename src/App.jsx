@@ -869,9 +869,9 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   function getLimpiezaStatus(reservaId) {
     const found = limpiezas.filter(l => l.reserva_id === reservaId);
     if (found.length === 0) return "none";
+    const realizada = found.some(l => l.realizada);
     const coord = found.some(l => l.coordinado);
-    const pag = found.some(l => l.pagado);
-    if (coord && pag) return "lista";
+    if (realizada) return "realizada";
     if (coord) return "coordinada";
     return "pendiente";
   }
@@ -879,13 +879,21 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   async function toggleLimpiezaRapida(r) {
     const found = limpiezas.filter(l => l.reserva_id === r.id);
     if (found.length === 0) {
-      const nueva = await sb.createLimpieza(onLogoutToken, { reserva_id: r.id, fecha: r.check_in, costo: 0, coordinado: true, pagado: false, notas: "" });
+      // none → coordinada
+      const nueva = await sb.createLimpieza(onLogoutToken, { reserva_id: r.id, fecha: r.check_out, costo: 0, coordinado: true, pagado: false, realizada: false, notas: "" });
       if (Array.isArray(nueva) && nueva[0]) setLimpiezas(prev => [...prev, nueva[0]]);
     } else {
       const l = found[found.length - 1];
-      const newVal = !l.coordinado;
-      await sb.updateLimpieza(onLogoutToken, l.id, { coordinado: newVal });
-      setLimpiezas(prev => prev.map(x => x.id === l.id ? { ...x, coordinado: newVal } : x));
+      if (!l.coordinado) {
+        // pendiente → coordinada
+        await sb.updateLimpieza(onLogoutToken, l.id, { coordinado: true, realizada: false });
+        setLimpiezas(prev => prev.map(x => x.id === l.id ? { ...x, coordinado: true, realizada: false } : x));
+      } else if (!l.realizada) {
+        // coordinada → realizada
+        await sb.updateLimpieza(onLogoutToken, l.id, { realizada: true });
+        setLimpiezas(prev => prev.map(x => x.id === l.id ? { ...x, realizada: true } : x));
+      }
+      // realizada → no action (pagada solo desde módulo limpieza)
     }
   }
 
@@ -897,7 +905,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
   function getCellReservas(day) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return reservas.filter(r => r.estado !== "cancelada" && isDateInRange(dateStr, r.check_in, r.check_out));
+    const order = { activa: 0, confirmada: 1, pendiente: 2, completada: 3 };
+    return reservas
+      .filter(r => r.estado !== "cancelada" && isDateInRange(dateStr, r.check_in, r.check_out))
+      .sort((a, b) => (order[a.estado] ?? 9) - (order[b.estado] ?? 9));
   }
   function openNewReserva() {
     setEditReserva(null);
@@ -1361,9 +1372,9 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     const st = getLimpiezaStatus(r.id);
                     const lmap = {
                       none:       { bg: "#F3F4F6", color: "#6B7280", label: "🧹 Sin limpieza coordinada", btn: "Coordinar" },
-                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "🧹 Limpieza pendiente", btn: "Marcar coordinada" },
-                      coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar lista" },
-                      lista:      { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza lista ✓", btn: null },
+                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "🧹 Limpieza pendiente", btn: "Coordinar" },
+                      coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar realizada" },
+                      realizada:  { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
                     };
                     const s = lmap[st];
                     return (
