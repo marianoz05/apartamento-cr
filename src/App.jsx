@@ -1848,10 +1848,10 @@ function ReportesView({ token, reservas }) {
 function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
   const [showForm, setShowForm] = useState(false);
   const [editL, setEditL] = useState(null);
-  const emptyF = { fecha:"", reserva_id:"", costo:0, coordinado:false, pagado:false, notas:"" };
+  const emptyF = { fecha:"", reserva_id:"", costo:0, coordinado:false, realizada:false, pagado:false, notas:"" };
   const [form, setForm] = useState(emptyF);
   function openNew() { setEditL(null); setForm(emptyF); setShowForm(true); }
-  function openEdit(l) { setEditL(l); setForm({fecha:l.fecha||"",reserva_id:l.reserva_id||"",costo:l.costo||0,coordinado:l.coordinado||false,pagado:l.pagado||false,notas:l.notas||""}); setShowForm(true); }
+  function openEdit(l) { setEditL(l); setForm({fecha:l.fecha||"",reserva_id:l.reserva_id||"",costo:l.costo||0,coordinado:l.coordinado||false,realizada:l.realizada||false,pagado:l.pagado||false,notas:l.notas||""}); setShowForm(true); }
   async function save() {
     if(!form.fecha)return;
     const p = {...form,costo:Number(form.costo),reserva_id:form.reserva_id||null};
@@ -1889,11 +1889,16 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
             </div>
           </div>
           <div style={{marginBottom:10}}><label style={{display:"block",fontSize:12,fontWeight:600,color:"#374151",marginBottom:4}}>Notas</label><textarea value={form.notas} onChange={e=>setForm(f=>({...f,notas:e.target.value}))} rows={2} style={{...iS,resize:"vertical"}}/></div>
-          <div style={{display:"flex",gap:16,marginBottom:14}}>
+          <div style={{display:"flex",gap:12,marginBottom:14,flexWrap:"wrap"}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <button onClick={()=>setForm(f=>({...f,coordinado:!f.coordinado}))} style={{width:24,height:24,borderRadius:6,border:form.coordinado?"none":"2px solid #D1D5DB",background:form.coordinado?"#2563EB":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 {form.coordinado&&<span style={{color:"#fff",fontSize:12}}>✓</span>}
               </button><span style={{fontSize:13,fontWeight:600,color:"#374151"}}>📋 Coordinada</span>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <button onClick={()=>setForm(f=>({...f,realizada:!f.realizada}))} style={{width:24,height:24,borderRadius:6,border:form.realizada?"none":"2px solid #D1D5DB",background:form.realizada?"#D97706":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {form.realizada&&<span style={{color:"#fff",fontSize:12}}>✓</span>}
+              </button><span style={{fontSize:13,fontWeight:600,color:"#374151"}}>🧹 Realizada</span>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <button onClick={()=>setForm(f=>({...f,pagado:!f.pagado}))} style={{width:24,height:24,borderRadius:6,border:form.pagado?"none":"2px solid #D1D5DB",background:form.pagado?"#16A34A":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -1924,6 +1929,7 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
                 </div>
                 <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
                   <button onClick={()=>tog(l.id,"coordinado")} style={{display:"flex",alignItems:"center",gap:5,background:l.coordinado?"#DBEAFE":"#F3F4F6",color:l.coordinado?"#1E40AF":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>📋 {l.coordinado?"Coordinada ✓":"Coordinar"}</button>
+                  <button onClick={()=>tog(l.id,"realizada")} style={{display:"flex",alignItems:"center",gap:5,background:l.realizada?"#FEF3C7":"#F3F4F6",color:l.realizada?"#D97706":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>🧹 {l.realizada?"Realizada ✓":"Marcar realizada"}</button>
                   <button onClick={()=>tog(l.id,"pagado")} style={{display:"flex",alignItems:"center",gap:5,background:l.pagado?"#DCFCE7":"#F3F4F6",color:l.pagado?"#166534":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>💰 {l.pagado?"Pagada ✓":"Pendiente pago"}</button>
                 </div>
                 <div style={{display:"flex",gap:8}}>
