@@ -876,9 +876,11 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const pendingLimpieza = reservas.filter(r => {
     if (!["confirmada","activa","completada"].includes(r.estado)) return false;
     const found = limpiezas.filter(l => l.reserva_id === r.id);
-    if (found.length === 0) return true; // no limpieza creada
-    return found.every(l => !l.realizada); // ninguna marcada como realizada
+    if (found.length === 0) return true;
+    return found.every(l => !l.realizada);
   }).length;
+  const limpiezasCoordinadas = limpiezas.filter(l => l.coordinado && !l.realizada).length;
+  const limpiezasPendientePago = limpiezas.filter(l => l.realizada && !l.pagado).length;
   const activeNow = reservas.filter(r => r.estado === "activa").length;
   const upcoming = reservas.filter(r => r.estado === "confirmada").length;
 
@@ -1119,11 +1121,16 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
               </div>
             )}
             {!showForm && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 16 }}>
-                {[{ label: "Activas", value: activeNow, color: "#16A34A", bg: "#DCFCE7" }, { label: "Próximas", value: upcoming, color: "#2563EB", bg: "#DBEAFE" }, { label: "Limpieza pend.", value: pendingLimpieza, color: "#D97706", bg: "#FEF3C7" }].map((s, i) => (
-                  <div key={i} style={{ background: s.bg, borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
-                    <p style={{ margin: 0, fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: 10, color: s.color, fontWeight: 600 }}>{s.label}</p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+                {[
+                  { label: "Reserva Activa", value: activeNow, color: "#16A34A", bg: "#DCFCE7" },
+                  { label: "Próximas Reservas", value: upcoming, color: "#2563EB", bg: "#DBEAFE" },
+                  { label: "Limpieza Coordinada", value: limpiezasCoordinadas, color: "#D97706", bg: "#FEF3C7" },
+                  { label: "Limpieza Pendiente Pago", value: limpiezasPendientePago, color: "#DC2626", bg: "#FEE2E2" },
+                ].map((s, i) => (
+                  <div key={i} style={{ background: s.bg, borderRadius: 14, padding: "14px 12px", textAlign: "center" }}>
+                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: s.color }}>{s.value}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 11, color: s.color, fontWeight: 600 }}>{s.label}</p>
                   </div>
                 ))}
               </div>
