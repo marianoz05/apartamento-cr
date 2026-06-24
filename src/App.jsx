@@ -968,7 +968,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     window.open(url, "_blank");
   }
 
-  const navItems = [["dashboard","📊","Resumen"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
+  const navItems = [["dashboard","📊","Resumen"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["reportes","📈","Reportes"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -1376,6 +1376,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
           <LimpiezaView token={onLogoutToken} reservas={reservas} />
         )}
 
+        {view === "reportes" && (
+          <ReportesView token={onLogoutToken} reservas={reservas} />
+        )}
+
         {view === "contenido" && (
           <ContenidoEditor content={content} onSave={onContentSave} />
         )}
@@ -1389,6 +1393,155 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 }
 
 
+
+
+// ─── REPORTES VIEW ────────────────────────────────────────────────
+function ReportesView({ token, reservas }) {
+  const now = new Date();
+  const [selYear, setSelYear] = useState(now.getFullYear());
+  const [selMonth, setSelMonth] = useState(now.getMonth());
+  const [limpiezas, setLimpiezas] = useState([]);
+
+  const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+  useEffect(() => {
+    sb.getLimpiezas(token).then(data => {
+      if (Array.isArray(data)) setLimpiezas(data);
+    });
+  }, []);
+
+  // Filter reservas for selected month (by check_in)
+  const monthStr = `${selYear}-${String(selMonth+1).padStart(2,"0")}`;
+  const reservasMes = reservas.filter(r => r.check_in && r.check_in.startsWith(monthStr) && r.estado !== "cancelada");
+  const limpiezasMes = limpiezas.filter(l => l.fecha && l.fecha.startsWith(monthStr));
+
+  // Calculations
+  const diasMes = new Date(selYear, selMonth+1, 0).getDate();
+  const nochesOcupadas = reservasMes.reduce((sum, r) => sum + (Number(r.noches)||0), 0);
+  const ocupacion = Math.round((nochesOcupadas / diasMes) * 100);
+
+  const ingresosUSD = reservasMes.filter(r => r.moneda === "USD").reduce((sum, r) => sum + Number(r.monto_total||0), 0);
+  const ingresosCRC = reservasMes.filter(r => r.moneda === "CRC").reduce((sum, r) => sum + Number(r.monto_total||0), 0);
+  const cobradoUSD = reservasMes.filter(r => r.moneda === "USD").reduce((sum, r) => sum + Number(r.pago1_monto||0) + Number(r.pago2_monto||0), 0);
+  const cobradoCRC = reservasMes.filter(r => r.moneda === "CRC").reduce((sum, r) => sum + Number(r.pago1_monto||0) + Number(r.pago2_monto||0), 0);
+  const saldoUSD = ingresosUSD - cobradoUSD;
+  const saldoCRC = ingresosCRC - cobradoCRC;
+
+  const costosLimpieza = limpiezasMes.reduce((sum, l) => sum + Number(l.costo||0), 0);
+  const limpiezasPagadas = limpiezasMes.filter(l => l.pagado).reduce((sum, l) => sum + Number(l.costo||0), 0);
+
+  const huespedes = reservasMes.reduce((sum, r) => sum + Number(r.cantidad_huespedes||0), 0);
+  const promedioNoches = reservasMes.length > 0 ? (nochesOcupadas / reservasMes.length).toFixed(1) : 0;
+
+  const StatCard = ({ label, value, sub, color, bg }) => (
+    <div style={{ background: bg || "#fff", borderRadius: 14, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+      <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: color || "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</p>
+      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: color || "#111827" }}>{value}</p>
+      {sub && <p style={{ margin: "4px 0 0", fontSize: 11, color: "#9CA3AF" }}>{sub}</p>}
+    </div>
+  );
+
+  return (
+    <div>
+      {/* Month selector */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Reportes</p>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button onClick={() => { let m = selMonth-1; let y = selYear; if(m<0){m=11;y--;} setSelMonth(m); setSelYear(y); }} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14 }}>‹</button>
+          <span style={{ fontWeight: 700, fontSize: 13, minWidth: 110, textAlign: "center" }}>{monthNames[selMonth]} {selYear}</span>
+          <button onClick={() => { let m = selMonth+1; let y = selYear; if(m>11){m=0;y++;} setSelMonth(m); setSelYear(y); }} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14 }}>›</button>
+        </div>
+      </div>
+
+      {/* Ocupación */}
+      <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Ocupación</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+        <StatCard label="Reservas" value={reservasMes.length} />
+        <StatCard label="Noches" value={nochesOcupadas} sub={`de ${diasMes} días`} />
+        <StatCard label="Ocupación" value={`${ocupacion}%`} color={ocupacion > 70 ? "#16A34A" : ocupacion > 40 ? "#D97706" : "#DC2626"} bg={ocupacion > 70 ? "#DCFCE7" : ocupacion > 40 ? "#FEF3C7" : "#FEE2E2"} />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+        <StatCard label="Huéspedes" value={huespedes} />
+        <StatCard label="Prom. noches" value={promedioNoches} sub="por reserva" />
+      </div>
+
+      {/* Ingresos */}
+      <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Ingresos</p>
+      {ingresosUSD > 0 && (
+        <div style={{ background: "#fff", borderRadius: 14, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: 10 }}>
+          <p style={{ margin: "0 0 10px", fontWeight: 700, fontSize: 13, color: "#374151" }}>💵 Dólares (USD)</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+            <div style={{ background: "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#166534" }}>${ingresosUSD.toLocaleString()}</p>
+            </div>
+            <div style={{ background: "#EFF6FF", borderRadius: 10, padding: 10, textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Cobrado</p>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#1E40AF" }}>${cobradoUSD.toLocaleString()}</p>
+            </div>
+            <div style={{ background: saldoUSD > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: saldoUSD > 0 ? "#D97706" : "#166534" }}>${saldoUSD.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      {ingresosCRC > 0 && (
+        <div style={{ background: "#fff", borderRadius: 14, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: 20 }}>
+          <p style={{ margin: "0 0 10px", fontWeight: 700, fontSize: 13, color: "#374151" }}>🇨🇷 Colones (CRC)</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+            <div style={{ background: "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#166534" }}>₡{ingresosCRC.toLocaleString()}</p>
+            </div>
+            <div style={{ background: "#EFF6FF", borderRadius: 10, padding: 10, textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Cobrado</p>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#1E40AF" }}>₡{cobradoCRC.toLocaleString()}</p>
+            </div>
+            <div style={{ background: saldoCRC > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
+              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
+              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: saldoCRC > 0 ? "#D97706" : "#166534" }}>₡{saldoCRC.toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      {ingresosUSD === 0 && ingresosCRC === 0 && (
+        <div style={{ background: "#F9FAFB", borderRadius: 14, padding: 20, textAlign: "center", marginBottom: 20, color: "#9CA3AF" }}>
+          <p style={{ margin: 0 }}>Sin ingresos registrados este mes</p>
+        </div>
+      )}
+
+      {/* Limpiezas */}
+      <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Limpiezas</p>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+        <StatCard label="Total" value={limpiezasMes.length} />
+        <StatCard label="Costo COP" value={`$${costosLimpieza.toLocaleString()}`} color="#DC2626" />
+        <StatCard label="Pagado" value={`$${limpiezasPagadas.toLocaleString()}`} color="#16A34A" />
+      </div>
+
+      {/* Reservas del mes */}
+      {reservasMes.length > 0 && (
+        <>
+          <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Detalle de reservas</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {reservasMes.map(r => (
+              <div key={r.id} style={{ background: "#fff", borderRadius: 12, padding: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{r.huesped_nombre}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "#6B7280" }}>{formatDate(r.check_in)} → {formatDate(r.check_out)} · {r.noches} noches</p>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{r.moneda === "USD" ? "$" : "₡"}{Number(r.monto_total||0).toLocaleString()}</p>
+                  {Number(r.saldo||0) > 0 && <p style={{ margin: "2px 0 0", fontSize: 11, color: "#D97706", fontWeight: 700 }}>Saldo: {r.moneda === "USD" ? "$" : "₡"}{Number(r.saldo).toLocaleString()}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 // ─── LIMPIEZA VIEW ────────────────────────────────────────────────
 function LimpiezaView({ token, reservas }) {
