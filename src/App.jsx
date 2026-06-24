@@ -1329,7 +1329,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 </div>
               </div>
             )}
-            {!showForm && <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {!showForm && <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {(() => {
                 const estadoOrder = { activa: 0, confirmada: 1, pendiente: 2, completada: 3, cancelada: 4 };
                 let list = [...reservas].sort((a, b) => {
@@ -1366,7 +1366,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                           {mk === currentMonth ? (
                             <p style={{ fontWeight: 700, fontSize: 13, color: "#1B4332", margin: "0 0 8px" }}>📅 {label} · {groupList.length} reserva{groupList.length !== 1 ? "s" : ""}</p>
                           ) : (
-                            <button onClick={() => setExpandedMonths(prev => { const next = new Set(prev); next.has(mk) ? next.delete(mk) : next.add(mk); return next; })}
+                            <button onClick={() => setExpandedMonths(prev => { const n = new Set(prev); n.has(mk) ? n.delete(mk) : n.add(mk); return n; })}
                               style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "10px 14px", cursor: "pointer", marginBottom: isOpen ? 8 : 0 }}>
                               <span style={{ fontWeight: 700, fontSize: 13, color: "#374151" }}>{label}</span>
                               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1379,128 +1379,129 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                               {groupList.map(r => {
                               const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
-                  return (
-                <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                    <div>
-                      <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.cantidad_huespedes ? `\ud83d\udc65 ${r.cantidad_huespedes} hu\u00e9spedes` : ""}{r.telefono ? ` \u00b7 ${r.codigo_pais||""} ${r.telefono}` : ""}</p>
-                    </div>
-                    {estadoBadge(r.estado)}
-                  </div>
-                  <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-                    {[["Check-in", formatDate(r.check_in)], ["Check-out", formatDate(r.check_out)], ["Noches", r.noches]].map(([lbl, val]) => (
-                      <div key={lbl} style={{ background: "#F9FAFB", borderRadius: 8, padding: "6px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{lbl}</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{val}</p>
-                      </div>
-                    ))}
-                  </div>
-                  {["confirmada","activa","completada"].includes(r.estado) && (() => {
-                    const st = getLimpiezaStatus(r.id);
-                    const lmap = {
-                      none:       { bg: "#F3F4F6", color: "#6B7280", label: "\ud83e\uddf9 Sin limpieza coordinada", btn: "Coordinar" },
-                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "\ud83e\uddf9 Limpieza pendiente", btn: "Coordinar" },
+                                                return (
+                                              <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
+                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                                                  <div>
+                                                    <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
+                                                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.cantidad_huespedes ? `👥 ${r.cantidad_huespedes} huéspedes` : ""}{r.telefono ? ` · ${r.codigo_pais||""} ${r.telefono}` : ""}</p>
+                                                  </div>
+                                                  {estadoBadge(r.estado)}
+                                                </div>
+                                                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                                                  {[["Check-in", formatDate(r.check_in)], ["Check-out", formatDate(r.check_out)], ["Noches", r.noches]].map(([lbl, val]) => (
+                                                    <div key={lbl} style={{ background: "#F9FAFB", borderRadius: 8, padding: "6px 10px" }}>
+                                                      <p style={{ margin: 0, fontSize: 10, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{lbl}</p>
+                                                      <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{val}</p>
+                                                    </div>
+                                                  ))}
+                                                </div>
+                                                {["confirmada","activa","completada"].includes(r.estado) && (() => {
+                                                  const st = getLimpiezaStatus(r.id);
+                                                  const lmap = {
+                      none:       { bg: "#F3F4F6", color: "#6B7280", label: "🧹 Sin limpieza coordinada", btn: "Coordinar" },
+                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "🧹 Limpieza pendiente", btn: "Coordinar" },
                       coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar realizada" },
                       realizada:  { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
                       lista:      { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
                     };
-                    const s = lmap[st] || lmap.none;
-                    return (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                        <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
-                        {s.btn && <button onClick={() => toggleLimpiezaRapida(r)} style={{ background: "none", border: `1px solid ${s.color}`, borderRadius: 8, padding: "2px 8px", fontSize: 11, fontWeight: 600, color: s.color, cursor: "pointer" }}>{s.btn}</button>}
-                      </div>
-                    );
-                  })()}
-                  {r.monto_total > 0 && (
-                    <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                      <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{fmt(r.monto_total, r.moneda)}</p>
-                      </div>
-                      <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "5px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{fmt(Number(r.pago1_monto||0) + Number(r.pago2_monto||0), r.moneda)}</p>
-                      </div>
-                      {Number(r.saldo||0) > 0 && (
-                        <div style={{ background: "#FEF3C7", borderRadius: 8, padding: "5px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
-                          <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#D97706" }}>{fmt(r.saldo, r.moneda)}</p>
-                        </div>
-                      )}
-                      {r.llave_entregada ? (
-                        <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>\ud83d\udd11 Llave entregada</p>
-                        </div>
-                      ) : ["pendiente","confirmada"].includes(r.estado) ? (
-                        <div style={{ background: "#FEE2E2", borderRadius: 8, padding: "5px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 11, color: "#991B1B", fontWeight: 700 }}>\ud83d\udd11 Llave pendiente</p>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>\u270f\ufe0f Editar</button>
-                    <div style={{ position: "relative" }}>
-                      <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        \ud83d\udcac WhatsApp \u25be
-                      </button>
-                      {waMenu === r.id && (
-                        <div style={{ position: "absolute", bottom: 36, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
-                          {r.telefono && (
-                            <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`} target="_blank" rel="noopener noreferrer"
-                              onClick={() => setWaMenu(null)}
-                              style={{ display: "block", padding: "12px 16px", fontSize: 13, fontWeight: 600, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F3F4F6" }}>
-                              \ud83d\udcac Contacto directo
-                            </a>
-                          )}
-                          {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
-                            <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
-                              \ud83c\udf3f Bienvenida + link del portal
-                            </button>
-                          )}
-                          {r.telefono && Number(r.saldo||0) > 0 && (
-                            <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#D97706" }}>
-                              \ud83d\udcb0 Recordatorio de pago
-                            </button>
-                          )}
-                          {["pendiente","confirmada","activa"].includes(r.estado) && (
-                            <button onClick={() => {
-                              if (r.telefono) { sendWhatsApp(r, "link"); }
-                              else { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${r.token}`); setCopiedToken(r.token); setTimeout(() => setCopiedToken(null), 2000); }
-                              setWaMenu(null);
-                            }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#2563EB" }}>
-                              {copiedToken === r.token ? "\u2713 Copiado" : r.telefono ? "\ud83d\udce4 Enviar link del portal" : "\ud83d\udd17 Copiar link del portal"}
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {r.estado === "completada" && r.telefono && (
-                      <button onClick={() => {
-                        const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
-                        const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estad\u00eda en Apartamento CR \ud83c\udf3f Nos encantar\u00eda conocer tu opini\u00f3n: ${link}`;
-                        const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`;
-                        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
-                      }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        \u2b50 Solicitar rese\u00f1a
-                      </button>
-                    )}
-                    <button onClick={() => setConfirmDelete(r)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>\ud83d\uddd1\ufe0f Eliminar</button>
-                  </div>
-                  {confirmDelete?.id === r.id && (
-                    <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: 14 }}>
-                      <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: 13, color: "#991B1B" }}>\u00bfQu\u00e9 deseas hacer con la reserva de {r.huesped_nombre}?</p>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button onClick={() => cancelarReserva(r.id)} style={{ background: "#FEF3C7", color: "#92400E", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>\u274c Cancelar reserva</button>
-                        <button onClick={() => deleteReserva(r.id)} style={{ background: "#DC2626", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>\ud83d\uddd1\ufe0f Eliminar permanentemente</button>
-                        <button onClick={() => setConfirmDelete(null)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Volver</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                );
+                                                  const s = lmap[st] || lmap.none;
+                                                  return (
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                                                      <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
+                                                      {s.btn && <button onClick={() => toggleLimpiezaRapida(r)} style={{ background: "none", border: `1px solid ${s.color}`, borderRadius: 8, padding: "2px 8px", fontSize: 11, fontWeight: 600, color: s.color, cursor: "pointer" }}>{s.btn}</button>}
+                                                    </div>
+                                                  );
+                                                })()}
+                                                {r.monto_total > 0 && (
+                                                  <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                                                    <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
+                                                      <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
+                                                      <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{fmt(r.monto_total, r.moneda)}</p>
+                                                    </div>
+                                                    <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "5px 10px" }}>
+                                                      <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
+                                                      <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{fmt(Number(r.pago1_monto||0) + Number(r.pago2_monto||0), r.moneda)}</p>
+                                                    </div>
+                                                    {Number(r.saldo||0) > 0 && (
+                                                      <div style={{ background: "#FEF3C7", borderRadius: 8, padding: "5px 10px" }}>
+                                                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
+                                                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#D97706" }}>{fmt(r.saldo, r.moneda)}</p>
+                                                      </div>
+                                                    )}
+                                                    {r.llave_entregada ? (
+                                                      <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
+                                                        <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>🔑 Llave entregada</p>
+                                                      </div>
+                                                    ) : ["pendiente","confirmada"].includes(r.estado) ? (
+                                                      <div style={{ background: "#FEE2E2", borderRadius: 8, padding: "5px 10px" }}>
+                                                        <p style={{ margin: 0, fontSize: 11, color: "#991B1B", fontWeight: 700 }}>🔑 Llave pendiente</p>
+                                                      </div>
+                                                    ) : null}
+                                                  </div>
+                                                )}
+                                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                                  <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
+                                                  <div style={{ position: "relative" }}>
+                                                    <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                                                      💬 WhatsApp ▾
+                                                    </button>
+                                                    {waMenu === r.id && (
+                                                      <div style={{ position: "absolute", bottom: 36, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
+                                                        {r.telefono && (
+                                                          <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`} target="_blank" rel="noopener noreferrer"
+                                                            onClick={() => setWaMenu(null)}
+                                                            style={{ display: "block", padding: "12px 16px", fontSize: 13, fontWeight: 600, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F3F4F6" }}>
+                                                            💬 Contacto directo
+                                                          </a>
+                                                        )}
+                                                        {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
+                                                          <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
+                                                            🌿 Bienvenida + link del portal
+                                                          </button>
+                                                        )}
+                                                        {r.telefono && Number(r.saldo||0) > 0 && (
+                                                          <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#D97706" }}>
+                                                            💰 Recordatorio de pago
+                                                          </button>
+                                                        )}
+                                                        {["pendiente","confirmada","activa"].includes(r.estado) && (
+                                                          <button onClick={() => {
+                                                            if (r.telefono) { sendWhatsApp(r, "link"); }
+                                                            else { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${r.token}`); setCopiedToken(r.token); setTimeout(() => setCopiedToken(null), 2000); }
+                                                            setWaMenu(null);
+                                                          }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#2563EB" }}>
+                                                            {copiedToken === r.token ? "✓ Copiado" : r.telefono ? "📤 Enviar link del portal" : "🔗 Copiar link del portal"}
+                                                          </button>
+                                                        )}
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                  {r.estado === "completada" && r.telefono && (
+                                                    <button onClick={() => {
+                                                      const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
+                                                      const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
+                                                      const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`;
+                                                      window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
+                                                    }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                                                      ⭐ Solicitar reseña
+                                                    </button>
+                                                  )}
+                                                  <button onClick={() => setConfirmDelete(r)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
+                                                </div>
+                                                {confirmDelete?.id === r.id && (
+                                                  <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: 14 }}>
+                                                    <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: 13, color: "#991B1B" }}>¿Qué deseas hacer con la reserva de {r.huesped_nombre}?</p>
+                                                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                                      <button onClick={() => cancelarReserva(r.id)} style={{ background: "#FEF3C7", color: "#92400E", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>❌ Cancelar reserva</button>
+                                                      <button onClick={() => deleteReserva(r.id)} style={{ background: "#DC2626", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🗑️ Eliminar permanentemente</button>
+                                                      <button onClick={() => setConfirmDelete(null)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Volver</button>
+                                                    </div>
+                                                  </div>
+                                                )}
+                                              </div>
+                                              );
+                              
                               })}
                             </div>
                           )}
@@ -1513,7 +1514,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       const yearMonths = pastYearKeys.filter(mk => mk.startsWith(yr)).sort((a, b) => b.localeCompare(a));
                       return (
                         <div key={yr} style={{ marginBottom: 8 }}>
-                          <button onClick={() => setExpandedMonths(prev => { const next = new Set(prev); next.has("year-"+yr) ? next.delete("year-"+yr) : next.add("year-"+yr); return next; })}
+                          <button onClick={() => setExpandedMonths(prev => { const n = new Set(prev); n.has("year-"+yr) ? n.delete("year-"+yr) : n.add("year-"+yr); return n; })}
                             style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#E5E7EB", border: "none", borderRadius: 12, padding: "10px 14px", cursor: "pointer", marginBottom: isYearOpen ? 8 : 0 }}>
                             <span style={{ fontWeight: 800, fontSize: 14, color: "#111827" }}>{yr}</span>
                             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1528,7 +1529,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                             const groupList = monthGroups[mk];
                             return (
                               <div key={mk} style={{ marginBottom: 8, paddingLeft: 8 }}>
-                                <button onClick={() => setExpandedMonths(prev => { const next = new Set(prev); next.has(mk) ? next.delete(mk) : next.add(mk); return next; })}
+                                <button onClick={() => setExpandedMonths(prev => { const n = new Set(prev); n.has(mk) ? n.delete(mk) : n.add(mk); return n; })}
                                   style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F3F4F6", border: "none", borderRadius: 10, padding: "8px 14px", cursor: "pointer", marginBottom: isMOpen ? 8 : 0 }}>
                                   <span style={{ fontWeight: 700, fontSize: 13, color: "#374151" }}>{label}</span>
                                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -1539,129 +1540,130 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                 {isMOpen && (
                                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                     {groupList.map(r => {
-                              const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
-                  return (
-                <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                    <div>
-                      <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.cantidad_huespedes ? `\ud83d\udc65 ${r.cantidad_huespedes} hu\u00e9spedes` : ""}{r.telefono ? ` \u00b7 ${r.codigo_pais||""} ${r.telefono}` : ""}</p>
-                    </div>
-                    {estadoBadge(r.estado)}
-                  </div>
-                  <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-                    {[["Check-in", formatDate(r.check_in)], ["Check-out", formatDate(r.check_out)], ["Noches", r.noches]].map(([lbl, val]) => (
-                      <div key={lbl} style={{ background: "#F9FAFB", borderRadius: 8, padding: "6px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{lbl}</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{val}</p>
-                      </div>
-                    ))}
-                  </div>
-                  {["confirmada","activa","completada"].includes(r.estado) && (() => {
-                    const st = getLimpiezaStatus(r.id);
-                    const lmap = {
-                      none:       { bg: "#F3F4F6", color: "#6B7280", label: "\ud83e\uddf9 Sin limpieza coordinada", btn: "Coordinar" },
-                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "\ud83e\uddf9 Limpieza pendiente", btn: "Coordinar" },
+                                    const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
+                                                      return (
+                                                    <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
+                                                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                                                        <div>
+                                                          <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
+                                                          <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.cantidad_huespedes ? `👥 ${r.cantidad_huespedes} huéspedes` : ""}{r.telefono ? ` · ${r.codigo_pais||""} ${r.telefono}` : ""}</p>
+                                                        </div>
+                                                        {estadoBadge(r.estado)}
+                                                      </div>
+                                                      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                                                        {[["Check-in", formatDate(r.check_in)], ["Check-out", formatDate(r.check_out)], ["Noches", r.noches]].map(([lbl, val]) => (
+                                                          <div key={lbl} style={{ background: "#F9FAFB", borderRadius: 8, padding: "6px 10px" }}>
+                                                            <p style={{ margin: 0, fontSize: 10, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.08em" }}>{lbl}</p>
+                                                            <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{val}</p>
+                                                          </div>
+                                                        ))}
+                                                      </div>
+                                                      {["confirmada","activa","completada"].includes(r.estado) && (() => {
+                                                        const st = getLimpiezaStatus(r.id);
+                                                        const lmap = {
+                      none:       { bg: "#F3F4F6", color: "#6B7280", label: "🧹 Sin limpieza coordinada", btn: "Coordinar" },
+                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "🧹 Limpieza pendiente", btn: "Coordinar" },
                       coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar realizada" },
                       realizada:  { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
                       lista:      { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
                     };
-                    const s = lmap[st] || lmap.none;
-                    return (
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                        <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
-                        {s.btn && <button onClick={() => toggleLimpiezaRapida(r)} style={{ background: "none", border: `1px solid ${s.color}`, borderRadius: 8, padding: "2px 8px", fontSize: 11, fontWeight: 600, color: s.color, cursor: "pointer" }}>{s.btn}</button>}
-                      </div>
-                    );
-                  })()}
-                  {r.monto_total > 0 && (
-                    <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                      <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{fmt(r.monto_total, r.moneda)}</p>
-                      </div>
-                      <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "5px 10px" }}>
-                        <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{fmt(Number(r.pago1_monto||0) + Number(r.pago2_monto||0), r.moneda)}</p>
-                      </div>
-                      {Number(r.saldo||0) > 0 && (
-                        <div style={{ background: "#FEF3C7", borderRadius: 8, padding: "5px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
-                          <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#D97706" }}>{fmt(r.saldo, r.moneda)}</p>
-                        </div>
-                      )}
-                      {r.llave_entregada ? (
-                        <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>\ud83d\udd11 Llave entregada</p>
-                        </div>
-                      ) : ["pendiente","confirmada"].includes(r.estado) ? (
-                        <div style={{ background: "#FEE2E2", borderRadius: 8, padding: "5px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 11, color: "#991B1B", fontWeight: 700 }}>\ud83d\udd11 Llave pendiente</p>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>\u270f\ufe0f Editar</button>
-                    <div style={{ position: "relative" }}>
-                      <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        \ud83d\udcac WhatsApp \u25be
-                      </button>
-                      {waMenu === r.id && (
-                        <div style={{ position: "absolute", bottom: 36, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
-                          {r.telefono && (
-                            <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`} target="_blank" rel="noopener noreferrer"
-                              onClick={() => setWaMenu(null)}
-                              style={{ display: "block", padding: "12px 16px", fontSize: 13, fontWeight: 600, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F3F4F6" }}>
-                              \ud83d\udcac Contacto directo
-                            </a>
-                          )}
-                          {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
-                            <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
-                              \ud83c\udf3f Bienvenida + link del portal
-                            </button>
-                          )}
-                          {r.telefono && Number(r.saldo||0) > 0 && (
-                            <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#D97706" }}>
-                              \ud83d\udcb0 Recordatorio de pago
-                            </button>
-                          )}
-                          {["pendiente","confirmada","activa"].includes(r.estado) && (
-                            <button onClick={() => {
-                              if (r.telefono) { sendWhatsApp(r, "link"); }
-                              else { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${r.token}`); setCopiedToken(r.token); setTimeout(() => setCopiedToken(null), 2000); }
-                              setWaMenu(null);
-                            }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#2563EB" }}>
-                              {copiedToken === r.token ? "\u2713 Copiado" : r.telefono ? "\ud83d\udce4 Enviar link del portal" : "\ud83d\udd17 Copiar link del portal"}
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {r.estado === "completada" && r.telefono && (
-                      <button onClick={() => {
-                        const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
-                        const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estad\u00eda en Apartamento CR \ud83c\udf3f Nos encantar\u00eda conocer tu opini\u00f3n: ${link}`;
-                        const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`;
-                        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
-                      }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                        \u2b50 Solicitar rese\u00f1a
-                      </button>
-                    )}
-                    <button onClick={() => setConfirmDelete(r)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>\ud83d\uddd1\ufe0f Eliminar</button>
-                  </div>
-                  {confirmDelete?.id === r.id && (
-                    <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: 14 }}>
-                      <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: 13, color: "#991B1B" }}>\u00bfQu\u00e9 deseas hacer con la reserva de {r.huesped_nombre}?</p>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button onClick={() => cancelarReserva(r.id)} style={{ background: "#FEF3C7", color: "#92400E", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>\u274c Cancelar reserva</button>
-                        <button onClick={() => deleteReserva(r.id)} style={{ background: "#DC2626", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>\ud83d\uddd1\ufe0f Eliminar permanentemente</button>
-                        <button onClick={() => setConfirmDelete(null)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Volver</button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                );
+                                                        const s = lmap[st] || lmap.none;
+                                                        return (
+                                                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                                                            <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
+                                                            {s.btn && <button onClick={() => toggleLimpiezaRapida(r)} style={{ background: "none", border: `1px solid ${s.color}`, borderRadius: 8, padding: "2px 8px", fontSize: 11, fontWeight: 600, color: s.color, cursor: "pointer" }}>{s.btn}</button>}
+                                                          </div>
+                                                        );
+                                                      })()}
+                                                      {r.monto_total > 0 && (
+                                                        <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                                                          <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
+                                                            <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
+                                                            <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{fmt(r.monto_total, r.moneda)}</p>
+                                                          </div>
+                                                          <div style={{ background: "#EFF6FF", borderRadius: 8, padding: "5px 10px" }}>
+                                                            <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Pagado</p>
+                                                            <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#1E40AF" }}>{fmt(Number(r.pago1_monto||0) + Number(r.pago2_monto||0), r.moneda)}</p>
+                                                          </div>
+                                                          {Number(r.saldo||0) > 0 && (
+                                                            <div style={{ background: "#FEF3C7", borderRadius: 8, padding: "5px 10px" }}>
+                                                              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
+                                                              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#D97706" }}>{fmt(r.saldo, r.moneda)}</p>
+                                                            </div>
+                                                          )}
+                                                          {r.llave_entregada ? (
+                                                            <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
+                                                              <p style={{ margin: 0, fontSize: 11, color: "#166534", fontWeight: 700 }}>🔑 Llave entregada</p>
+                                                            </div>
+                                                          ) : ["pendiente","confirmada"].includes(r.estado) ? (
+                                                            <div style={{ background: "#FEE2E2", borderRadius: 8, padding: "5px 10px" }}>
+                                                              <p style={{ margin: 0, fontSize: 11, color: "#991B1B", fontWeight: 700 }}>🔑 Llave pendiente</p>
+                                                            </div>
+                                                          ) : null}
+                                                        </div>
+                                                      )}
+                                                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                                        <button onClick={() => openEditReserva(r)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
+                                                        <div style={{ position: "relative" }}>
+                                                          <button onClick={e => { e.stopPropagation(); setWaMenu(waMenu === r.id ? null : r.id); }} style={{ background: "#DCFCE7", color: "#166534", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                                                            💬 WhatsApp ▾
+                                                          </button>
+                                                          {waMenu === r.id && (
+                                                            <div style={{ position: "absolute", bottom: 36, left: 0, background: "#fff", borderRadius: 12, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", zIndex: 50, minWidth: 230, overflow: "hidden" }}>
+                                                              {r.telefono && (
+                                                                <a href={`https://wa.me/${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`} target="_blank" rel="noopener noreferrer"
+                                                                  onClick={() => setWaMenu(null)}
+                                                                  style={{ display: "block", padding: "12px 16px", fontSize: 13, fontWeight: 600, color: "#374151", textDecoration: "none", borderBottom: "1px solid #F3F4F6" }}>
+                                                                  💬 Contacto directo
+                                                                </a>
+                                                              )}
+                                                              {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
+                                                                <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
+                                                                  🌿 Bienvenida + link del portal
+                                                                </button>
+                                                              )}
+                                                              {r.telefono && Number(r.saldo||0) > 0 && (
+                                                                <button onClick={() => { sendWhatsApp(r, "pago"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#D97706" }}>
+                                                                  💰 Recordatorio de pago
+                                                                </button>
+                                                              )}
+                                                              {["pendiente","confirmada","activa"].includes(r.estado) && (
+                                                                <button onClick={() => {
+                                                                  if (r.telefono) { sendWhatsApp(r, "link"); }
+                                                                  else { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${r.token}`); setCopiedToken(r.token); setTimeout(() => setCopiedToken(null), 2000); }
+                                                                  setWaMenu(null);
+                                                                }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", fontWeight: 600, color: "#2563EB" }}>
+                                                                  {copiedToken === r.token ? "✓ Copiado" : r.telefono ? "📤 Enviar link del portal" : "🔗 Copiar link del portal"}
+                                                                </button>
+                                                              )}
+                                                            </div>
+                                                          )}
+                                                        </div>
+                                                        {r.estado === "completada" && r.telefono && (
+                                                          <button onClick={() => {
+                                                            const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
+                                                            const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
+                                                            const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\\\\D/g,"")}`;
+                                                            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
+                                                          }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                                                            ⭐ Solicitar reseña
+                                                          </button>
+                                                        )}
+                                                        <button onClick={() => setConfirmDelete(r)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
+                                                      </div>
+                                                      {confirmDelete?.id === r.id && (
+                                                        <div style={{ marginTop: 12, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: 14 }}>
+                                                          <p style={{ margin: "0 0 12px", fontWeight: 700, fontSize: 13, color: "#991B1B" }}>¿Qué deseas hacer con la reserva de {r.huesped_nombre}?</p>
+                                                          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                                                            <button onClick={() => cancelarReserva(r.id)} style={{ background: "#FEF3C7", color: "#92400E", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>❌ Cancelar reserva</button>
+                                                            <button onClick={() => deleteReserva(r.id)} style={{ background: "#DC2626", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🗑️ Eliminar permanentemente</button>
+                                                            <button onClick={() => setConfirmDelete(null)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "8px 14px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Volver</button>
+                                                          </div>
+                                                        </div>
+                                                      )}
+                                                    </div>
+                                                    );
+                                    
                                     })}
                                   </div>
                                 )}
@@ -2276,22 +2278,6 @@ function Login({ onLogin }) {
 }
 
 // ─── ROOT ─────────────────────────────────────────────────────────
-class ErrorBoundary extends React.Component {
-  constructor(props) { super(props); this.state = { error: null }; }
-  static getDerivedStateFromError(e) { return { error: e }; }
-  render() {
-    if (this.state.error) return (
-      <div style={{ padding: 20, fontFamily: "monospace", background: "#FEE2E2", minHeight: "100vh" }}>
-        <h2 style={{ color: "#991B1B" }}>Error de React</h2>
-        <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: "#7F1D1D" }}>{this.state.error?.message}
-
-{this.state.error?.stack}</pre>
-      </div>
-    );
-    return this.props.children;
-  }
-}
-
 export default function App() {
   const path = window.location.pathname;
   const guestMatch = path.match(/^\/g\/(.+)$/);
@@ -2328,7 +2314,6 @@ export default function App() {
   }
 
   return (
-    <ErrorBoundary>
     <div>
       {screen === "login" && (
         <div>
@@ -2364,6 +2349,5 @@ export default function App() {
         <ResenasPublicas />
       )}
     </div>
-    </ErrorBoundary>
   );
 }
