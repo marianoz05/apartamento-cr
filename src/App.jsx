@@ -1378,7 +1378,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                           {isOpen && (
                             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                               {groupList.map(r => {
-const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
+                              const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
                   return (
                 <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
@@ -1538,7 +1538,7 @@ const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.chec
                                 {isMOpen && (
                                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                     {groupList.map(r => {
-const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
+                              const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
                   return (
                 <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
