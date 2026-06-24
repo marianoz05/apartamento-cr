@@ -111,6 +111,13 @@ const sb = {
     });
     return res.json();
   },
+  async toggleOculta(token, id, oculta) {
+    await fetch(`${SUPABASE_URL}/rest/v1/resenas?id=eq.${id}`, {
+      method: "PATCH",
+      headers: { ...this.headers(token), "Prefer": "return=representation" },
+      body: JSON.stringify({ oculta }),
+    });
+  },
   async deleteResena(token, id) {
     await fetch(`${SUPABASE_URL}/rest/v1/resenas?id=eq.${id}`, {
       method: "DELETE",
@@ -850,7 +857,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   }, []);
 
   const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-  const statColors = { activa: "#16A34A", confirmada: "#2563EB", completada: "#9CA3AF" };
+  const statColors = { activa: "#16A34A", confirmada: "#2563EB", pendiente: "#EA580C", completada: "#9CA3AF", cancelada: "#D1D5DB" };
   const { year, month } = calendarDate;
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = new Date(year, month, 1).getDay();
@@ -1164,10 +1171,9 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     })}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                  {[["activa","#16A34A","Activa"],["confirmada","#2563EB","Confirmada"],["pendiente","#D97706","Pendiente"]].map(([e,col,l]) => (
+                <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" }}>
+                  {[["activa","#16A34A","🟢 Activa"],["confirmada","#2563EB","🔵 Confirmada"],["pendiente","#EA580C","🟠 Pendiente"],["completada","#9CA3AF","⚫ Completada"]].map(([e,col,l]) => (
                     <div key={e} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 2, background: col }} />
                       <span style={{ fontSize: 11, color: "#6B7280" }}>{l}</span>
                     </div>
                   ))}
@@ -1497,9 +1503,13 @@ function ResenasAdminView({ token, reservas }) {
     sb.getResenas(token).then(data => { if (Array.isArray(data)) setResenas(data); setLoading(false); });
   }, []);
 
-  const promedio = resenas.length > 0 ? (resenas.reduce((s,r)=>s+r.calificacion,0)/resenas.length).toFixed(1) : null;
+  const visibles = resenas.filter(r => !r.oculta);
+  const promedio = visibles.length > 0 ? (visibles.reduce((s,r)=>s+r.calificacion,0)/visibles.length).toFixed(1) : null;
   function Stars({ n, size=16 }) { return <span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>; }
-  async function deleteResena(id) { await sb.deleteResena(token, id); setResenas(prev => prev.filter(r => r.id !== id)); }
+  async function toggleOculta(id, oculta) {
+    await sb.toggleOculta(token, id, oculta);
+    setResenas(prev => prev.map(r => r.id === id ? { ...r, oculta } : r));
+  }
 
   return (
     <div>
@@ -1521,7 +1531,7 @@ function ResenasAdminView({ token, reservas }) {
         <div style={{background:"#fff",borderRadius:16,padding:16,marginBottom:16,boxShadow:"0 1px 6px rgba(0,0,0,0.07)",textAlign:"center"}}>
           <p style={{margin:"0 0 4px",fontSize:36,fontWeight:800,color:"#111827"}}>{promedio}</p>
           <Stars n={Math.round(promedio)} size={24}/>
-          <p style={{margin:"8px 0 0",fontSize:13,color:"#6B7280"}}>{resenas.length} reseña{resenas.length!==1?"s":""}</p>
+          <p style={{margin:"8px 0 0",fontSize:13,color:"#6B7280"}}>{visibles.length} visible{visibles.length!==1?"s":""} · {resenas.length} total</p>
         </div>
       )}
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
@@ -1535,8 +1545,14 @@ function ResenasAdminView({ token, reservas }) {
               <Stars n={r.calificacion} size={16}/>
             </div>
             {r.comentario&&<p style={{margin:0,fontSize:13,color:"#374151",lineHeight:1.5,fontStyle:"italic"}}>"{r.comentario}"</p>}
-            <div style={{display:"flex",justifyContent:"flex-end",marginTop:8}}>
-              <button onClick={()=>deleteResena(r.id)} style={{background:"none",border:"none",color:"#DC262680",fontSize:11,cursor:"pointer",fontWeight:600}}>🗑️ Eliminar</button>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:8}}>
+              {r.oculta
+                ? <span style={{background:"#F3F4F6",color:"#6B7280",borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700}}>👁️ Oculta</span>
+                : <span/>}
+              <button onClick={()=>toggleOculta(r.id, !r.oculta)}
+                style={{background:r.oculta?"#EFF6FF":"#F9FAFB",color:r.oculta?"#2563EB":"#9CA3AF",border:`1px solid ${r.oculta?"#BFDBFE":"#E5E7EB"}`,borderRadius:8,padding:"3px 10px",fontSize:11,cursor:"pointer",fontWeight:600}}>
+                {r.oculta ? "👁️ Mostrar" : "🙈 Ocultar"}
+              </button>
             </div>
           </div>
         ))}
@@ -1604,7 +1620,7 @@ function ResenaForm({ reservaId }) {
 function ResenasPublicas() {
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
-  useEffect(()=>{sb.getResenas(null).then(data=>{if(Array.isArray(data))setResenas(data);setLoading(false);});},[]);
+  useEffect(()=>{sb.getResenas(null).then(data=>{if(Array.isArray(data))setResenas(data.filter(r=>!r.oculta));setLoading(false);});},[]);
   const promedio = resenas.length>0?(resenas.reduce((s,r)=>s+r.calificacion,0)/resenas.length).toFixed(1):null;
   function Stars({n,size=18}){return<span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>;}
   return (
