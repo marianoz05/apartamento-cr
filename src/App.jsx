@@ -759,7 +759,7 @@ function ContenidoEditor({ content, onSave }) {
 
 // ─── ADMIN PANEL ─────────────────────────────────────────────────
 function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
-  const [view, setView] = useState("dashboard");
+  const [view, setView] = useState("reservas");
   const [reservas, setReservas] = useState([]);
   const [limpiezas, setLimpiezas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -873,7 +873,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = new Date(year, month, 1).getDay();
   const today = new Date().toISOString().split("T")[0];
-  const pendingLimpieza = reservas.filter(r => !r.limpieza_hecha && r.estado !== "confirmada").length;
+  const pendingLimpieza = reservas.filter(r => {
+    if (!["confirmada","activa","completada"].includes(r.estado)) return false;
+    const found = limpiezas.filter(l => l.reserva_id === r.id);
+    if (found.length === 0) return true; // no limpieza creada
+    return found.every(l => !l.realizada); // ninguna marcada como realizada
+  }).length;
   const activeNow = reservas.filter(r => r.estado === "activa").length;
   const upcoming = reservas.filter(r => r.estado === "confirmada").length;
 
@@ -1022,7 +1027,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     window.open(url, "_blank");
   }
 
-  const navItems = [["dashboard","📊","Resumen"],["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["reportes","📈","Reportes"],["resenas","⭐","Reseñas"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
+  const navItems = [["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["reportes","📈","Reportes"],["resenas","⭐","Reseñas"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -1069,51 +1074,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
       <div className="admin-content" style={{ padding: 16, maxWidth: 700, margin: "0 auto" }}>
 
-        {view === "dashboard" && (
-          <div>
-            <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Resumen</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-              {[{ label: "Activas ahora", value: activeNow, color: "#16A34A", bg: "#DCFCE7" }, { label: "Próximas", value: upcoming, color: "#2563EB", bg: "#DBEAFE" }, { label: "Limpieza pendiente", value: pendingLimpieza, color: "#D97706", bg: "#FEF3C7" }].map((s, i) => (
-                <div key={i} style={{ background: s.bg, borderRadius: 14, padding: "14px 12px", textAlign: "center" }}>
-                  <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: s.color }}>{s.value}</p>
-                  <p style={{ margin: "4px 0 0", fontSize: 11, color: s.color, fontWeight: 600 }}>{s.label}</p>
-                </div>
-              ))}
-            </div>
-            <div style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
-              <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 12px", color: "#374151" }}>Reservas recientes</p>
-              {reservas.slice(0, 3).map((r) => (
-                <div key={r.id} onClick={() => setDashboardDetail(dashboardDetail?.id === r.id ? null : r)}
-                  style={{ padding: "10px 0", borderBottom: "1px solid #F3F4F6", cursor: "pointer" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{r.huesped_nombre}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{formatDate(r.check_in)} → {formatDate(r.check_out)}</p>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      {estadoBadge(r.estado)}
-                      <span style={{ fontSize: 11, color: "#9CA3AF" }}>{dashboardDetail?.id === r.id ? "▲" : "▼"}</span>
-                    </div>
-                  </div>
-                  {dashboardDetail?.id === r.id && (
-                    <div style={{ marginTop: 10, background: "#F9FAFB", borderRadius: 10, padding: 12 }}>
-                      {r.cantidad_huespedes > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>👥 {r.cantidad_huespedes} huéspedes</p>}
-                      {r.telefono && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>📱 {r.codigo_pais} {r.telefono}</p>}
-                      {r.noches > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>🌙 {r.noches} noches</p>}
-                      {r.monto_total > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>💰 Total: {fmt(r.monto_total, r.moneda)}</p>}
-                      {Number(r.saldo||0) > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#D97706", fontWeight: 700 }}>⚠️ Saldo: {fmt(r.saldo, r.moneda)}</p>}
-                      {r.llave_entregada && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#166534" }}>🔑 Llave entregada</p>}
-                      <button onClick={e => { e.stopPropagation(); openEditReserva(r); setView("reservas"); setDashboardDetail(null); }}
-                        style={{ marginTop: 8, background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                        ✏️ Editar reserva
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+
 
         {view === "calendario" && (
           <div>
@@ -1155,6 +1116,16 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Reservas</p>
                 <button onClick={openNewReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
+              </div>
+            )}
+            {!showForm && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 16 }}>
+                {[{ label: "Activas", value: activeNow, color: "#16A34A", bg: "#DCFCE7" }, { label: "Próximas", value: upcoming, color: "#2563EB", bg: "#DBEAFE" }, { label: "Limpieza pend.", value: pendingLimpieza, color: "#D97706", bg: "#FEF3C7" }].map((s, i) => (
+                  <div key={i} style={{ background: s.bg, borderRadius: 14, padding: "12px 10px", textAlign: "center" }}>
+                    <p style={{ margin: 0, fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 10, color: s.color, fontWeight: 600 }}>{s.label}</p>
+                  </div>
+                ))}
               </div>
             )}
 
