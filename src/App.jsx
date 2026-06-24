@@ -2274,6 +2274,22 @@ function Login({ onLogin }) {
 }
 
 // ─── ROOT ─────────────────────────────────────────────────────────
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(e) { return { error: e }; }
+  render() {
+    if (this.state.error) return (
+      <div style={{ padding: 20, fontFamily: "monospace", background: "#FEE2E2", minHeight: "100vh" }}>
+        <h2 style={{ color: "#991B1B" }}>Error de React</h2>
+        <pre style={{ whiteSpace: "pre-wrap", fontSize: 12, color: "#7F1D1D" }}>{this.state.error?.message}
+
+{this.state.error?.stack}</pre>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const path = window.location.pathname;
   const guestMatch = path.match(/^\/g\/(.+)$/);
@@ -2310,6 +2326,7 @@ export default function App() {
   }
 
   return (
+    <ErrorBoundary>
     <div>
       {screen === "login" && (
         <div>
@@ -2345,5 +2362,6 @@ export default function App() {
         <ResenasPublicas />
       )}
     </div>
+    </ErrorBoundary>
   );
 }
