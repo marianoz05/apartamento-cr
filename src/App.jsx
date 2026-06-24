@@ -748,6 +748,7 @@ function ContenidoEditor({ content, onSave }) {
 function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [view, setView] = useState("dashboard");
   const [reservas, setReservas] = useState([]);
+  const [limpiezas, setLimpiezas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [calendarDate, setCalendarDate] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() });
   const [showForm, setShowForm] = useState(false);
@@ -839,6 +840,9 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   }, []);
 
   useEffect(() => {
+    sb.getLimpiezas(onLogoutToken).then(data => {
+      if (Array.isArray(data)) setLimpiezas(data);
+    });
     sb.getReservas(onLogoutToken).then(data => {
       if (Array.isArray(data)) {
         // Auto-update states based on dates and payments
@@ -865,6 +869,33 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const pendingLimpieza = reservas.filter(r => !r.limpieza_hecha && r.estado !== "confirmada").length;
   const activeNow = reservas.filter(r => r.estado === "activa").length;
   const upcoming = reservas.filter(r => r.estado === "confirmada").length;
+
+  function getLimpiezaStatus(reservaId) {
+    const found = limpiezas.filter(l => l.reserva_id === reservaId);
+    if (found.length === 0) return "none";
+    const coordinada = found.some(l => l.coordinado);
+    const pagada = found.some(l => l.pagado);
+    if (coordinada && pagada) return "lista";
+    if (coordinada) return "coordinada";
+    return "pendiente";
+  }
+
+  async function toggleLimpiezaRapida(r) {
+    const found = limpiezas.filter(l => l.reserva_id === r.id);
+    if (found.length === 0) {
+      // Create new limpieza
+      const nueva = await sb.createLimpieza(onLogoutToken, {
+        reserva_id: r.id, fecha: r.check_in, costo: 0, coordinado: true, pagado: false, notas: ""
+      });
+      if (Array.isArray(nueva) && nueva[0]) setLimpiezas(prev => [...prev, nueva[0]]);
+    } else {
+      // Toggle the most recent one
+      const l = found[found.length - 1];
+      const newCoordinado = !l.coordinado;
+      await sb.updateLimpieza(onLogoutToken, l.id, { coordinado: newCoordinado });
+      setLimpiezas(prev => prev.map(x => x.id === l.id ? { ...x, coordinado: newCoordinado } : x));
+    }
+  }
 
   function getCellReservas(day) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -1297,6 +1328,29 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       </div>
                     ))}
                   </div>
+                  {/* Limpieza badge */}
+                  {["confirmada","activa","completada"].includes(r.estado) && (() => {
+                    const st = getLimpiezaStatus(r.id);
+                    const map = {
+                      none:        { bg: "#F3F4F6", color: "#6B7280", label: "🧹 Sin limpieza coordinada", btn: "Coordinar" },
+                      pendiente:   { bg: "#FEF3C7", color: "#D97706", label: "🧹 Limpieza pendiente", btn: "Marcar coordinada" },
+                      coordinada:  { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar lista" },
+                      lista:       { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza lista ✓", btn: null },
+                    };
+                    const s = map[st];
+                    return (
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
+                        {s.btn && (
+                          <button onClick={() => toggleLimpiezaRapida(r)}
+                            style={{ background: "none", border: `1px solid ${s.color}`, borderRadius: 8, padding: "2px 8px", fontSize: 11, fontWeight: 600, color: s.color, cursor: "pointer" }}>
+                            {s.btn}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   {/* Financial summary */}
                   {r.monto_total > 0 && (
                     <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
@@ -1382,7 +1436,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
           </div>
         )}
         {view === "limpieza" && (
-          <LimpiezaView token={onLogoutToken} reservas={reservas} />
+          <LimpiezaView token={onLogoutToken} reservas={reservas} limpiezas={limpiezas} setLimpiezas={setLimpiezas} />
         )}
 
         {view === "reportes" && (
@@ -1553,20 +1607,12 @@ function ReportesView({ token, reservas }) {
 }
 
 // ─── LIMPIEZA VIEW ────────────────────────────────────────────────
-function LimpiezaView({ token, reservas }) {
-  const [limpiezas, setLimpiezas] = useState([]);
+function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
   const [showForm, setShowForm] = useState(false);
   const [editLimpieza, setEditLimpieza] = useState(null);
   const emptyForm = { fecha: "", reserva_id: "", costo: 0, coordinado: false, pagado: false, notas: "" };
   const [form, setForm] = useState(emptyForm);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    sb.getLimpiezas(token).then(data => {
-      if (Array.isArray(data)) setLimpiezas(data);
-      setLoading(false);
-    });
-  }, []);
+  const loading = false;
 
   function openNew(reservaId = "") {
     setEditLimpieza(null);
