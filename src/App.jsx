@@ -762,6 +762,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [view, setView] = useState("reservas");
   const [reservas, setReservas] = useState([]);
   const [limpiezas, setLimpiezas] = useState([]);
+  const [resenaIds, setResenaIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [calendarDate, setCalendarDate] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() });
   const [showForm, setShowForm] = useState(false);
@@ -849,6 +850,9 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   useEffect(() => {
     sb.getLimpiezas(onLogoutToken).then(data => {
       if (Array.isArray(data)) setLimpiezas(data);
+    });
+    sb.getResenas(onLogoutToken).then(data => {
+      if (Array.isArray(data)) setResenaIds(new Set(data.map(r => r.reserva_id).filter(Boolean)));
     });
     sb.getReservas(onLogoutToken).then(data => {
       if (Array.isArray(data)) {
@@ -1115,10 +1119,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
         {view === "reservas" && (
           <div>
             {!showForm && (
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Reservas</p>
-                <button onClick={openNewReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
-              </div>
+              <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Reservas</p>
             )}
             {!showForm && (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
@@ -1144,9 +1145,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     <span style={{ fontWeight: 700, fontSize: 13, minWidth: 110, textAlign: "center" }}>{monthNames[month]} {year}</span>
                     <button onClick={() => setCalendarDate(d => { const m = d.month === 11 ? 0 : d.month + 1; return { month: m, year: m === 0 ? d.year + 1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14 }}>›</button>
                   </div>
-                  {selectedDay && (
-                    <button onClick={() => setSelectedDay(null)} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, padding: "4px 10px", fontSize: 12, cursor: "pointer", color: "#6B7280" }}>✕ Quitar filtro</button>
-                  )}
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    {selectedDay && (
+                      <button onClick={() => setSelectedDay(null)} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, padding: "4px 10px", fontSize: 12, cursor: "pointer", color: "#6B7280" }}>✕ Quitar filtro</button>
+                    )}
+                    <button onClick={openNewReserva} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "7px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
+                  </div>
                 </div>
                 <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
@@ -1437,7 +1441,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                         </div>
                       )}
                     </div>
-                    {r.estado === "completada" && r.telefono && (
+                    {r.estado === "completada" && r.telefono && !resenaIds.has(r.id) && (
                       <button onClick={() => {
                         const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
                         const plantilla = content?.mensajes?.resena || "Hola [nombre], gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión:\n[link_resena]";
