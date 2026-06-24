@@ -1415,7 +1415,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                               💬 Contacto directo
                             </a>
                           )}
-                          {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
+                          {r.telefono && r.estado !== "completada" && r.check_out >= new Date().toISOString().split("T")[0] && (
                             <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
                               🌿 Bienvenida + link del portal
                             </button>
@@ -2064,7 +2064,7 @@ export default function App() {
         <div>
           <Login onLogin={handleLogin} />
           <div style={{ position: "fixed", bottom: 16, right: 16 }}>
-            <button onClick={() => setScreen("guest")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
+            <button onClick={() => setScreen("portal_preview")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
               👤 Ver portal huésped
             </button>
           </div>
@@ -2083,6 +2083,12 @@ export default function App() {
       )}
       {screen === "resena" && (
         <ResenaForm reservaId={resenaId} />
+      )}
+      {screen === "portal_preview" && (
+        <GuestPortal
+          reserva={{ huesped_nombre: "Admin", check_in: new Date().toISOString().split("T")[0], check_out: new Date(Date.now()+3*86400000).toISOString().split("T")[0], noches: 3 }}
+          content={content}
+        />
       )}
       {screen === "resenas_publicas" && (
         <ResenasPublicas />
