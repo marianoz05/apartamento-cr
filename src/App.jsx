@@ -890,7 +890,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
   function getCellReservas(day) {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return reservas.filter(r => r.estado !== "completada" && isDateInRange(dateStr, r.check_in, r.check_out));
+    return reservas.filter(r => r.estado !== "cancelada" && isDateInRange(dateStr, r.check_in, r.check_out));
   }
   function openNewReserva() {
     setEditReserva(null);
@@ -1320,7 +1320,13 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
             )}
             {!showForm && <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {(() => {
-                let list = [...reservas].sort((a, b) => a.check_in > b.check_in ? 1 : -1);
+                const estadoOrder = { activa: 0, confirmada: 1, pendiente: 2, completada: 3, cancelada: 4 };
+                let list = [...reservas].sort((a, b) => {
+                  const oa = estadoOrder[a.estado] ?? 5;
+                  const ob = estadoOrder[b.estado] ?? 5;
+                  if (oa !== ob) return oa - ob;
+                  return a.check_in > b.check_in ? 1 : -1;
+                });
                 if (selectedDay) {
                   const hit = list.filter(r => isDateInRange(selectedDay, r.check_in, r.check_out));
                   const rest = list.filter(r => !isDateInRange(selectedDay, r.check_in, r.check_out));
