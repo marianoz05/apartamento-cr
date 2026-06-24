@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import * as XLSX from "xlsx";
 
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────
 const SUPABASE_URL = "https://cxjumlciielwwhunvmym.supabase.co";
@@ -1978,70 +1977,63 @@ function ReportesView({ token, reservas }) {
   const pLimp = lMes.filter(l=>l.pagado).reduce((s,l)=>s+Number(l.costo||0),0);
   const huespedes = rMes.reduce((s,r)=>s+Number(r.cantidad_huespedes||0),0);
   const promN = rMes.length>0?(noches/rMes.length).toFixed(1):0;
-  function exportExcel() {
-    const wb = XLSX.utils.book_new();
+  function toCSV(rows) {
+    return rows.map(row =>
+      row.map(v => {
+        const s = String(v ?? "").replace(/"/g, '""');
+        return s.includes(",") || s.includes("\n") || s.includes('"') ? `"${s}"` : s;
+      }).join(",")
+    ).join("\n");
+  }
 
-    // Sheet 1: Reservas
-    const resData = [
-      ["Nombre", "Check-in", "Check-out", "Noches", "Huéspedes", "Estado", "Moneda", "Total", "Pagado", "Saldo", "Llave entregada", "Teléfono"],
+  function downloadCSV(content, filename) {
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + content], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportExcel() {
+    const fecha = new Date().toISOString().split("T")[0];
+
+    // Reservas CSV
+    const resRows = [
+      ["Nombre","Check-in","Check-out","Noches","Huéspedes","Estado","Moneda","Total","Pagado","Saldo","Llave","Teléfono"],
       ...reservas.map(r => [
-        r.huesped_nombre || "",
-        r.check_in || "",
-        r.check_out || "",
-        r.noches || 0,
-        r.cantidad_huespedes || 0,
-        r.estado || "",
-        r.moneda || "",
-        Number(r.monto_total || 0),
-        Number((r.pago1_monto||0)) + Number((r.pago2_monto||0)),
-        Number(r.saldo || 0),
-        r.llave_entregada ? "Sí" : "No",
-        r.telefono ? `${r.codigo_pais||""} ${r.telefono}` : "",
+        r.huesped_nombre||"", r.check_in||"", r.check_out||"",
+        r.noches||0, r.cantidad_huespedes||0, r.estado||"",
+        r.moneda||"", Number(r.monto_total||0),
+        Number(r.pago1_monto||0)+Number(r.pago2_monto||0),
+        Number(r.saldo||0), r.llave_entregada?"Sí":"No",
+        r.telefono?`${r.codigo_pais||""} ${r.telefono}`:"",
       ])
     ];
-    const wsRes = XLSX.utils.aoa_to_sheet(resData);
-    wsRes["!cols"] = [20,12,12,8,10,12,8,12,12,12,14,16].map(w=>({wch:w}));
-    XLSX.utils.book_append_sheet(wb, wsRes, "Reservas");
+    downloadCSV(toCSV(resRows), `ApartamentoCR_Reservas_${fecha}.csv`);
 
-    // Sheet 2: Limpiezas
-    const limpData = [
-      ["Fecha", "Reserva", "Costo COP", "Coordinada", "Realizada", "Pagada", "Notas"],
+    // Limpiezas CSV
+    const limpRows = [
+      ["Fecha","Reserva","Costo COP","Coordinada","Realizada","Pagada","Notas"],
       ...limpiezas.map(l => {
         const res = reservas.find(r => r.id === l.reserva_id);
-        return [
-          l.fecha || "",
-          res ? res.huesped_nombre : "Independiente",
-          Number(l.costo || 0),
-          l.coordinado ? "Sí" : "No",
-          l.realizada ? "Sí" : "No",
-          l.pagado ? "Sí" : "No",
-          l.notas || "",
-        ];
+        return [l.fecha||"", res?res.huesped_nombre:"Independiente",
+          Number(l.costo||0), l.coordinado?"Sí":"No",
+          l.realizada?"Sí":"No", l.pagado?"Sí":"No", l.notas||""];
       })
     ];
-    const wsLimp = XLSX.utils.aoa_to_sheet(limpData);
-    wsLimp["!cols"] = [12,20,12,12,12,12,24].map(w=>({wch:w}));
-    XLSX.utils.book_append_sheet(wb, wsLimp, "Limpiezas");
+    downloadCSV(toCSV(limpRows), `ApartamentoCR_Limpiezas_${fecha}.csv`);
 
-    // Sheet 3: Reseñas — fetch inline
-    sb.getResenas(token).then(resenas => {
-      const resenaData = [
-        ["Nombre", "Calificación", "Comentario", "Fecha", "Oculta"],
-        ...resenas.map(r => [
-          r.huesped_nombre || "",
-          r.calificacion || 0,
-          r.comentario || "",
-          r.created_at ? r.created_at.split("T")[0] : "",
-          r.oculta ? "Sí" : "No",
-        ])
-      ];
-      const wsRes2 = XLSX.utils.aoa_to_sheet(resenaData);
-      wsRes2["!cols"] = [20,12,40,12,8].map(w=>({wch:w}));
-      XLSX.utils.book_append_sheet(wb, wsRes2, "Reseñas");
-
-      const fecha = new Date().toISOString().split("T")[0];
-      XLSX.writeFile(wb, `ApartamentoCR_${fecha}.xlsx`);
-    });
+    // Reseñas CSV
+    const resenas = await sb.getResenas(token);
+    const resenaRows = [
+      ["Nombre","Calificación","Comentario","Fecha","Oculta"],
+      ...(Array.isArray(resenas)?resenas:[]).map(r => [
+        r.huesped_nombre||"", r.calificacion||0, r.comentario||"",
+        r.created_at?r.created_at.split("T")[0]:"", r.oculta?"Sí":"No",
+      ])
+    ];
+    downloadCSV(toCSV(resenaRows), `ApartamentoCR_Resenas_${fecha}.csv`);
   }
 
   const SC = ({label,value,sub,color,bg})=>(
@@ -2055,7 +2047,7 @@ function ReportesView({ token, reservas }) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
         <p style={{fontWeight:800,fontSize:18,margin:0,color:"#111827"}}>Reportes</p>
-        <button onClick={exportExcel} style={{background:"#1B4332",color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>⬇️ Exportar Excel</button>
+        <button onClick={exportExcel} style={{background:"#1B4332",color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>⬇️ Exportar CSV</button>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <button onClick={()=>{let m=selMonth-1,y=selYear;if(m<0){m=11;y--;}setSelMonth(m);setSelYear(y);}} style={{background:"#F3F4F6",border:"none",borderRadius:8,width:28,height:28,cursor:"pointer",fontSize:14}}>‹</button>
           <span style={{fontWeight:700,fontSize:13,minWidth:110,textAlign:"center"}}>{monthNames[selMonth]} {selYear}</span>
