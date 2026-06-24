@@ -270,12 +270,21 @@ function GuestPortal({ reserva, content }) {
     },
     {
       id: "wifi", icon: "📶", title: "WiFi y Acceso", color: "#1B4332",
-      render: () => (
-        <div>
-          <Card label="Red WiFi" value={c.wifi.nombre} accent="#2D6A4F" />
-          <Card label="Contraseña" value={c.wifi.clave} accent="#2D6A4F" />
-        </div>
-      )
+      render: () => {
+        const qrData = `WIFI:T:WPA;S:${c.wifi.nombre};P:${c.wifi.clave};;`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=1B4332&margin=10`;
+        return (
+          <div>
+            <Card label="Red WiFi" value={c.wifi.nombre} accent="#2D6A4F" />
+            <Card label="Contraseña" value={c.wifi.clave} accent="#2D6A4F" />
+            <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 16, padding: 20, marginTop: 8, textAlign: "center" }}>
+              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>📱 Escanea para conectarte</p>
+              <p style={{ margin: "0 0 14px", fontSize: 12, color: "#6B7280" }}>Apunta la cámara de tu celular al código</p>
+              <img src={qrUrl} alt="QR WiFi" style={{ width: 180, height: 180, borderRadius: 12, display: "block", margin: "0 auto" }} />
+            </div>
+          </div>
+        );
+      }
     },
     {
       id: "normas", icon: "📋", title: "Normas de la casa", color: "#4C1D95",
