@@ -772,6 +772,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [dashboardDetail, setDashboardDetail] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [expandedMonths, setExpandedMonths] = useState(new Set());
   const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "USD", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
@@ -1342,7 +1343,41 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   const rest = list.filter(r => !isDateInRange(selectedDay, r.check_in, r.check_out));
                   list = [...hit, ...rest];
                 }
-                return list.map(r => {
+                // Group by month, last 12 months only
+                const currentMonth = today.substring(0, 7);
+                const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 11);
+                const cutoffStr = cutoff.toISOString().substring(0, 7);
+                const filtered = list.filter(r => r.check_in && r.check_in.substring(0, 7) >= cutoffStr);
+                const groups = {};
+                filtered.forEach(r => {
+                  const mk = r.check_in.substring(0, 7);
+                  if (!groups[mk]) groups[mk] = [];
+                  groups[mk].push(r);
+                });
+                const sortedKeys = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+                return sortedKeys.map(mk => {
+                  const [gy, gm] = mk.split("-");
+                  const isCurrentMonth = mk === currentMonth;
+                  const isOpen = expandedMonths.has(mk) || isCurrentMonth;
+                  const label = `${monthNames[parseInt(gm)-1]} ${gy}`;
+                  const groupList = groups[mk];
+                  return (
+                    <div key={mk} style={{ marginBottom: 8 }}>
+                      {isCurrentMonth ? (
+                        <p style={{ fontWeight: 700, fontSize: 13, color: "#1B4332", margin: "0 0 8px", padding: "4px 0" }}>📅 {label} · {groupList.length} reserva{groupList.length !== 1 ? "s" : ""}</p>
+                      ) : (
+                        <button onClick={() => setExpandedMonths(prev => { const next = new Set(prev); next.has(mk) ? next.delete(mk) : next.add(mk); return next; })}
+                          style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "10px 14px", cursor: "pointer", marginBottom: isOpen ? 8 : 0 }}>
+                          <span style={{ fontWeight: 700, fontSize: 13, color: "#374151" }}>{label}</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 11, color: "#9CA3AF" }}>{groupList.length} reserva{groupList.length !== 1 ? "s" : ""}</span>
+                            <span style={{ fontSize: 12, color: "#9CA3AF" }}>{isOpen ? "▲" : "▼"}</span>
+                          </div>
+                        </button>
+                      )}
+                      {isOpen && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                          {groupList.map(r => {
                   const highlighted = selectedDay && isDateInRange(selectedDay, r.check_in, r.check_out);
                   return (
                 <div key={r.id} style={{ background: highlighted ? "#F0FDF4" : "#fff", borderRadius: 16, padding: 14, boxShadow: highlighted ? "0 0 0 2px #16A34A" : "0 1px 6px rgba(0,0,0,0.07)" }}>
@@ -1469,6 +1504,11 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   )}
                 </div>
                 );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
                 });
               })()}
             </div>}
