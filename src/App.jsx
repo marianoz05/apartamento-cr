@@ -87,32 +87,23 @@ const sb = {
     return res.json();
   },
   async getLimpiezas(token) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?order=fecha.asc`, {
-      headers: this.headers(token),
-    });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?order=fecha.asc`, { headers: this.headers(token) });
     return res.json();
   },
   async createLimpieza(token, data) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/limpiezas`, {
-      method: "POST",
-      headers: { ...this.headers(token), "Prefer": "return=representation" },
-      body: JSON.stringify(data),
+      method: "POST", headers: { ...this.headers(token), "Prefer": "return=representation" }, body: JSON.stringify(data),
     });
     return res.json();
   },
   async updateLimpieza(token, id, data) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?id=eq.${id}`, {
-      method: "PATCH",
-      headers: { ...this.headers(token), "Prefer": "return=representation" },
-      body: JSON.stringify(data),
+      method: "PATCH", headers: { ...this.headers(token), "Prefer": "return=representation" }, body: JSON.stringify(data),
     });
     return res.json();
   },
   async deleteLimpieza(token, id) {
-    await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?id=eq.${id}`, {
-      method: "DELETE",
-      headers: this.headers(token),
-    });
+    await fetch(`${SUPABASE_URL}/rest/v1/limpiezas?id=eq.${id}`, { method: "DELETE", headers: this.headers(token) });
   },
   async getResenas(token) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/resenas?order=created_at.desc`, {
@@ -127,13 +118,6 @@ const sb = {
       body: JSON.stringify(data),
     });
     return res.json();
-  },
-  async getResenaByToken(token) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/resenas?token=eq.${token}&select=*`, {
-      headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
-    });
-    const rows = await res.json();
-    return Array.isArray(rows) ? (rows[0] || null) : null;
   },
   async getReservaByToken(guestToken) {
     try {
@@ -175,10 +159,10 @@ const INITIAL_CONTENT = {
   ],
   restaurantes: [
     { nombre: "Mondongo's", tipo: "Comida típica antioqueña", distancia: "5 min", precio: "$$" },
-    { nombre: "Pergamino Café", tipo: "Café de especialidad", distancia: "7 min", precio: "$" },
+    { nombre: "Pergamino Café", tipo: "Café de especialidad", distancia: "7 min", precio: "$$" },
     { nombre: "El Rancho de Jonás", tipo: "Bandeja paisa", distancia: "3 min", precio: "$$" },
     { nombre: "La Hamburguesería", tipo: "Hamburguesas artesanales", distancia: "2 min", precio: "$$" },
-    { nombre: "El Cielo", tipo: "Cocina colombiana moderna", distancia: "10 min", precio: "$$$" },
+    { nombre: "El Cielo", tipo: "Cocina colombiana moderna", distancia: "10 min", precio: "$$" },
   ],
   transporte: [
     { icon: "🚇", titulo: "Metro — Estación Estadio", desc: "Línea A · 10 min caminando · $2.950" },
@@ -195,16 +179,11 @@ const INITIAL_CONTENT = {
     { icon: "🌆", lugar: "El Poblado", desc: "El barrio más turístico. 15 min en Uber. Ideal para la noche." },
     { icon: "🚡", lugar: "Metro Cable", desc: "Sube a los cerros y ve la ciudad entera. Única experiencia." },
   ],
-  ubicacion: {
-    direccion: "Laureles, Medellín, Colombia",
-    edificio: "",
-    numero: "",
-    maps_link: "",
-  },
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
     pago: "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in.",
   },
+  ubicacion: { direccion: "Laureles, Medellín, Colombia", edificio: "", numero: "", maps_link: "" },
   contacto: {
     anfitrion_nombre: "Yanina Mora",
     anfitrion_tel: "+506 8891-1513",
@@ -539,7 +518,6 @@ function ContenidoEditor({ content, onSave }) {
         ))}
       </div>
 
-      {/* Ubicación */}
       {tab === "ubicacion" && (
         <div style={cardStyle}>
           <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 12px" }}>Ubicación del apartamento</p>
@@ -613,19 +591,9 @@ function ContenidoEditor({ content, onSave }) {
                 <div style={{ flex: 1 }}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Precio</label>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <button onClick={() => {
-                      const levels = ["$","$$","$$$","$$$$"];
-                      const cur = r.precio || r.estrellas || "$$";
-                      const idx = levels.indexOf(cur);
-                      if (idx > 0) updArr("restaurantes", i, "precio", levels[idx-1]);
-                    }} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E5E7EB", background: "#F9FAFB", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>−</button>
-                    <span style={{ fontWeight: 700, fontSize: 14, color: "#D97706", minWidth: 36, textAlign: "center" }}>{r.precio || r.estrellas || "$$"}</span>
-                    <button onClick={() => {
-                      const levels = ["$","$$","$$$","$$$$"];
-                      const cur = r.precio || r.estrellas || "$$";
-                      const idx = levels.indexOf(cur);
-                      if (idx < levels.length-1) updArr("restaurantes", i, "precio", levels[idx+1]);
-                    }} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E5E7EB", background: "#F9FAFB", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>+</button>
+                    <button onClick={() => { const lvl=["$","$$","$$$","$$$$"]; const ix=lvl.indexOf(r.precio||"$$"); if(ix>0) updArr("restaurantes", i, "precio", lvl[ix-1]); }} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E5E7EB", background: "#F9FAFB", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>−</button>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: "#D97706", minWidth: 36, textAlign: "center" }}>{r.precio||"$$"}</span>
+                    <button onClick={() => { const lvl=["$","$$","$$$","$$$$"]; const ix=lvl.indexOf(r.precio||"$$"); if(ix<3) updArr("restaurantes", i, "precio", lvl[ix+1]); }} style={{ width: 28, height: 28, borderRadius: 6, border: "1px solid #E5E7EB", background: "#F9FAFB", cursor: "pointer", fontSize: 14, fontWeight: 700 }}>+</button>
                   </div>
                 </div>
               </div>
@@ -812,18 +780,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   function checkTraslape(checkIn, checkOut, excludeId = null) {
     if (!checkIn || !checkOut) return { traslape: false, tipo: null };
     return reservas.reduce((acc, r) => {
-      if (acc.traslape && acc.tipo === "total") return acc; // already found worst case
+      if (acc.traslape && acc.tipo === "total") return acc;
       if (excludeId && r.id === excludeId) return acc;
       if (r.estado === "cancelada" || r.estado === "completada") return acc;
       const rIn = r.check_in, rOut = r.check_out;
-      // Limpieza: new check-in = existing check-out, or new check-out = existing check-in
-      if (checkIn === rOut || checkOut === rIn) {
-        return { traslape: true, tipo: "limpieza", nombre: r.huesped_nombre };
-      }
-      // Full overlap
-      if (checkIn < rOut && checkOut > rIn) {
-        return { traslape: true, tipo: "total", nombre: r.huesped_nombre };
-      }
+      if (checkIn === rOut || checkOut === rIn) return { traslape: true, tipo: "limpieza", nombre: r.huesped_nombre };
+      if (checkIn < rOut && checkOut > rIn) return { traslape: true, tipo: "total", nombre: r.huesped_nombre };
       return acc;
     }, { traslape: false, tipo: null });
   }
@@ -894,28 +856,30 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   function getLimpiezaStatus(reservaId) {
     const found = limpiezas.filter(l => l.reserva_id === reservaId);
     if (found.length === 0) return "none";
-    const coordinada = found.some(l => l.coordinado);
-    const pagada = found.some(l => l.pagado);
-    if (coordinada && pagada) return "lista";
-    if (coordinada) return "coordinada";
+    const coord = found.some(l => l.coordinado);
+    const pag = found.some(l => l.pagado);
+    if (coord && pag) return "lista";
+    if (coord) return "coordinada";
     return "pendiente";
   }
 
   async function toggleLimpiezaRapida(r) {
     const found = limpiezas.filter(l => l.reserva_id === r.id);
     if (found.length === 0) {
-      // Create new limpieza
-      const nueva = await sb.createLimpieza(onLogoutToken, {
-        reserva_id: r.id, fecha: r.check_in, costo: 0, coordinado: true, pagado: false, notas: ""
-      });
+      const nueva = await sb.createLimpieza(onLogoutToken, { reserva_id: r.id, fecha: r.check_in, costo: 0, coordinado: true, pagado: false, notas: "" });
       if (Array.isArray(nueva) && nueva[0]) setLimpiezas(prev => [...prev, nueva[0]]);
     } else {
-      // Toggle the most recent one
       const l = found[found.length - 1];
-      const newCoordinado = !l.coordinado;
-      await sb.updateLimpieza(onLogoutToken, l.id, { coordinado: newCoordinado });
-      setLimpiezas(prev => prev.map(x => x.id === l.id ? { ...x, coordinado: newCoordinado } : x));
+      const newVal = !l.coordinado;
+      await sb.updateLimpieza(onLogoutToken, l.id, { coordinado: newVal });
+      setLimpiezas(prev => prev.map(x => x.id === l.id ? { ...x, coordinado: newVal } : x));
     }
+  }
+
+  async function cancelarReserva(id) {
+    await sb.updateReserva(onLogoutToken, id, { estado: "cancelada" });
+    setReservas(prev => prev.map(r => r.id === id ? { ...r, estado: "cancelada" } : r));
+    setConfirmDelete(null);
   }
 
   function getCellReservas(day) {
@@ -988,12 +952,6 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     setReservas(prev => prev.filter(r => r.id !== id));
     setConfirmDelete(null);
   }
-  async function cancelarReserva(id) {
-    await sb.updateReserva(onLogoutToken, id, { estado: "cancelada" });
-    setReservas(prev => prev.map(r => r.id === id ? { ...r, estado: "cancelada" } : r));
-    setConfirmDelete(null);
-  }
-
   function copyGuestLink(token) { navigator.clipboard?.writeText(`https://apartamento-cr.vercel.app/g/${token}`); setCopiedToken(token); setTimeout(() => setCopiedToken(null), 2000); }
 
   function sendWhatsApp(r, tipo) {
@@ -1022,7 +980,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       .replace(/\\n/g, "\n");
 
     if (tipo === "bienvenida" && r.traslape_autorizado) {
-      msg += "\n\n⚠️ Nota: el check-in de ese dia coincide con la salida de otro huesped. La limpieza del apartamento se coordina en la manana, por lo que el acceso estara disponible a partir de las 3:00 PM una vez finalizada.";
+      msg += "\n\n⚠️ El check-in coincide con la salida de otro huesped. Acceso disponible a partir de las 3:00 PM.";
     }
 
     const url = "https://wa.me/" + tel + "?text=" + encodeURIComponent(msg);
@@ -1109,7 +1067,6 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       {r.noches > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>🌙 {r.noches} noches</p>}
                       {r.monto_total > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#374151" }}>💰 Total: {fmt(r.monto_total, r.moneda)}</p>}
                       {Number(r.saldo||0) > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#D97706", fontWeight: 700 }}>⚠️ Saldo: {fmt(r.saldo, r.moneda)}</p>}
-                      {Number(r.saldo||0) > 0 && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#D97706", fontWeight: 700 }}>⚠️ Saldo: {fmt(r.saldo, r.moneda)}</p>}
                       {r.llave_entregada && <p style={{ margin: "0 0 4px", fontSize: 12, color: "#166534" }}>🔑 Llave entregada</p>}
                       <button onClick={e => { e.stopPropagation(); openEditReserva(r); setView("reservas"); setDashboardDetail(null); }}
                         style={{ marginTop: 8, background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
@@ -1123,6 +1080,40 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
           </div>
         )}
 
+        {view === "calendario" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Calendario</p>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <button onClick={() => setCalendarDate(d => { const m = d.month === 0 ? 11 : d.month - 1; return { month: m, year: m === 11 ? d.year - 1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", fontSize: 16 }}>‹</button>
+                <span style={{ fontWeight: 700, fontSize: 14, minWidth: 120, textAlign: "center" }}>{monthNames[month]} {year}</span>
+                <button onClick={() => setCalendarDate(d => { const m = d.month === 11 ? 0 : d.month + 1; return { month: m, year: m === 0 ? d.year + 1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 30, height: 30, cursor: "pointer", fontSize: 16 }}>›</button>
+              </div>
+            </div>
+            <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", background: "#F9FAFB", borderBottom: "1px solid #E5E7EB" }}>
+                {["Do","Lu","Ma","Mi","Ju","Vi","Sa"].map(d => <div key={d} style={{ textAlign: "center", padding: "8px 0", fontSize: 11, fontWeight: 700, color: "#9CA3AF" }}>{d}</div>)}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+                {Array.from({ length: firstDay }).map((_, i) => <div key={"e"+i} style={{ minHeight: 52, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6" }} />)}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1;
+                  const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+                  const dayRes = getCellReservas(day);
+                  const isToday = dateStr === today;
+                  return (
+                    <div key={day} style={{ minHeight: 52, borderRight: "1px solid #F3F4F6", borderBottom: "1px solid #F3F4F6", padding: 4, background: isToday ? "#F0FDF4" : "#fff" }}>
+                      <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: isToday ? 800 : 500, color: isToday ? "#16A34A" : "#374151", textAlign: "center" }}>{day}</p>
+                      {dayRes.slice(0,1).map(r => <div key={r.id} style={{ background: statColors[r.estado]+"20", borderLeft: `2px solid ${statColors[r.estado]}`, borderRadius: 3, padding: "1px 3px", fontSize: 9, fontWeight: 700, color: statColors[r.estado], overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{r.huesped_nombre.split(" ")[0]}</div>)}
+                      {dayRes.length > 1 && <p style={{ margin: "1px 0 0", fontSize: 9, color: "#9CA3AF", textAlign: "center" }}>+{dayRes.length-1}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {view === "reservas" && (
           <div>
             {!showForm && (
@@ -1132,7 +1123,6 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
               </div>
             )}
 
-            {/* CALENDARIO */}
             {!showForm && (
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -1169,9 +1159,9 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
-                  {[["activa","#16A34A","Activa"],["confirmada","#2563EB","Confirmada"],["pendiente","#D97706","Pendiente"]].map(([e,c,l]) => (
+                  {[["activa","#16A34A","Activa"],["confirmada","#2563EB","Confirmada"],["pendiente","#D97706","Pendiente"]].map(([e,col,l]) => (
                     <div key={e} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 2, background: c }} />
+                      <div style={{ width: 8, height: 8, borderRadius: 2, background: col }} />
                       <span style={{ fontSize: 11, color: "#6B7280" }}>{l}</span>
                     </div>
                   ))}
@@ -1186,7 +1176,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 <p style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Huésped</p>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Nombre completo</label>
-                  <input type="text" value={form.huesped_nombre} onChange={e => updForm("huesped_nombre", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: !form.huesped_nombre ? "1px solid #FCA5A5" : "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Requerido" required />
+                  <input type="text" value={form.huesped_nombre} onChange={e => updForm("huesped_nombre", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: !form.huesped_nombre ? "1px solid #FCA5A5" : "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Requerido" />
                 </div>
                 <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
                   <div style={{ width: 130 }}>
@@ -1349,30 +1339,22 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       </div>
                     ))}
                   </div>
-                  {/* Limpieza badge */}
                   {["confirmada","activa","completada"].includes(r.estado) && (() => {
                     const st = getLimpiezaStatus(r.id);
-                    const map = {
-                      none:        { bg: "#F3F4F6", color: "#6B7280", label: "🧹 Sin limpieza coordinada", btn: "Coordinar" },
-                      pendiente:   { bg: "#FEF3C7", color: "#D97706", label: "🧹 Limpieza pendiente", btn: "Marcar coordinada" },
-                      coordinada:  { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar lista" },
-                      lista:       { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza lista ✓", btn: null },
+                    const lmap = {
+                      none:       { bg: "#F3F4F6", color: "#6B7280", label: "🧹 Sin limpieza coordinada", btn: "Coordinar" },
+                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "🧹 Limpieza pendiente", btn: "Marcar coordinada" },
+                      coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar lista" },
+                      lista:      { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza lista ✓", btn: null },
                     };
-                    const s = map[st];
+                    const s = lmap[st];
                     return (
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                         <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
-                        {s.btn && (
-                          <button onClick={() => toggleLimpiezaRapida(r)}
-                            style={{ background: "none", border: `1px solid ${s.color}`, borderRadius: 8, padding: "2px 8px", fontSize: 11, fontWeight: 600, color: s.color, cursor: "pointer" }}>
-                            {s.btn}
-                          </button>
-                        )}
+                        {s.btn && <button onClick={() => toggleLimpiezaRapida(r)} style={{ background: "none", border: `1px solid ${s.color}`, borderRadius: 8, padding: "2px 8px", fontSize: 11, fontWeight: 600, color: s.color, cursor: "pointer" }}>{s.btn}</button>}
                       </div>
                     );
                   })()}
-
-                  {/* Financial summary */}
                   {r.monto_total > 0 && (
                     <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                       <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "5px 10px" }}>
@@ -1440,7 +1422,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     {r.estado === "completada" && r.telefono && (
                       <button onClick={() => {
                         const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
-                        const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR. Nos encantaría conocer tu opinión. Déjanos tu reseña aquí: ${link}`;
+                        const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
                         const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`;
                         window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
                       }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
@@ -1466,6 +1448,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
             </div>}
           </div>
         )}
+
         {view === "limpieza" && (
           <LimpiezaView token={onLogoutToken} reservas={reservas} limpiezas={limpiezas} setLimpiezas={setLimpiezas} />
         )}
@@ -1492,65 +1475,53 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
 
 
-
-
 // ─── RESENAS ADMIN VIEW ───────────────────────────────────────────
 function ResenasAdminView({ token, reservas }) {
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    sb.getResenas(token).then(data => {
-      if (Array.isArray(data)) setResenas(data);
-      setLoading(false);
-    });
+    sb.getResenas(token).then(data => { if (Array.isArray(data)) setResenas(data); setLoading(false); });
   }, []);
 
-  const promedio = resenas.length > 0
-    ? (resenas.reduce((s, r) => s + r.calificacion, 0) / resenas.length).toFixed(1)
-    : null;
-
-  function Stars({ n, size = 16 }) {
-    return (
-      <span>
-        {[1,2,3,4,5].map(i => (
-          <span key={i} style={{ fontSize: size, color: i <= n ? "#F59E0B" : "#E5E7EB" }}>★</span>
-        ))}
-      </span>
-    );
-  }
+  const promedio = resenas.length > 0 ? (resenas.reduce((s,r)=>s+r.calificacion,0)/resenas.length).toFixed(1) : null;
+  function Stars({ n, size=16 }) { return <span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>; }
 
   return (
     <div>
-      <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Reseñas</p>
-
-      {resenas.length === 0 && !loading && (
-        <div style={{ background: "#fff", borderRadius: 16, padding: 32, textAlign: "center", color: "#9CA3AF" }}>
-          <p style={{ fontSize: 32, margin: "0 0 8px" }}>⭐</p>
-          <p style={{ margin: 0, fontWeight: 600 }}>Aún no hay reseñas</p>
-          <p style={{ margin: "8px 0 0", fontSize: 13 }}>Solicítalas desde las reservas completadas</p>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <p style={{fontWeight:800,fontSize:18,margin:0,color:"#111827"}}>Reseñas</p>
+        <button onClick={()=>{navigator.clipboard?.writeText("https://apartamento-cr.vercel.app/resenas");setCopied(true);setTimeout(()=>setCopied(false),2000);}}
+          style={{background:"#F0FDF4",color:"#166534",border:"1px solid #A7F3D0",borderRadius:10,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+          {copied?"✓ Copiado":"🔗 Copiar link público"}
+        </button>
+      </div>
+      {resenas.length===0&&!loading&&(
+        <div style={{background:"#fff",borderRadius:16,padding:32,textAlign:"center",color:"#9CA3AF"}}>
+          <p style={{fontSize:32,margin:"0 0 8px"}}>⭐</p>
+          <p style={{margin:0,fontWeight:600}}>Aún no hay reseñas</p>
+          <p style={{margin:"8px 0 0",fontSize:13}}>Solicítalas desde las reservas completadas</p>
         </div>
       )}
-
-      {resenas.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)", textAlign: "center" }}>
-          <p style={{ margin: "0 0 4px", fontSize: 36, fontWeight: 800, color: "#111827" }}>{promedio}</p>
-          <Stars n={Math.round(promedio)} size={24} />
-          <p style={{ margin: "8px 0 0", fontSize: 13, color: "#6B7280" }}>{resenas.length} reseña{resenas.length !== 1 ? "s" : ""}</p>
+      {resenas.length>0&&(
+        <div style={{background:"#fff",borderRadius:16,padding:16,marginBottom:16,boxShadow:"0 1px 6px rgba(0,0,0,0.07)",textAlign:"center"}}>
+          <p style={{margin:"0 0 4px",fontSize:36,fontWeight:800,color:"#111827"}}>{promedio}</p>
+          <Stars n={Math.round(promedio)} size={24}/>
+          <p style={{margin:"8px 0 0",fontSize:13,color:"#6B7280"}}>{resenas.length} reseña{resenas.length!==1?"s":""}</p>
         </div>
       )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        {resenas.map(r => (
-          <div key={r.id} style={{ background: "#fff", borderRadius: 16, padding: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {resenas.map(r=>(
+          <div key={r.id} style={{background:"#fff",borderRadius:16,padding:14,boxShadow:"0 1px 6px rgba(0,0,0,0.07)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
               <div>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.huesped_nombre}</p>
-                <p style={{ margin: "2px 0 0", fontSize: 11, color: "#9CA3AF" }}>{formatDate(r.created_at?.split("T")[0])}</p>
+                <p style={{margin:0,fontWeight:700,fontSize:14}}>{r.huesped_nombre}</p>
+                <p style={{margin:"2px 0 0",fontSize:11,color:"#9CA3AF"}}>{formatDate(r.created_at?.split("T")[0])}</p>
               </div>
-              <Stars n={r.calificacion} size={16} />
+              <Stars n={r.calificacion} size={16}/>
             </div>
-            {r.comentario && <p style={{ margin: 0, fontSize: 13, color: "#374151", lineHeight: 1.5, fontStyle: "italic" }}>"{r.comentario}"</p>}
+            {r.comentario&&<p style={{margin:0,fontSize:13,color:"#374151",lineHeight:1.5,fontStyle:"italic"}}>"{r.comentario}"</p>}
           </div>
         ))}
       </div>
@@ -1558,101 +1529,55 @@ function ResenasAdminView({ token, reservas }) {
   );
 }
 
-// ─── RESENA FORM (página pública) ─────────────────────────────────
+// ─── RESENA FORM ──────────────────────────────────────────────────
 function ResenaForm({ reservaId }) {
-  const [resena, setResena] = useState(null);
   const [reserva, setReserva] = useState(null);
   const [cal, setCal] = useState(0);
   const [comentario, setComentario] = useState("");
-  const [status, setStatus] = useState("loading"); // loading | form | sent | error | already
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
-    // Check if resena already exists for this reserva
-    fetch(`${SUPABASE_URL}/rest/v1/resenas?reserva_id=eq.${reservaId}&select=*`, {
-      headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
-    }).then(r => r.json()).then(rows => {
-      if (Array.isArray(rows) && rows.length > 0) {
-        setStatus("already");
-        return;
-      }
-      // Get reserva name
-      fetch(`${SUPABASE_URL}/rest/v1/reservas?id=eq.${reservaId}&select=huesped_nombre,check_in,check_out`, {
-        headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` },
-      }).then(r => r.json()).then(rows => {
-        if (Array.isArray(rows) && rows[0]) setReserva(rows[0]);
-        setStatus("form");
-      });
-    }).catch(() => setStatus("error"));
-  }, [reservaId]);
+    fetch(`${SUPABASE_URL}/rest/v1/resenas?reserva_id=eq.${reservaId}&select=*`,{headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`}})
+      .then(r=>r.json()).then(rows=>{
+        if(Array.isArray(rows)&&rows.length>0){setStatus("already");return;}
+        fetch(`${SUPABASE_URL}/rest/v1/reservas?id=eq.${reservaId}&select=huesped_nombre,check_in,check_out`,{headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`}})
+          .then(r=>r.json()).then(rows=>{if(Array.isArray(rows)&&rows[0])setReserva(rows[0]);setStatus("form");});
+      }).catch(()=>setStatus("error"));
+  },[reservaId]);
 
   async function submit() {
-    if (cal === 0) return;
+    if(cal===0)return;
     setStatus("loading");
-    await sb.createResena({
-      reserva_id: reservaId,
-      huesped_nombre: reserva?.huesped_nombre || "Huésped",
-      calificacion: cal,
-      comentario,
-    });
+    await sb.createResena({reserva_id:reservaId,huesped_nombre:reserva?.huesped_nombre||"Huésped",calificacion:cal,comentario});
     setStatus("sent");
   }
 
-  if (status === "loading") return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0", fontFamily: "Inter, sans-serif" }}>
-      <p style={{ color: "#6B7280" }}>Cargando...</p>
-    </div>
-  );
-
-  if (status === "already") return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0", fontFamily: "Inter, sans-serif", padding: 20 }}>
-      <div style={{ textAlign: "center" }}>
-        <p style={{ fontSize: 48, margin: "0 0 12px" }}>✅</p>
-        <p style={{ fontWeight: 800, fontSize: 20, color: "#111827" }}>¡Gracias!</p>
-        <p style={{ color: "#6B7280", fontSize: 14 }}>Ya enviaste tu reseña para esta estadía.</p>
-      </div>
-    </div>
-  );
-
-  if (status === "sent") return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F7F5F0", fontFamily: "Inter, sans-serif", padding: 20 }}>
-      <div style={{ textAlign: "center" }}>
-        <p style={{ fontSize: 48, margin: "0 0 12px" }}>🌿</p>
-        <p style={{ fontWeight: 800, fontSize: 22, color: "#111827", margin: "0 0 8px" }}>¡Muchas gracias!</p>
-        <p style={{ color: "#6B7280", fontSize: 15 }}>Tu reseña fue enviada con éxito.</p>
-      </div>
-    </div>
-  );
+  if(status==="loading")return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F5F0",fontFamily:"Inter,sans-serif"}}><p style={{color:"#6B7280"}}>Cargando...</p></div>;
+  if(status==="already")return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F5F0",fontFamily:"Inter,sans-serif",padding:20}}><div style={{textAlign:"center"}}><p style={{fontSize:48,margin:"0 0 12px"}}>✅</p><p style={{fontWeight:800,fontSize:20,color:"#111827"}}>¡Gracias!</p><p style={{color:"#6B7280",fontSize:14}}>Ya enviaste tu reseña.</p></div></div>;
+  if(status==="sent")return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F5F0",fontFamily:"Inter,sans-serif",padding:20}}><div style={{textAlign:"center"}}><p style={{fontSize:48,margin:"0 0 12px"}}>🌿</p><p style={{fontWeight:800,fontSize:22,color:"#111827",margin:"0 0 8px"}}>¡Muchas gracias!</p><p style={{color:"#6B7280",fontSize:15}}>Tu reseña fue enviada con éxito.</p></div></div>;
 
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: "#F7F5F0", minHeight: "100vh", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px" }}>
-      <div style={{ background: "#fff", borderRadius: 24, padding: 28, width: "100%", maxWidth: 400, boxShadow: "0 8px 40px rgba(0,0,0,0.1)" }}>
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <div style={{ background: "linear-gradient(160deg, #1B4332, #2D6A4F)", borderRadius: 16, padding: "20px 0", marginBottom: 16 }}>
-            <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", margin: "0 0 4px", textTransform: "uppercase" }}>Apartamento CR</p>
-            <p style={{ color: "#fff", fontSize: 20, fontWeight: 800, margin: 0 }}>¿Cómo fue tu estadía?</p>
+    <div style={{fontFamily:"Inter,sans-serif",background:"#F7F5F0",minHeight:"100vh",display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"40px 20px"}}>
+      <div style={{background:"#fff",borderRadius:24,padding:28,width:"100%",maxWidth:400,boxShadow:"0 8px 40px rgba(0,0,0,0.1)"}}>
+        <div style={{textAlign:"center",marginBottom:24}}>
+          <div style={{background:"linear-gradient(160deg,#1B4332,#2D6A4F)",borderRadius:16,padding:"20px 0",marginBottom:16}}>
+            <p style={{color:"#95D5B2",fontSize:11,fontWeight:700,letterSpacing:"0.15em",margin:"0 0 4px",textTransform:"uppercase"}}>Apartamento CR</p>
+            <p style={{color:"#fff",fontSize:20,fontWeight:800,margin:0}}>¿Cómo fue tu estadía?</p>
           </div>
-          {reserva && <p style={{ color: "#6B7280", fontSize: 13, margin: 0 }}>{reserva.huesped_nombre} · {formatDate(reserva.check_in)} → {formatDate(reserva.check_out)}</p>}
+          {reserva&&<p style={{color:"#6B7280",fontSize:13,margin:0}}>{reserva.huesped_nombre} · {formatDate(reserva.check_in)} → {formatDate(reserva.check_out)}</p>}
         </div>
-
-        <p style={{ fontWeight: 700, fontSize: 14, color: "#374151", textAlign: "center", marginBottom: 12 }}>Calificación</p>
-        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 20 }}>
-          {[1,2,3,4,5].map(i => (
-            <button key={i} onClick={() => setCal(i)}
-              style={{ fontSize: 36, background: "none", border: "none", cursor: "pointer", color: i <= cal ? "#F59E0B" : "#E5E7EB", transition: "transform 0.1s", transform: i <= cal ? "scale(1.1)" : "scale(1)" }}>
-              ★
-            </button>
-          ))}
+        <p style={{fontWeight:700,fontSize:14,color:"#374151",textAlign:"center",marginBottom:12}}>Calificación</p>
+        <div style={{display:"flex",justifyContent:"center",gap:8,marginBottom:20}}>
+          {[1,2,3,4,5].map(i=><button key={i} onClick={()=>setCal(i)} style={{fontSize:36,background:"none",border:"none",cursor:"pointer",color:i<=cal?"#F59E0B":"#E5E7EB"}}>★</button>)}
         </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Comentario (opcional)</label>
-          <textarea value={comentario} onChange={e => setComentario(e.target.value)} rows={4} placeholder="Cuéntanos tu experiencia..."
-            style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "1px solid #E5E7EB", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "none", lineHeight: 1.5 }} />
+        <div style={{marginBottom:20}}>
+          <label style={{display:"block",fontSize:13,fontWeight:600,color:"#374151",marginBottom:8}}>Comentario (opcional)</label>
+          <textarea value={comentario} onChange={e=>setComentario(e.target.value)} rows={4} placeholder="Cuéntanos tu experiencia..."
+            style={{width:"100%",padding:"10px 14px",borderRadius:12,border:"1px solid #E5E7EB",fontSize:14,outline:"none",boxSizing:"border-box",fontFamily:"inherit",resize:"none",lineHeight:1.5}}/>
         </div>
-
-        <button onClick={submit} disabled={cal === 0}
-          style={{ width: "100%", background: cal === 0 ? "#D1D5DB" : "#1B4332", color: "#fff", border: "none", borderRadius: 14, padding: "14px 0", fontSize: 15, fontWeight: 700, cursor: cal === 0 ? "not-allowed" : "pointer" }}>
-          {cal === 0 ? "Selecciona una calificación" : "Enviar reseña ✨"}
+        <button onClick={submit} disabled={cal===0}
+          style={{width:"100%",background:cal===0?"#D1D5DB":"#1B4332",color:"#fff",border:"none",borderRadius:14,padding:"14px 0",fontSize:15,fontWeight:700,cursor:cal===0?"not-allowed":"pointer"}}>
+          {cal===0?"Selecciona una calificación":"Enviar reseña ✨"}
         </button>
       </div>
     </div>
@@ -1663,55 +1588,36 @@ function ResenaForm({ reservaId }) {
 function ResenasPublicas() {
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    sb.getResenas(null).then(data => {
-      if (Array.isArray(data)) setResenas(data);
-      setLoading(false);
-    });
-  }, []);
-
-  const promedio = resenas.length > 0
-    ? (resenas.reduce((s, r) => s + r.calificacion, 0) / resenas.length).toFixed(1)
-    : null;
-
-  function Stars({ n, size = 18 }) {
-    return <span>{[1,2,3,4,5].map(i => <span key={i} style={{ fontSize: size, color: i <= n ? "#F59E0B" : "#E5E7EB" }}>★</span>)}</span>;
-  }
-
+  useEffect(()=>{sb.getResenas(null).then(data=>{if(Array.isArray(data))setResenas(data);setLoading(false);});},[]);
+  const promedio = resenas.length>0?(resenas.reduce((s,r)=>s+r.calificacion,0)/resenas.length).toFixed(1):null;
+  function Stars({n,size=18}){return<span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>;}
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: "#F7F5F0", minHeight: "100vh" }}>
-      <div style={{ background: "linear-gradient(160deg, #1B4332, #2D6A4F)", padding: "36px 20px 28px", textAlign: "center" }}>
-        <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px" }}>Laureles · Medellín</p>
-        <h1 style={{ color: "#fff", fontSize: 28, fontWeight: 800, margin: "0 0 8px" }}>Apartamento CR</h1>
-        <p style={{ color: "#B7E4C7", fontSize: 14, margin: 0 }}>Lo que dicen nuestros huéspedes</p>
-        {promedio && (
-          <div style={{ marginTop: 16, display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.12)", borderRadius: 20, padding: "8px 20px" }}>
-            <span style={{ color: "#fff", fontSize: 28, fontWeight: 800 }}>{promedio}</span>
-            <Stars n={Math.round(promedio)} size={20} />
-            <span style={{ color: "#B7E4C7", fontSize: 13 }}>{resenas.length} reseñas</span>
+    <div style={{fontFamily:"Inter,sans-serif",background:"#F7F5F0",minHeight:"100vh"}}>
+      <div style={{background:"linear-gradient(160deg,#1B4332,#2D6A4F)",padding:"36px 20px 28px",textAlign:"center"}}>
+        <p style={{color:"#95D5B2",fontSize:11,fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",margin:"0 0 6px"}}>Laureles · Medellín</p>
+        <h1 style={{color:"#fff",fontSize:28,fontWeight:800,margin:"0 0 8px"}}>Apartamento CR</h1>
+        <p style={{color:"#B7E4C7",fontSize:14,margin:0}}>Lo que dicen nuestros huéspedes</p>
+        {promedio&&(
+          <div style={{marginTop:16,display:"inline-flex",alignItems:"center",gap:10,background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"8px 20px"}}>
+            <span style={{color:"#fff",fontSize:28,fontWeight:800}}>{promedio}</span>
+            <Stars n={Math.round(promedio)} size={20}/>
+            <span style={{color:"#B7E4C7",fontSize:13}}>{resenas.length} reseñas</span>
           </div>
         )}
       </div>
-
-      <div style={{ padding: "20px 16px", maxWidth: 500, margin: "0 auto" }}>
-        {loading && <p style={{ textAlign: "center", color: "#9CA3AF" }}>Cargando reseñas...</p>}
-        {!loading && resenas.length === 0 && (
-          <div style={{ textAlign: "center", padding: 40, color: "#9CA3AF" }}>
-            <p style={{ fontSize: 32 }}>⭐</p>
-            <p>Aún no hay reseñas publicadas.</p>
-          </div>
-        )}
-        {resenas.map(r => (
-          <div key={r.id} style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 12, boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+      <div style={{padding:"20px 16px",maxWidth:500,margin:"0 auto"}}>
+        {loading&&<p style={{textAlign:"center",color:"#9CA3AF"}}>Cargando reseñas...</p>}
+        {!loading&&resenas.length===0&&<div style={{textAlign:"center",padding:40,color:"#9CA3AF"}}><p style={{fontSize:32}}>⭐</p><p>Aún no hay reseñas publicadas.</p></div>}
+        {resenas.map(r=>(
+          <div key={r.id} style={{background:"#fff",borderRadius:16,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,0.07)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>{r.huesped_nombre}</p>
-                <p style={{ margin: "2px 0 0", fontSize: 11, color: "#9CA3AF" }}>{formatDate(r.created_at?.split("T")[0])}</p>
+                <p style={{margin:0,fontWeight:700,fontSize:15}}>{r.huesped_nombre}</p>
+                <p style={{margin:"2px 0 0",fontSize:11,color:"#9CA3AF"}}>{formatDate(r.created_at?.split("T")[0])}</p>
               </div>
-              <Stars n={r.calificacion} size={18} />
+              <Stars n={r.calificacion} size={18}/>
             </div>
-            {r.comentario && <p style={{ margin: 0, fontSize: 14, color: "#374151", lineHeight: 1.6, fontStyle: "italic" }}>"{r.comentario}"</p>}
+            {r.comentario&&<p style={{margin:0,fontSize:14,color:"#374151",lineHeight:1.6,fontStyle:"italic"}}>"{r.comentario}"</p>}
           </div>
         ))}
       </div>
@@ -1725,138 +1631,83 @@ function ReportesView({ token, reservas }) {
   const [selYear, setSelYear] = useState(now.getFullYear());
   const [selMonth, setSelMonth] = useState(now.getMonth());
   const [limpiezas, setLimpiezas] = useState([]);
-
   const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-
-  useEffect(() => {
-    sb.getLimpiezas(token).then(data => {
-      if (Array.isArray(data)) setLimpiezas(data);
-    });
-  }, []);
-
-  // Filter reservas for selected month (by check_in)
-  const monthStr = `${selYear}-${String(selMonth+1).padStart(2,"0")}`;
-  const reservasMes = reservas.filter(r => r.check_in && r.check_in.startsWith(monthStr) && r.estado !== "cancelada");
-  const limpiezasMes = limpiezas.filter(l => l.fecha && l.fecha.startsWith(monthStr));
-
-  // Calculations
-  const diasMes = new Date(selYear, selMonth+1, 0).getDate();
-  const nochesOcupadas = reservasMes.reduce((sum, r) => sum + (Number(r.noches)||0), 0);
-  const ocupacion = Math.round((nochesOcupadas / diasMes) * 100);
-
-  const ingresosUSD = reservasMes.filter(r => r.moneda === "USD").reduce((sum, r) => sum + Number(r.monto_total||0), 0);
-  const ingresosCRC = reservasMes.filter(r => r.moneda === "CRC").reduce((sum, r) => sum + Number(r.monto_total||0), 0);
-  const cobradoUSD = reservasMes.filter(r => r.moneda === "USD").reduce((sum, r) => sum + Number(r.pago1_monto||0) + Number(r.pago2_monto||0), 0);
-  const cobradoCRC = reservasMes.filter(r => r.moneda === "CRC").reduce((sum, r) => sum + Number(r.pago1_monto||0) + Number(r.pago2_monto||0), 0);
-  const saldoUSD = ingresosUSD - cobradoUSD;
-  const saldoCRC = ingresosCRC - cobradoCRC;
-
-  const costosLimpieza = limpiezasMes.reduce((sum, l) => sum + Number(l.costo||0), 0);
-  const limpiezasPagadas = limpiezasMes.filter(l => l.pagado).reduce((sum, l) => sum + Number(l.costo||0), 0);
-
-  const huespedes = reservasMes.reduce((sum, r) => sum + Number(r.cantidad_huespedes||0), 0);
-  const promedioNoches = reservasMes.length > 0 ? (nochesOcupadas / reservasMes.length).toFixed(1) : 0;
-
-  const StatCard = ({ label, value, sub, color, bg }) => (
-    <div style={{ background: bg || "#fff", borderRadius: 14, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
-      <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: color || "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</p>
-      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: color || "#111827" }}>{value}</p>
-      {sub && <p style={{ margin: "4px 0 0", fontSize: 11, color: "#9CA3AF" }}>{sub}</p>}
+  useEffect(()=>{sb.getLimpiezas(token).then(data=>{if(Array.isArray(data))setLimpiezas(data);});},[]);
+  const mStr = `${selYear}-${String(selMonth+1).padStart(2,"0")}`;
+  const rMes = reservas.filter(r=>r.check_in&&r.check_in.startsWith(mStr)&&r.estado!=="cancelada");
+  const lMes = limpiezas.filter(l=>l.fecha&&l.fecha.startsWith(mStr));
+  const dias = new Date(selYear,selMonth+1,0).getDate();
+  const noches = rMes.reduce((s,r)=>s+(Number(r.noches)||0),0);
+  const ocup = Math.round((noches/dias)*100);
+  const iUSD = rMes.filter(r=>r.moneda==="USD").reduce((s,r)=>s+Number(r.monto_total||0),0);
+  const iCRC = rMes.filter(r=>r.moneda==="CRC").reduce((s,r)=>s+Number(r.monto_total||0),0);
+  const cUSD = rMes.filter(r=>r.moneda==="USD").reduce((s,r)=>s+Number(r.pago1_monto||0)+Number(r.pago2_monto||0),0);
+  const cCRC = rMes.filter(r=>r.moneda==="CRC").reduce((s,r)=>s+Number(r.pago1_monto||0)+Number(r.pago2_monto||0),0);
+  const cLimp = lMes.reduce((s,l)=>s+Number(l.costo||0),0);
+  const pLimp = lMes.filter(l=>l.pagado).reduce((s,l)=>s+Number(l.costo||0),0);
+  const huespedes = rMes.reduce((s,r)=>s+Number(r.cantidad_huespedes||0),0);
+  const promN = rMes.length>0?(noches/rMes.length).toFixed(1):0;
+  const SC = ({label,value,sub,color,bg})=>(
+    <div style={{background:bg||"#fff",borderRadius:14,padding:16,boxShadow:"0 1px 6px rgba(0,0,0,0.07)"}}>
+      <p style={{margin:"0 0 4px",fontSize:11,fontWeight:700,color:color||"#6B7280",textTransform:"uppercase",letterSpacing:"0.08em"}}>{label}</p>
+      <p style={{margin:0,fontSize:22,fontWeight:800,color:color||"#111827"}}>{value}</p>
+      {sub&&<p style={{margin:"4px 0 0",fontSize:11,color:"#9CA3AF"}}>{sub}</p>}
     </div>
   );
-
   return (
     <div>
-      {/* Month selector */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Reportes</p>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button onClick={() => { let m = selMonth-1; let y = selYear; if(m<0){m=11;y--;} setSelMonth(m); setSelYear(y); }} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14 }}>‹</button>
-          <span style={{ fontWeight: 700, fontSize: 13, minWidth: 110, textAlign: "center" }}>{monthNames[selMonth]} {selYear}</span>
-          <button onClick={() => { let m = selMonth+1; let y = selYear; if(m>11){m=0;y++;} setSelMonth(m); setSelYear(y); }} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 28, height: 28, cursor: "pointer", fontSize: 14 }}>›</button>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+        <p style={{fontWeight:800,fontSize:18,margin:0,color:"#111827"}}>Reportes</p>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button onClick={()=>{let m=selMonth-1,y=selYear;if(m<0){m=11;y--;}setSelMonth(m);setSelYear(y);}} style={{background:"#F3F4F6",border:"none",borderRadius:8,width:28,height:28,cursor:"pointer",fontSize:14}}>‹</button>
+          <span style={{fontWeight:700,fontSize:13,minWidth:110,textAlign:"center"}}>{monthNames[selMonth]} {selYear}</span>
+          <button onClick={()=>{let m=selMonth+1,y=selYear;if(m>11){m=0;y++;}setSelMonth(m);setSelYear(y);}} style={{background:"#F3F4F6",border:"none",borderRadius:8,width:28,height:28,cursor:"pointer",fontSize:14}}>›</button>
         </div>
       </div>
-
-      {/* Ocupación */}
-      <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Ocupación</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-        <StatCard label="Reservas" value={reservasMes.length} />
-        <StatCard label="Noches" value={nochesOcupadas} sub={`de ${diasMes} días`} />
-        <StatCard label="Ocupación" value={`${ocupacion}%`} color={ocupacion > 70 ? "#16A34A" : ocupacion > 40 ? "#D97706" : "#DC2626"} bg={ocupacion > 70 ? "#DCFCE7" : ocupacion > 40 ? "#FEF3C7" : "#FEE2E2"} />
+      <p style={{fontWeight:700,fontSize:13,color:"#6B7280",textTransform:"uppercase",letterSpacing:"0.08em",margin:"0 0 10px"}}>Ocupación</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:20}}>
+        <SC label="Reservas" value={rMes.length}/><SC label="Noches" value={noches} sub={`de ${dias} días`}/>
+        <SC label="Ocupación" value={`${ocup}%`} color={ocup>70?"#16A34A":ocup>40?"#D97706":"#DC2626"} bg={ocup>70?"#DCFCE7":ocup>40?"#FEF3C7":"#FEE2E2"}/>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
-        <StatCard label="Huéspedes" value={huespedes} />
-        <StatCard label="Prom. noches" value={promedioNoches} sub="por reserva" />
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}}>
+        <SC label="Huéspedes" value={huespedes}/><SC label="Prom. noches" value={promN} sub="por reserva"/>
       </div>
-
-      {/* Ingresos */}
-      <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Ingresos</p>
-      {ingresosUSD > 0 && (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: 10 }}>
-          <p style={{ margin: "0 0 10px", fontWeight: 700, fontSize: 13, color: "#374151" }}>💵 Dólares (USD)</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-            <div style={{ background: "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
-              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
-              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#166534" }}>${ingresosUSD.toLocaleString()}</p>
-            </div>
-            <div style={{ background: "#EFF6FF", borderRadius: 10, padding: 10, textAlign: "center" }}>
-              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Cobrado</p>
-              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#1E40AF" }}>${cobradoUSD.toLocaleString()}</p>
-            </div>
-            <div style={{ background: saldoUSD > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
-              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
-              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: saldoUSD > 0 ? "#D97706" : "#166534" }}>${saldoUSD.toLocaleString()}</p>
-            </div>
+      <p style={{fontWeight:700,fontSize:13,color:"#6B7280",textTransform:"uppercase",letterSpacing:"0.08em",margin:"0 0 10px"}}>Ingresos</p>
+      {iUSD>0&&(
+        <div style={{background:"#fff",borderRadius:14,padding:16,boxShadow:"0 1px 6px rgba(0,0,0,0.07)",marginBottom:10}}>
+          <p style={{margin:"0 0 10px",fontWeight:700,fontSize:13,color:"#374151"}}>💵 Dólares (USD)</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+            <div style={{background:"#F0FDF4",borderRadius:10,padding:10,textAlign:"center"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>Total</p><p style={{margin:0,fontWeight:800,fontSize:16,color:"#166534"}}>${iUSD.toLocaleString()}</p></div>
+            <div style={{background:"#EFF6FF",borderRadius:10,padding:10,textAlign:"center"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>Cobrado</p><p style={{margin:0,fontWeight:800,fontSize:16,color:"#1E40AF"}}>${cUSD.toLocaleString()}</p></div>
+            <div style={{background:(iUSD-cUSD)>0?"#FEF3C7":"#F0FDF4",borderRadius:10,padding:10,textAlign:"center"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>Saldo</p><p style={{margin:0,fontWeight:800,fontSize:16,color:(iUSD-cUSD)>0?"#D97706":"#166534"}}>${(iUSD-cUSD).toLocaleString()}</p></div>
           </div>
         </div>
       )}
-      {ingresosCRC > 0 && (
-        <div style={{ background: "#fff", borderRadius: 14, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.07)", marginBottom: 20 }}>
-          <p style={{ margin: "0 0 10px", fontWeight: 700, fontSize: 13, color: "#374151" }}>🇨🇷 Colones (CRC)</p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-            <div style={{ background: "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
-              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Total</p>
-              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#166534" }}>₡{ingresosCRC.toLocaleString()}</p>
-            </div>
-            <div style={{ background: "#EFF6FF", borderRadius: 10, padding: 10, textAlign: "center" }}>
-              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Cobrado</p>
-              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#1E40AF" }}>₡{cobradoCRC.toLocaleString()}</p>
-            </div>
-            <div style={{ background: saldoCRC > 0 ? "#FEF3C7" : "#F0FDF4", borderRadius: 10, padding: 10, textAlign: "center" }}>
-              <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>Saldo</p>
-              <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: saldoCRC > 0 ? "#D97706" : "#166534" }}>₡{saldoCRC.toLocaleString()}</p>
-            </div>
+      {iCRC>0&&(
+        <div style={{background:"#fff",borderRadius:14,padding:16,boxShadow:"0 1px 6px rgba(0,0,0,0.07)",marginBottom:20}}>
+          <p style={{margin:"0 0 10px",fontWeight:700,fontSize:13,color:"#374151"}}>🇨🇷 Colones (CRC)</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+            <div style={{background:"#F0FDF4",borderRadius:10,padding:10,textAlign:"center"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>Total</p><p style={{margin:0,fontWeight:800,fontSize:16,color:"#166534"}}>₡{iCRC.toLocaleString()}</p></div>
+            <div style={{background:"#EFF6FF",borderRadius:10,padding:10,textAlign:"center"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>Cobrado</p><p style={{margin:0,fontWeight:800,fontSize:16,color:"#1E40AF"}}>₡{cCRC.toLocaleString()}</p></div>
+            <div style={{background:(iCRC-cCRC)>0?"#FEF3C7":"#F0FDF4",borderRadius:10,padding:10,textAlign:"center"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>Saldo</p><p style={{margin:0,fontWeight:800,fontSize:16,color:(iCRC-cCRC)>0?"#D97706":"#166534"}}>₡{(iCRC-cCRC).toLocaleString()}</p></div>
           </div>
         </div>
       )}
-      {ingresosUSD === 0 && ingresosCRC === 0 && (
-        <div style={{ background: "#F9FAFB", borderRadius: 14, padding: 20, textAlign: "center", marginBottom: 20, color: "#9CA3AF" }}>
-          <p style={{ margin: 0 }}>Sin ingresos registrados este mes</p>
-        </div>
-      )}
-
-      {/* Limpiezas */}
-      <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Limpiezas</p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-        <StatCard label="Total" value={limpiezasMes.length} />
-        <StatCard label="Costo COP" value={`$${costosLimpieza.toLocaleString()}`} color="#DC2626" />
-        <StatCard label="Pagado" value={`$${limpiezasPagadas.toLocaleString()}`} color="#16A34A" />
+      {iUSD===0&&iCRC===0&&<div style={{background:"#F9FAFB",borderRadius:14,padding:20,textAlign:"center",marginBottom:20,color:"#9CA3AF"}}><p style={{margin:0}}>Sin ingresos registrados este mes</p></div>}
+      <p style={{fontWeight:700,fontSize:13,color:"#6B7280",textTransform:"uppercase",letterSpacing:"0.08em",margin:"0 0 10px"}}>Limpiezas</p>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:20}}>
+        <SC label="Total" value={lMes.length}/><SC label="Costo COP" value={`$${cLimp.toLocaleString()}`} color="#DC2626"/><SC label="Pagado" value={`$${pLimp.toLocaleString()}`} color="#16A34A"/>
       </div>
-
-      {/* Reservas del mes */}
-      {reservasMes.length > 0 && (
+      {rMes.length>0&&(
         <>
-          <p style={{ fontWeight: 700, fontSize: 13, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>Detalle de reservas</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {reservasMes.map(r => (
-              <div key={r.id} style={{ background: "#fff", borderRadius: 12, padding: 12, boxShadow: "0 1px 4px rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13 }}>{r.huesped_nombre}</p>
-                  <p style={{ margin: "2px 0 0", fontSize: 11, color: "#6B7280" }}>{formatDate(r.check_in)} → {formatDate(r.check_out)} · {r.noches} noches</p>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>{r.moneda === "USD" ? "$" : "₡"}{Number(r.monto_total||0).toLocaleString()}</p>
-                  {Number(r.saldo||0) > 0 && <p style={{ margin: "2px 0 0", fontSize: 11, color: "#D97706", fontWeight: 700 }}>Saldo: {r.moneda === "USD" ? "$" : "₡"}{Number(r.saldo).toLocaleString()}</p>}
+          <p style={{fontWeight:700,fontSize:13,color:"#6B7280",textTransform:"uppercase",letterSpacing:"0.08em",margin:"0 0 10px"}}>Detalle de reservas</p>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {rMes.map(r=>(
+              <div key={r.id} style={{background:"#fff",borderRadius:12,padding:12,boxShadow:"0 1px 4px rgba(0,0,0,0.06)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div><p style={{margin:0,fontWeight:700,fontSize:13}}>{r.huesped_nombre}</p><p style={{margin:"2px 0 0",fontSize:11,color:"#6B7280"}}>{formatDate(r.check_in)} → {formatDate(r.check_out)} · {r.noches} noches</p></div>
+                <div style={{textAlign:"right"}}>
+                  <p style={{margin:0,fontWeight:700,fontSize:13,color:"#166534"}}>{r.moneda==="USD"?"$":"₡"}{Number(r.monto_total||0).toLocaleString()}</p>
+                  {Number(r.saldo||0)>0&&<p style={{margin:"2px 0 0",fontSize:11,color:"#D97706",fontWeight:700}}>Saldo: {r.moneda==="USD"?"$":"₡"}{Number(r.saldo).toLocaleString()}</p>}
                 </div>
               </div>
             ))}
@@ -1870,163 +1721,88 @@ function ReportesView({ token, reservas }) {
 // ─── LIMPIEZA VIEW ────────────────────────────────────────────────
 function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
   const [showForm, setShowForm] = useState(false);
-  const [editLimpieza, setEditLimpieza] = useState(null);
-  const emptyForm = { fecha: "", reserva_id: "", costo: 0, coordinado: false, pagado: false, notas: "" };
-  const [form, setForm] = useState(emptyForm);
-  const loading = false;
-
-  function openNew(reservaId = "") {
-    setEditLimpieza(null);
-    setForm({ ...emptyForm, reserva_id: reservaId });
-    setShowForm(true);
-  }
-
-  function openEdit(l) {
-    setEditLimpieza(l);
-    setForm({ fecha: l.fecha || "", reserva_id: l.reserva_id || "", costo: l.costo || 0, coordinado: l.coordinado || false, pagado: l.pagado || false, notas: l.notas || "" });
-    setShowForm(true);
-  }
-
+  const [editL, setEditL] = useState(null);
+  const emptyF = { fecha:"", reserva_id:"", costo:0, coordinado:false, pagado:false, notas:"" };
+  const [form, setForm] = useState(emptyF);
+  function openNew() { setEditL(null); setForm(emptyF); setShowForm(true); }
+  function openEdit(l) { setEditL(l); setForm({fecha:l.fecha||"",reserva_id:l.reserva_id||"",costo:l.costo||0,coordinado:l.coordinado||false,pagado:l.pagado||false,notas:l.notas||""}); setShowForm(true); }
   async function save() {
-    if (!form.fecha) return;
-    const payload = { ...form, costo: Number(form.costo), reserva_id: form.reserva_id || null };
-    if (editLimpieza) {
-      await sb.updateLimpieza(token, editLimpieza.id, payload);
-      setLimpiezas(prev => prev.map(l => l.id === editLimpieza.id ? { ...l, ...payload } : l));
-    } else {
-      const created = await sb.createLimpieza(token, payload);
-      if (Array.isArray(created) && created[0]) setLimpiezas(prev => [...prev, created[0]]);
-    }
+    if(!form.fecha)return;
+    const p = {...form,costo:Number(form.costo),reserva_id:form.reserva_id||null};
+    if(editL){ await sb.updateLimpieza(token,editL.id,p); setLimpiezas(prev=>prev.map(l=>l.id===editL.id?{...l,...p}:l)); }
+    else { const cr=await sb.createLimpieza(token,p); if(Array.isArray(cr)&&cr[0])setLimpiezas(prev=>[...prev,cr[0]]); }
     setShowForm(false);
   }
-
-  async function deleteLimpieza(id) {
-    await sb.deleteLimpieza(token, id);
-    setLimpiezas(prev => prev.filter(l => l.id !== id));
-  }
-
-  async function toggle(id, field) {
-    const l = limpiezas.find(l => l.id === id);
-    const val = !l[field];
-    await sb.updateLimpieza(token, id, { [field]: val });
-    setLimpiezas(prev => prev.map(l => l.id === id ? { ...l, [field]: val } : l));
-  }
-
-  function getReserva(id) { return reservas.find(r => r.id === id); }
-
-  const inputStyle = { width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
-  const reservasActivas = reservas.filter(r => ["pendiente","confirmada","activa"].includes(r.estado));
-
+  async function del(id){ await sb.deleteLimpieza(token,id); setLimpiezas(prev=>prev.filter(l=>l.id!==id)); }
+  async function tog(id,field){ const l=limpiezas.find(l=>l.id===id); const v=!l[field]; await sb.updateLimpieza(token,id,{[field]:v}); setLimpiezas(prev=>prev.map(l=>l.id===id?{...l,[field]:v}:l)); }
+  function getR(id){ return reservas.find(r=>r.id===id); }
+  const iS = {width:"100%",padding:"8px 12px",borderRadius:8,border:"1px solid #E5E7EB",fontSize:13,outline:"none",boxSizing:"border-box",fontFamily:"inherit"};
+  const rAct = reservas.filter(r=>["pendiente","confirmada","activa"].includes(r.estado));
   return (
     <div>
-      {!showForm && (
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <p style={{ fontWeight: 800, fontSize: 18, margin: 0, color: "#111827" }}>Limpiezas</p>
-          <button onClick={() => openNew()} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Nueva</button>
+      {!showForm&&(
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+          <p style={{fontWeight:800,fontSize:18,margin:0,color:"#111827"}}>Limpiezas</p>
+          <button onClick={openNew} style={{background:"#1B4332",color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Nueva</button>
         </div>
       )}
-
-      {showForm && (
-        <div style={{ background: "#fff", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.1)" }}>
-          <p style={{ fontWeight: 700, fontSize: 15, margin: "0 0 14px" }}>{editLimpieza ? "Editar limpieza" : "Nueva limpieza"}</p>
-
-          <div style={{ marginBottom: 10 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Fecha de limpieza</label>
-            <input type="date" value={form.fecha} onChange={e => setForm(f => ({ ...f, fecha: e.target.value }))} style={inputStyle} />
-          </div>
-
-          <div style={{ marginBottom: 10 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Asociar a reserva (opcional)</label>
-            <select value={form.reserva_id} onChange={e => setForm(f => ({ ...f, reserva_id: e.target.value }))}
-              style={{ ...inputStyle, background: "#fff" }}>
+      {showForm&&(
+        <div style={{background:"#fff",borderRadius:16,padding:16,marginBottom:16,boxShadow:"0 2px 12px rgba(0,0,0,0.1)"}}>
+          <p style={{fontWeight:700,fontSize:15,margin:"0 0 14px"}}>{editL?"Editar limpieza":"Nueva limpieza"}</p>
+          <div style={{marginBottom:10}}><label style={{display:"block",fontSize:12,fontWeight:600,color:"#374151",marginBottom:4}}>Fecha de limpieza</label><input type="date" value={form.fecha} onChange={e=>setForm(f=>({...f,fecha:e.target.value}))} style={iS}/></div>
+          <div style={{marginBottom:10}}><label style={{display:"block",fontSize:12,fontWeight:600,color:"#374151",marginBottom:4}}>Asociar a reserva (opcional)</label>
+            <select value={form.reserva_id} onChange={e=>setForm(f=>({...f,reserva_id:e.target.value}))} style={{...iS,background:"#fff"}}>
               <option value="">— Limpieza independiente —</option>
-              {reservasActivas.map(r => (
-                <option key={r.id} value={r.id}>{r.huesped_nombre} · {formatDate(r.check_in)} → {formatDate(r.check_out)}</option>
-              ))}
+              {rAct.map(r=><option key={r.id} value={r.id}>{r.huesped_nombre} · {formatDate(r.check_in)} → {formatDate(r.check_out)}</option>)}
             </select>
           </div>
-
-          <div style={{ marginBottom: 10 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Costo (COP)</label>
-            <div style={{ display: "flex", alignItems: "center", border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
-              <span style={{ padding: "8px 10px", background: "#F9FAFB", fontSize: 13, fontWeight: 700, color: "#374151", borderRight: "1px solid #E5E7EB" }}>$</span>
-              <input type="number" value={form.costo} onChange={e => setForm(f => ({ ...f, costo: e.target.value }))}
-                style={{ flex: 1, padding: "8px 12px", border: "none", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+          <div style={{marginBottom:10}}><label style={{display:"block",fontSize:12,fontWeight:600,color:"#374151",marginBottom:4}}>Costo (COP)</label>
+            <div style={{display:"flex",alignItems:"center",border:"1px solid #E5E7EB",borderRadius:8,overflow:"hidden"}}>
+              <span style={{padding:"8px 10px",background:"#F9FAFB",fontSize:13,fontWeight:700,color:"#374151",borderRight:"1px solid #E5E7EB"}}>$</span>
+              <input type="number" value={form.costo} onChange={e=>setForm(f=>({...f,costo:e.target.value}))} style={{flex:1,padding:"8px 12px",border:"none",fontSize:13,outline:"none",boxSizing:"border-box"}}/>
             </div>
           </div>
-
-          <div style={{ marginBottom: 10 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Notas</label>
-            <textarea value={form.notas} onChange={e => setForm(f => ({ ...f, notas: e.target.value }))} rows={2}
-              style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
-
-          <div style={{ display: "flex", gap: 16, marginBottom: 14 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button onClick={() => setForm(f => ({ ...f, coordinado: !f.coordinado }))}
-                style={{ width: 24, height: 24, borderRadius: 6, border: form.coordinado ? "none" : "2px solid #D1D5DB", background: form.coordinado ? "#2563EB" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {form.coordinado && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
-              </button>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>📋 Coordinada</span>
+          <div style={{marginBottom:10}}><label style={{display:"block",fontSize:12,fontWeight:600,color:"#374151",marginBottom:4}}>Notas</label><textarea value={form.notas} onChange={e=>setForm(f=>({...f,notas:e.target.value}))} rows={2} style={{...iS,resize:"vertical"}}/></div>
+          <div style={{display:"flex",gap:16,marginBottom:14}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <button onClick={()=>setForm(f=>({...f,coordinado:!f.coordinado}))} style={{width:24,height:24,borderRadius:6,border:form.coordinado?"none":"2px solid #D1D5DB",background:form.coordinado?"#2563EB":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {form.coordinado&&<span style={{color:"#fff",fontSize:12}}>✓</span>}
+              </button><span style={{fontSize:13,fontWeight:600,color:"#374151"}}>📋 Coordinada</span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button onClick={() => setForm(f => ({ ...f, pagado: !f.pagado }))}
-                style={{ width: 24, height: 24, borderRadius: 6, border: form.pagado ? "none" : "2px solid #D1D5DB", background: form.pagado ? "#16A34A" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {form.pagado && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
-              </button>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>💰 Pagada</span>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <button onClick={()=>setForm(f=>({...f,pagado:!f.pagado}))} style={{width:24,height:24,borderRadius:6,border:form.pagado?"none":"2px solid #D1D5DB",background:form.pagado?"#16A34A":"#fff",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                {form.pagado&&<span style={{color:"#fff",fontSize:12}}>✓</span>}
+              </button><span style={{fontSize:13,fontWeight:600,color:"#374151"}}>💰 Pagada</span>
             </div>
           </div>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", flex: 1 }}>Guardar</button>
-            <button onClick={() => setShowForm(false)} style={{ background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "10px 16px", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={save} style={{background:"#1B4332",color:"#fff",border:"none",borderRadius:8,padding:"10px 16px",fontSize:13,fontWeight:700,cursor:"pointer",flex:1}}>Guardar</button>
+            <button onClick={()=>setShowForm(false)} style={{background:"#F3F4F6",color:"#374151",border:"none",borderRadius:8,padding:"10px 16px",fontSize:13,fontWeight:600,cursor:"pointer"}}>Cancelar</button>
           </div>
         </div>
       )}
-
-      {!showForm && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {limpiezas.length === 0 && !loading && (
-            <div style={{ background: "#fff", borderRadius: 16, padding: 32, textAlign: "center", color: "#9CA3AF" }}>
-              <p style={{ fontSize: 32, margin: "0 0 8px" }}>🧹</p>
-              <p style={{ margin: 0, fontWeight: 600 }}>No hay limpiezas registradas</p>
-            </div>
-          )}
-          {limpiezas.map(l => {
-            const reserva = l.reserva_id ? getReserva(l.reserva_id) : null;
-            return (
-              <div key={l.id} style={{ background: "#fff", borderRadius: 16, padding: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+      {!showForm&&(
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {limpiezas.length===0&&<div style={{background:"#fff",borderRadius:16,padding:32,textAlign:"center",color:"#9CA3AF"}}><p style={{fontSize:32,margin:"0 0 8px"}}>🧹</p><p style={{margin:0,fontWeight:600}}>No hay limpiezas registradas</p></div>}
+          {limpiezas.map(l=>{
+            const res=l.reserva_id?getR(l.reserva_id):null;
+            return(
+              <div key={l.id} style={{background:"#fff",borderRadius:16,padding:14,boxShadow:"0 1px 6px rgba(0,0,0,0.07)"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                   <div>
-                    <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>🧹 {formatDate(l.fecha)}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>
-                      {reserva ? `📋 ${reserva.huesped_nombre} · Check-in ${formatDate(reserva.check_in)}` : "Limpieza independiente"}
-                    </p>
-                    {l.notas && <p style={{ margin: "4px 0 0", fontSize: 12, color: "#9CA3AF", fontStyle: "italic" }}>{l.notas}</p>}
+                    <p style={{margin:0,fontWeight:800,fontSize:15}}>🧹 {formatDate(l.fecha)}</p>
+                    <p style={{margin:"2px 0 0",fontSize:12,color:"#6B7280"}}>{res?`📋 ${res.huesped_nombre} · Check-in ${formatDate(res.check_in)}`:"Limpieza independiente"}</p>
+                    {l.notas&&<p style={{margin:"4px 0 0",fontSize:12,color:"#9CA3AF",fontStyle:"italic"}}>{l.notas}</p>}
                   </div>
-                  {l.costo > 0 && (
-                    <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "4px 10px", textAlign: "right" }}>
-                      <p style={{ margin: 0, fontSize: 10, color: "#6B7280" }}>COP</p>
-                      <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#166534" }}>${Number(l.costo).toLocaleString()}</p>
-                    </div>
-                  )}
+                  {l.costo>0&&<div style={{background:"#F0FDF4",borderRadius:8,padding:"4px 10px",textAlign:"right"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>COP</p><p style={{margin:0,fontWeight:700,fontSize:13,color:"#166534"}}>${Number(l.costo).toLocaleString()}</p></div>}
                 </div>
-
-                <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-                  <button onClick={() => toggle(l.id, "coordinado")}
-                    style={{ display: "flex", alignItems: "center", gap: 5, background: l.coordinado ? "#DBEAFE" : "#F3F4F6", color: l.coordinado ? "#1E40AF" : "#6B7280", border: "none", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                    📋 {l.coordinado ? "Coordinada ✓" : "Coordinar"}
-                  </button>
-                  <button onClick={() => toggle(l.id, "pagado")}
-                    style={{ display: "flex", alignItems: "center", gap: 5, background: l.pagado ? "#DCFCE7" : "#F3F4F6", color: l.pagado ? "#166534" : "#6B7280", border: "none", borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
-                    💰 {l.pagado ? "Pagada ✓" : "Pendiente pago"}
-                  </button>
+                <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+                  <button onClick={()=>tog(l.id,"coordinado")} style={{display:"flex",alignItems:"center",gap:5,background:l.coordinado?"#DBEAFE":"#F3F4F6",color:l.coordinado?"#1E40AF":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>📋 {l.coordinado?"Coordinada ✓":"Coordinar"}</button>
+                  <button onClick={()=>tog(l.id,"pagado")} style={{display:"flex",alignItems:"center",gap:5,background:l.pagado?"#DCFCE7":"#F3F4F6",color:l.pagado?"#166534":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>💰 {l.pagado?"Pagada ✓":"Pendiente pago"}</button>
                 </div>
-
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={() => openEdit(l)} style={{ background: "#F9FAFB", color: "#374151", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
-                  <button onClick={() => deleteLimpieza(l.id)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>openEdit(l)} style={{background:"#F9FAFB",color:"#374151",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>✏️ Editar</button>
+                  <button onClick={()=>del(l.id)} style={{background:"#FEF2F2",color:"#DC2626",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>🗑️ Eliminar</button>
                 </div>
               </div>
             );
