@@ -1400,11 +1400,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     const st = getLimpiezaStatus(r.id);
                     const lmap = {
                       none:       { bg: "#F3F4F6", color: "#6B7280", label: "\ud83e\uddf9 Sin limpieza coordinada", btn: "Coordinar" },
-                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "\ud83e\uddf9 Limpieza pendiente", btn: "Marcar coordinada" },
-                      coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "\ud83e\uddf9 Limpieza coordinada", btn: "Marcar lista" },
-                      lista:      { bg: "#DCFCE7", color: "#166534", label: "\ud83e\uddf9 Limpieza lista \u2713", btn: null },
+                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "\ud83e\uddf9 Limpieza pendiente", btn: "Coordinar" },
+                      coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar realizada" },
+                      realizada:  { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
+                      lista:      { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
                     };
-                    const s = lmap[st];
+                    const s = lmap[st] || lmap.none;
                     return (
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                         <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
@@ -1560,11 +1561,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     const st = getLimpiezaStatus(r.id);
                     const lmap = {
                       none:       { bg: "#F3F4F6", color: "#6B7280", label: "\ud83e\uddf9 Sin limpieza coordinada", btn: "Coordinar" },
-                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "\ud83e\uddf9 Limpieza pendiente", btn: "Marcar coordinada" },
-                      coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "\ud83e\uddf9 Limpieza coordinada", btn: "Marcar lista" },
-                      lista:      { bg: "#DCFCE7", color: "#166534", label: "\ud83e\uddf9 Limpieza lista \u2713", btn: null },
+                      pendiente:  { bg: "#FEF3C7", color: "#D97706", label: "\ud83e\uddf9 Limpieza pendiente", btn: "Coordinar" },
+                      coordinada: { bg: "#DBEAFE", color: "#1E40AF", label: "🧹 Limpieza coordinada", btn: "Marcar realizada" },
+                      realizada:  { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
+                      lista:      { bg: "#DCFCE7", color: "#166534", label: "🧹 Limpieza realizada ✓", btn: null },
                     };
-                    const s = lmap[st];
+                    const s = lmap[st] || lmap.none;
                     return (
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                         <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 11, fontWeight: 700 }}>{s.label}</span>
