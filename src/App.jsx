@@ -1466,8 +1466,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                         const msg = plantilla
                           .replace(/\[nombre\]/g, r.huesped_nombre.split(" ")[0])
                           .replace(/\[link_resena\]/g, link)
-                          .replace(/\n/g, "
-");
+                          .replace(/\\n/g, "\n");
                         const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`;
                         window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
                       }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
