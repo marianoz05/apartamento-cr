@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import * as XLSX from "xlsx";
 
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────
 const SUPABASE_URL = "https://cxjumlciielwwhunvmym.supabase.co";
@@ -1977,6 +1978,72 @@ function ReportesView({ token, reservas }) {
   const pLimp = lMes.filter(l=>l.pagado).reduce((s,l)=>s+Number(l.costo||0),0);
   const huespedes = rMes.reduce((s,r)=>s+Number(r.cantidad_huespedes||0),0);
   const promN = rMes.length>0?(noches/rMes.length).toFixed(1):0;
+  function exportExcel() {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Reservas
+    const resData = [
+      ["Nombre", "Check-in", "Check-out", "Noches", "Huéspedes", "Estado", "Moneda", "Total", "Pagado", "Saldo", "Llave entregada", "Teléfono"],
+      ...reservas.map(r => [
+        r.huesped_nombre || "",
+        r.check_in || "",
+        r.check_out || "",
+        r.noches || 0,
+        r.cantidad_huespedes || 0,
+        r.estado || "",
+        r.moneda || "",
+        Number(r.monto_total || 0),
+        Number((r.pago1_monto||0)) + Number((r.pago2_monto||0)),
+        Number(r.saldo || 0),
+        r.llave_entregada ? "Sí" : "No",
+        r.telefono ? `${r.codigo_pais||""} ${r.telefono}` : "",
+      ])
+    ];
+    const wsRes = XLSX.utils.aoa_to_sheet(resData);
+    wsRes["!cols"] = [20,12,12,8,10,12,8,12,12,12,14,16].map(w=>({wch:w}));
+    XLSX.utils.book_append_sheet(wb, wsRes, "Reservas");
+
+    // Sheet 2: Limpiezas
+    const limpData = [
+      ["Fecha", "Reserva", "Costo COP", "Coordinada", "Realizada", "Pagada", "Notas"],
+      ...limpiezas.map(l => {
+        const res = reservas.find(r => r.id === l.reserva_id);
+        return [
+          l.fecha || "",
+          res ? res.huesped_nombre : "Independiente",
+          Number(l.costo || 0),
+          l.coordinado ? "Sí" : "No",
+          l.realizada ? "Sí" : "No",
+          l.pagado ? "Sí" : "No",
+          l.notas || "",
+        ];
+      })
+    ];
+    const wsLimp = XLSX.utils.aoa_to_sheet(limpData);
+    wsLimp["!cols"] = [12,20,12,12,12,12,24].map(w=>({wch:w}));
+    XLSX.utils.book_append_sheet(wb, wsLimp, "Limpiezas");
+
+    // Sheet 3: Reseñas — fetch inline
+    sb.getResenas(token).then(resenas => {
+      const resenaData = [
+        ["Nombre", "Calificación", "Comentario", "Fecha", "Oculta"],
+        ...resenas.map(r => [
+          r.huesped_nombre || "",
+          r.calificacion || 0,
+          r.comentario || "",
+          r.created_at ? r.created_at.split("T")[0] : "",
+          r.oculta ? "Sí" : "No",
+        ])
+      ];
+      const wsRes2 = XLSX.utils.aoa_to_sheet(resenaData);
+      wsRes2["!cols"] = [20,12,40,12,8].map(w=>({wch:w}));
+      XLSX.utils.book_append_sheet(wb, wsRes2, "Reseñas");
+
+      const fecha = new Date().toISOString().split("T")[0];
+      XLSX.writeFile(wb, `ApartamentoCR_${fecha}.xlsx`);
+    });
+  }
+
   const SC = ({label,value,sub,color,bg})=>(
     <div style={{background:bg||"#fff",borderRadius:14,padding:16,boxShadow:"0 1px 6px rgba(0,0,0,0.07)"}}>
       <p style={{margin:"0 0 4px",fontSize:11,fontWeight:700,color:color||"#6B7280",textTransform:"uppercase",letterSpacing:"0.08em"}}>{label}</p>
@@ -1988,6 +2055,7 @@ function ReportesView({ token, reservas }) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
         <p style={{fontWeight:800,fontSize:18,margin:0,color:"#111827"}}>Reportes</p>
+        <button onClick={exportExcel} style={{background:"#1B4332",color:"#fff",border:"none",borderRadius:10,padding:"8px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}}>⬇️ Exportar Excel</button>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <button onClick={()=>{let m=selMonth-1,y=selYear;if(m<0){m=11;y--;}setSelMonth(m);setSelYear(y);}} style={{background:"#F3F4F6",border:"none",borderRadius:8,width:28,height:28,cursor:"pointer",fontSize:14}}>‹</button>
           <span style={{fontWeight:700,fontSize:13,minWidth:110,textAlign:"center"}}>{monthNames[selMonth]} {selYear}</span>
