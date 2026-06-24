@@ -773,7 +773,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     if (r.estado === "cancelada") return "cancelada";
     const hoy = new Date().toISOString().split("T")[0];
     if (r.check_out && hoy > r.check_out) return "completada";
-    if (r.check_in && hoy >= r.check_in && hoy <= r.check_out) return "activa";
+    if (r.check_in && hoy > r.check_in && hoy < r.check_out) return "activa";
     if (Number(r.saldo || 0) <= 0 && Number(r.monto_total || 0) > 0) return "confirmada";
     return "pendiente";
   }
