@@ -195,6 +195,7 @@ const INITIAL_CONTENT = {
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
     pago: "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in.",
+    resena: "Hola [nombre], gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión:\n[link_resena]",
   },
   ubicacion: { direccion: "Laureles, Medellín, Colombia", edificio: "", numero: "", maps_link: "" },
   contacto: {
@@ -678,7 +679,7 @@ function ContenidoEditor({ content, onSave }) {
       {tab === "mensajes" && (
         <div>
           <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
-            Edita las plantillas de WhatsApp. Variables disponibles: <strong>[nombre]</strong>, <strong>[checkin]</strong>, <strong>[checkout]</strong>, <strong>[link]</strong>, <strong>[saldo]</strong>, <strong>[moneda]</strong>
+            Edita las plantillas de WhatsApp. Variables: <strong>[nombre]</strong>, <strong>[checkin]</strong>, <strong>[checkout]</strong>, <strong>[link]</strong>, <strong>[saldo]</strong>, <strong>[moneda]</strong>, <strong>[link_resena]</strong>
           </p>
           <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14, marginBottom: 12 }}>
             <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#1B4332" }}>🌿 Bienvenida + link del portal</p>
@@ -689,12 +690,22 @@ function ContenidoEditor({ content, onSave }) {
               style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "vertical", lineHeight: 1.6 }}
             />
           </div>
-          <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14 }}>
+          <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14, marginBottom: 12 }}>
             <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#D97706" }}>💰 Recordatorio de pago</p>
             <textarea
               value={local.mensajes?.pago || ""}
               onChange={e => setLocal(prev => ({ ...prev, mensajes: { ...prev.mensajes, pago: e.target.value } }))}
               rows={6}
+              style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "vertical", lineHeight: 1.6 }}
+            />
+          </div>
+          <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14 }}>
+            <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#A16207" }}>⭐ Solicitar reseña</p>
+            <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 8px" }}>Variables: <strong>[nombre]</strong>, <strong>[link_resena]</strong></p>
+            <textarea
+              value={local.mensajes?.resena || ""}
+              onChange={e => setLocal(prev => ({ ...prev, mensajes: { ...prev.mensajes, resena: e.target.value } }))}
+              rows={4}
               style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "vertical", lineHeight: 1.6 }}
             />
           </div>
@@ -1451,7 +1462,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     {r.estado === "completada" && r.telefono && (
                       <button onClick={() => {
                         const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
-                        const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
+                        const plantilla = content?.mensajes?.resena || "Hola [nombre], gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión:\n[link_resena]";
+                        const msg = plantilla
+                          .replace(/\[nombre\]/g, r.huesped_nombre.split(" ")[0])
+                          .replace(/\[link_resena\]/g, link)
+                          .replace(/\n/g, "
+");
                         const tel = `${(r.codigo_pais||"+506").replace("+","")}${r.telefono.replace(/\D/g,"")}`;
                         window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, "_blank");
                       }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
@@ -1572,6 +1588,40 @@ function ResenasAdminView({ token, reservas }) {
   );
 }
 
+// ─── RESENA EMAIL ─────────────────────────────────────────────────
+async function sendResenaEmail(resena) {
+  const RESEND_KEYS = [
+    { key: "re_NZ1ckJbz_25CMRCKNj4YJmXsPpUaxkTT3", to: "marianoz-5@hotmail.com" },
+    { key: "re_4e4MkzNA_DjuD9JmUc2tYZLC7xDLfnqTa", to: "ymora93@gmail.com" },
+  ];
+  const stars = "★".repeat(resena.calificacion) + "☆".repeat(5 - resena.calificacion);
+  const html = `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
+      <h2 style="color:#1B4332;margin:0 0 4px">⭐ Nueva reseña — Apartamento CR</h2>
+      <p style="color:#6B7280;margin:0 0 20px;font-size:13px">Acaba de llegar una nueva reseña</p>
+      <div style="background:#F9FAFB;border-radius:12px;padding:16px;margin-bottom:16px">
+        <p style="margin:0 0 6px;font-weight:700;font-size:16px">${resena.huesped_nombre}</p>
+        <p style="margin:0 0 8px;font-size:22px;color:#F59E0B">${stars}</p>
+        ${resena.comentario ? `<p style="margin:0;font-size:14px;color:#374151;font-style:italic">"${resena.comentario}"</p>` : "<p style='margin:0;font-size:13px;color:#9CA3AF'>Sin comentario</p>"}
+      </div>
+      <a href="https://apartamento-cr.vercel.app" style="display:inline-block;background:#1B4332;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:13px">Ver panel admin</a>
+    </div>`;
+  for (const { key, to } of RESEND_KEYS) {
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: "Apartamento CR <onboarding@resend.dev>",
+          to,
+          subject: `⭐ Nueva reseña de ${resena.huesped_nombre} — ${resena.calificacion}/5`,
+          html,
+        }),
+      });
+    } catch(e) { console.error("Email error:", e); }
+  }
+}
+
 // ─── RESENA FORM ──────────────────────────────────────────────────
 function ResenaForm({ reservaId }) {
   const [reserva, setReserva] = useState(null);
@@ -1591,7 +1641,9 @@ function ResenaForm({ reservaId }) {
   async function submit() {
     if(cal===0)return;
     setStatus("loading");
-    await sb.createResena({reserva_id:reservaId,huesped_nombre:reserva?.huesped_nombre||"Huésped",calificacion:cal,comentario});
+    const resenaData = {reserva_id:reservaId,huesped_nombre:reserva?.huesped_nombre||"Huésped",calificacion:cal,comentario};
+    await sb.createResena(resenaData);
+    sendResenaEmail(resenaData); // fire and forget
     setStatus("sent");
   }
 
