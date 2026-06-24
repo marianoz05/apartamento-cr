@@ -111,6 +111,12 @@ const sb = {
     });
     return res.json();
   },
+  async deleteResena(token, id) {
+    await fetch(`${SUPABASE_URL}/rest/v1/resenas?id=eq.${id}`, {
+      method: "DELETE",
+      headers: this.headers(token),
+    });
+  },
   async createResena(data) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/resenas`, {
       method: "POST",
@@ -1487,6 +1493,7 @@ function ResenasAdminView({ token, reservas }) {
 
   const promedio = resenas.length > 0 ? (resenas.reduce((s,r)=>s+r.calificacion,0)/resenas.length).toFixed(1) : null;
   function Stars({ n, size=16 }) { return <span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>; }
+  async function deleteResena(id) { await sb.deleteResena(token, id); setResenas(prev => prev.filter(r => r.id !== id)); }
 
   return (
     <div>
@@ -1522,6 +1529,9 @@ function ResenasAdminView({ token, reservas }) {
               <Stars n={r.calificacion} size={16}/>
             </div>
             {r.comentario&&<p style={{margin:0,fontSize:13,color:"#374151",lineHeight:1.5,fontStyle:"italic"}}>"{r.comentario}"</p>}
+            <div style={{display:"flex",justifyContent:"flex-end",marginTop:8}}>
+              <button onClick={()=>deleteResena(r.id)} style={{background:"none",border:"none",color:"#DC262680",fontSize:11,cursor:"pointer",fontWeight:600}}>🗑️ Eliminar</button>
+            </div>
           </div>
         ))}
       </div>
@@ -1593,33 +1603,76 @@ function ResenasPublicas() {
   function Stars({n,size=18}){return<span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>;}
   return (
     <div style={{fontFamily:"Inter,sans-serif",background:"#F7F5F0",minHeight:"100vh"}}>
-      <div style={{background:"linear-gradient(160deg,#1B4332,#2D6A4F)",padding:"36px 20px 28px",textAlign:"center"}}>
+      {/* Header */}
+      <div style={{background:"linear-gradient(160deg,#1B4332,#2D6A4F)",padding:"36px 20px 24px",textAlign:"center"}}>
         <p style={{color:"#95D5B2",fontSize:11,fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",margin:"0 0 6px"}}>Laureles · Medellín</p>
-        <h1 style={{color:"#fff",fontSize:28,fontWeight:800,margin:"0 0 8px"}}>Apartamento CR</h1>
-        <p style={{color:"#B7E4C7",fontSize:14,margin:0}}>Lo que dicen nuestros huéspedes</p>
+        <h1 style={{color:"#fff",fontSize:28,fontWeight:800,margin:"0 0 4px"}}>Apartamento Medellín</h1>
+        <p style={{color:"#B7E4C7",fontSize:14,margin:0}}>Moderno · Fresco · Central</p>
+      </div>
+
+      <div style={{maxWidth:560,margin:"0 auto",paddingBottom:40}}>
+        {/* Main photo */}
+        <img src="https://apartamento-cr.vercel.app/flyer.jpg" alt="Apartamento CR Medellín"
+          style={{width:"100%",display:"block",maxHeight:300,objectFit:"cover"}}
+          onError={e=>{e.target.style.display="none";}}/>
+
+        {/* Info */}
+        <div style={{background:"#fff",padding:"20px 16px",borderBottom:"1px solid #F3F4F6"}}>
+          <p style={{margin:"0 0 14px",fontSize:14,color:"#374151",lineHeight:1.7}}>
+            Estancia exclusiva y cómoda en Medellín, a solo 5 minutos a pie de gimnasios, restaurantes, supermercados y transporte público. Un equilibrio perfecto entre comodidad, seguridad y estilo.
+          </p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+            {[["🛏️","2 cuartos"],["🚿","2 baños"],["📐","91 m²"],["👥","1 a 6 personas"],["📶","Internet alta velocidad"],["📍","Laureles, Medellín"]].map(([icon,label],i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:8,background:"#F9FAFB",borderRadius:10,padding:"10px 12px"}}>
+                <span style={{fontSize:18}}>{icon}</span>
+                <span style={{fontSize:13,fontWeight:600,color:"#374151"}}>{label}</span>
+              </div>
+            ))}
+          </div>
+          <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
+            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
+            💬 Contactar a Yanina · +506 8891-1513
+          </a>
+        </div>
+
+        {/* Rating summary */}
         {promedio&&(
-          <div style={{marginTop:16,display:"inline-flex",alignItems:"center",gap:10,background:"rgba(255,255,255,0.12)",borderRadius:20,padding:"8px 20px"}}>
-            <span style={{color:"#fff",fontSize:28,fontWeight:800}}>{promedio}</span>
-            <Stars n={Math.round(promedio)} size={20}/>
-            <span style={{color:"#B7E4C7",fontSize:13}}>{resenas.length} reseñas</span>
+          <div style={{background:"#fff",padding:16,margin:"12px 16px 0",borderRadius:16,boxShadow:"0 1px 6px rgba(0,0,0,0.07)",display:"flex",alignItems:"center",gap:16}}>
+            <div style={{textAlign:"center",minWidth:60}}>
+              <p style={{margin:0,fontSize:40,fontWeight:800,color:"#111827",lineHeight:1}}>{promedio}</p>
+              <Stars n={Math.round(promedio)} size={16}/>
+            </div>
+            <div>
+              <p style={{margin:0,fontWeight:700,fontSize:14,color:"#111827"}}>{resenas.length} reseña{resenas.length!==1?"s":""} verificadas</p>
+              <p style={{margin:"4px 0 0",fontSize:12,color:"#6B7280"}}>De huéspedes que se hospedaron aquí</p>
+            </div>
           </div>
         )}
-      </div>
-      <div style={{padding:"20px 16px",maxWidth:500,margin:"0 auto"}}>
-        {loading&&<p style={{textAlign:"center",color:"#9CA3AF"}}>Cargando reseñas...</p>}
-        {!loading&&resenas.length===0&&<div style={{textAlign:"center",padding:40,color:"#9CA3AF"}}><p style={{fontSize:32}}>⭐</p><p>Aún no hay reseñas publicadas.</p></div>}
-        {resenas.map(r=>(
-          <div key={r.id} style={{background:"#fff",borderRadius:16,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,0.07)"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-              <div>
-                <p style={{margin:0,fontWeight:700,fontSize:15}}>{r.huesped_nombre}</p>
-                <p style={{margin:"2px 0 0",fontSize:11,color:"#9CA3AF"}}>{formatDate(r.created_at?.split("T")[0])}</p>
-              </div>
-              <Stars n={r.calificacion} size={18}/>
+
+        {/* Reviews */}
+        <div style={{padding:"16px 16px 0"}}>
+          <p style={{fontWeight:700,fontSize:16,color:"#111827",margin:"0 0 12px"}}>Lo que dicen nuestros huéspedes</p>
+          {loading&&<p style={{textAlign:"center",color:"#9CA3AF"}}>Cargando...</p>}
+          {!loading&&resenas.length===0&&(
+            <div style={{textAlign:"center",padding:32,color:"#9CA3AF",background:"#fff",borderRadius:16}}>
+              <p style={{fontSize:32,margin:"0 0 8px"}}>⭐</p>
+              <p style={{margin:0}}>Aún no hay reseñas publicadas.</p>
             </div>
-            {r.comentario&&<p style={{margin:0,fontSize:14,color:"#374151",lineHeight:1.6,fontStyle:"italic"}}>"{r.comentario}"</p>}
-          </div>
-        ))}
+          )}
+          {resenas.map(r=>(
+            <div key={r.id} style={{background:"#fff",borderRadius:16,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,0.07)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+                <div>
+                  <p style={{margin:0,fontWeight:700,fontSize:15}}>{r.huesped_nombre}</p>
+                  <p style={{margin:"2px 0 0",fontSize:11,color:"#9CA3AF"}}>{formatDate(r.created_at?.split("T")[0])}</p>
+                </div>
+                <Stars n={r.calificacion} size={18}/>
+              </div>
+              {r.comentario&&<p style={{margin:0,fontSize:14,color:"#374151",lineHeight:1.6,fontStyle:"italic"}}>"{r.comentario}"</p>}
+            </div>
+          ))}
+        </div>
+        <p style={{textAlign:"center",color:"#bbb",fontSize:11,padding:"16px 0 0"}}>Apartamento CR · Laureles, Medellín</p>
       </div>
     </div>
   );
