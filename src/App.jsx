@@ -1499,7 +1499,7 @@ function ResenasAdminView({ token, reservas }) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <p style={{fontWeight:800,fontSize:18,margin:0,color:"#111827"}}>Reseñas</p>
-        <button onClick={()=>{navigator.clipboard?.writeText("https://apartamento-cr.vercel.app/resenas");setCopied(true);setTimeout(()=>setCopied(false),2000);}}
+        <button onClick={()=>{navigator.clipboard?.writeText("https://apartamento-cr.vercel.app/apartamento-medellin");setCopied(true);setTimeout(()=>setCopied(false),2000);}}
           style={{background:"#F0FDF4",color:"#166534",border:"1px solid #A7F3D0",borderRadius:10,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
           {copied?"✓ Copiado":"🔗 Copiar link público"}
         </button>
@@ -1612,26 +1612,15 @@ function ResenasPublicas() {
 
       <div style={{maxWidth:560,margin:"0 auto",paddingBottom:40}}>
         {/* Main photo */}
-        <img src="https://apartamento-cr.vercel.app/flyer.jpg" alt="Apartamento CR Medellín"
-          style={{width:"100%",display:"block",maxHeight:300,objectFit:"cover"}}
+        <img src="/flyer.jpg" alt="Apartamento CR Medellín"
+          style={{width:"100%",display:"block",objectFit:"contain",background:"#fff"}}
           onError={e=>{e.target.style.display="none";}}/>
 
-        {/* Info */}
-        <div style={{background:"#fff",padding:"20px 16px",borderBottom:"1px solid #F3F4F6"}}>
-          <p style={{margin:"0 0 14px",fontSize:14,color:"#374151",lineHeight:1.7}}>
-            Estancia exclusiva y cómoda en Medellín, a solo 5 minutos a pie de gimnasios, restaurantes, supermercados y transporte público. Un equilibrio perfecto entre comodidad, seguridad y estilo.
-          </p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
-            {[["🛏️","2 cuartos"],["🚿","2 baños"],["📐","91 m²"],["👥","1 a 6 personas"],["📶","Internet alta velocidad"],["📍","Laureles, Medellín"]].map(([icon,label],i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:8,background:"#F9FAFB",borderRadius:10,padding:"10px 12px"}}>
-                <span style={{fontSize:18}}>{icon}</span>
-                <span style={{fontSize:13,fontWeight:600,color:"#374151"}}>{label}</span>
-              </div>
-            ))}
-          </div>
+        {/* WhatsApp CTA */}
+        <div style={{background:"#fff",padding:"16px",borderBottom:"1px solid #F3F4F6"}}>
           <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
             style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
-            💬 Contactar a Yanina · +506 8891-1513
+            💬 Consultar disponibilidad por WhatsApp
           </a>
         </div>
 
@@ -2018,7 +2007,7 @@ export default function App() {
   const guestToken = guestMatch ? guestMatch[1] : null;
   const resenaMatch = path.match(/^\/resena\/(.+)$/);
   const resenaId = resenaMatch ? resenaMatch[1] : null;
-  const isResenasPublicas = path === "/resenas";
+  const isResenasPublicas = path === "/resenas" || path === "/apartamento-medellin";
 
   const savedToken = localStorage.getItem("cr_token");
   const [screen, setScreen] = useState(
