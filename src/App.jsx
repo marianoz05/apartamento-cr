@@ -1879,6 +1879,7 @@ function ResenaForm({ reservaId }) {
 function ResenasPublicas() {
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [resenaPage, setResenaPage] = useState(10);
   useEffect(()=>{sb.getResenas(null).then(data=>{if(Array.isArray(data))setResenas(data.filter(r=>!r.oculta));setLoading(false);});},[]);
   const promedio = resenas.length>0?(resenas.reduce((s,r)=>s+r.calificacion,0)/resenas.length).toFixed(1):null;
   function Stars({n,size=18}){return<span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>;}
@@ -1929,7 +1930,7 @@ function ResenasPublicas() {
               <p style={{margin:0}}>Aún no hay reseñas publicadas.</p>
             </div>
           )}
-          {resenas.map(r=>(
+          {resenas.slice(0, resenaPage).map(r=>(
             <div key={r.id} style={{background:"#fff",borderRadius:16,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,0.07)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                 <div>
@@ -1941,6 +1942,12 @@ function ResenasPublicas() {
               {r.comentario&&<p style={{margin:0,fontSize:14,color:"#374151",lineHeight:1.6,fontStyle:"italic"}}>"{r.comentario}"</p>}
             </div>
           ))}
+          {resenaPage < resenas.length && (
+            <button onClick={() => setResenaPage(p => p + 10)}
+              style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", margin: "0 0 8px" }}>
+              Ver {Math.min(10, resenas.length - resenaPage)} reseña{Math.min(10, resenas.length - resenaPage) !== 1 ? "s" : ""} más ▼
+            </button>
+          )}
         </div>
         <p style={{textAlign:"center",color:"#bbb",fontSize:11,padding:"16px 0 0"}}>Apartamento CR · Laureles, Medellín</p>
       </div>
