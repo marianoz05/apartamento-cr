@@ -773,6 +773,8 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [dashboardDetail, setDashboardDetail] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [expandedMonths, setExpandedMonths] = useState(new Set());
+  const [reservaPage, setReservaPage] = useState(1);
+  const RESERVAS_PER_PAGE = 10;
   const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "USD", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
@@ -1039,6 +1041,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   useEffect(() => {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
+    if (view === 'reservas') setReservaPage(1);
   }, [view]);
 
   useEffect(() => {
@@ -1343,6 +1346,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   const rest = list.filter(r => !isDateInRange(selectedDay, r.check_in, r.check_out));
                   list = [...hit, ...rest];
                 }
+
+                // Pagination - apply BEFORE grouping
+                const totalReservas = list.filter(r => r.check_in).length;
+                const pagedList = list.filter(r => r.check_in).slice(0, reservaPage * RESERVAS_PER_PAGE);
+                // Rebuild list with paged items
+                list = list.filter(r => !r.check_in || pagedList.includes(r));
                 const currentYear = today.substring(0, 4);
                 const currentMonth = today.substring(0, 7);
                 const monthGroups = {};
@@ -1676,6 +1685,12 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   </div>
                 );
               })()}
+              {reservaPage * RESERVAS_PER_PAGE < reservas.filter(r => r.check_in).length && (
+                <button onClick={() => setReservaPage(p => p + 1)}
+                  style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", marginTop: 4 }}>
+                  Ver {Math.min(RESERVAS_PER_PAGE, reservas.filter(r => r.check_in).length - reservaPage * RESERVAS_PER_PAGE)} reservas más ▼
+                </button>
+              )}
             </div>}
           </div>
         )}
