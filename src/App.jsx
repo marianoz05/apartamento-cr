@@ -2190,52 +2190,25 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
             const isPending = l => !(l.coordinado && l.realizada && l.pagado);
             const pending = sorted.filter(isPending);
             const done = sorted.filter(l => !isPending(l));
-            const items = pending;
-            return <>{items.map(l=>{
-            const res=l.reserva_id?getR(l.reserva_id):null;
-            return(
-              <div key={l.id} style={{background:"#fff",borderRadius:16,padding:14,boxShadow:"0 1px 6px rgba(0,0,0,0.07)"}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-                  <div>
-                    <p style={{margin:0,fontWeight:800,fontSize:15}}>🧹 {formatDate(l.fecha)}</p>
-                    <p style={{margin:"2px 0 0",fontSize:12,color:"#6B7280"}}>{res?`📋 ${res.huesped_nombre} · Check-in ${formatDate(res.check_in)}`:"Limpieza independiente"}</p>
-                    {l.notas&&<p style={{margin:"4px 0 0",fontSize:12,color:"#9CA3AF",fontStyle:"italic"}}>{l.notas}</p>}
-                  </div>
-                  {l.costo>0&&<div style={{background:"#F0FDF4",borderRadius:8,padding:"4px 10px",textAlign:"right"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>COP</p><p style={{margin:0,fontWeight:700,fontSize:13,color:"#166534"}}>${Number(l.costo).toLocaleString()}</p></div>}
-                </div>
-                <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
-                  <button onClick={()=>tog(l.id,"coordinado")} style={{display:"flex",alignItems:"center",gap:5,background:l.coordinado?"#DBEAFE":"#F3F4F6",color:l.coordinado?"#1E40AF":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>📋 {l.coordinado?"Coordinada ✓":"Coordinar"}</button>
-                  <button onClick={()=>tog(l.id,"realizada")} style={{display:"flex",alignItems:"center",gap:5,background:l.realizada?"#FEF3C7":"#F3F4F6",color:l.realizada?"#D97706":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>🧹 {l.realizada?"Realizada ✓":"Marcar realizada"}</button>
-                  <button onClick={()=>tog(l.id,"pagado")} style={{display:"flex",alignItems:"center",gap:5,background:l.pagado?"#DCFCE7":"#F3F4F6",color:l.pagado?"#166534":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>💰 {l.pagado?"Pagada ✓":"Pendiente pago"}</button>
-                </div>
-                <div style={{display:"flex",gap:8}}>
-                  <button onClick={()=>openEdit(l)} style={{background:"#F9FAFB",color:"#374151",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>✏️ Editar</button>
-                  <button onClick={()=>del(l.id)} style={{background:"#FEF2F2",color:"#DC2626",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>🗑️ Eliminar</button>
-                </div>
-              </div>
-            );
-          })}</>; })()}
-          {(() => {
-            const sorted2 = [...limpiezas].sort((a,b) => a.fecha > b.fecha ? 1 : -1);
-            const done2 = sorted2.filter(l => l.coordinado && l.realizada && l.pagado);
-            const visibleDone2 = done2.slice(0, limpiezasPage);
+            const visibleDone = done.slice(0, limpiezasPage);
             return (
               <>
-                {visibleDone2.map(l => {
+                {pending.map(l => {
                   const res = l.reserva_id ? reservas.find(r=>r.id===l.reserva_id) : null;
-                  return (
-                    <div key={l.id} style={{background:"#F9FAFB",borderRadius:16,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,0.05)",opacity:0.8}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                  return(
+                    <div key={l.id} style={{background:"#fff",borderRadius:16,padding:14,boxShadow:"0 1px 6px rgba(0,0,0,0.07)"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
                         <div>
-                          <p style={{margin:0,fontWeight:700,fontSize:14}}>🧹 {formatDate(l.fecha)}</p>
-                          <p style={{margin:"2px 0 0",fontSize:12,color:"#6B7280"}}>{res?`${res.huesped_nombre}`:"Independiente"}</p>
+                          <p style={{margin:0,fontWeight:800,fontSize:15}}>🧹 {formatDate(l.fecha)}</p>
+                          <p style={{margin:"2px 0 0",fontSize:12,color:"#6B7280"}}>{res?`📋 ${res.huesped_nombre} · Check-in ${formatDate(res.check_in)}`:"Limpieza independiente"}</p>
+                          {l.notas&&<p style={{margin:"4px 0 0",fontSize:12,color:"#9CA3AF",fontStyle:"italic"}}>{l.notas}</p>}
                         </div>
                         {l.costo>0&&<div style={{background:"#F0FDF4",borderRadius:8,padding:"4px 10px",textAlign:"right"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>COP</p><p style={{margin:0,fontWeight:700,fontSize:13,color:"#166534"}}>${Number(l.costo).toLocaleString()}</p></div>}
                       </div>
-                      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-                        <span style={{background:"#DBEAFE",color:"#1E40AF",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>📋 Coordinada ✓</span>
-                        <span style={{background:"#FEF3C7",color:"#D97706",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>🧹 Realizada ✓</span>
-                        <span style={{background:"#DCFCE7",color:"#166534",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>💰 Pagada ✓</span>
+                      <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+                        <button onClick={()=>tog(l.id,"coordinado")} style={{display:"flex",alignItems:"center",gap:5,background:l.coordinado?"#DBEAFE":"#F3F4F6",color:l.coordinado?"#1E40AF":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>📋 {l.coordinado?"Coordinada ✓":"Coordinar"}</button>
+                        <button onClick={()=>tog(l.id,"realizada")} style={{display:"flex",alignItems:"center",gap:5,background:l.realizada?"#FEF3C7":"#F3F4F6",color:l.realizada?"#D97706":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>🧹 {l.realizada?"Realizada ✓":"Marcar realizada"}</button>
+                        <button onClick={()=>tog(l.id,"pagado")} style={{display:"flex",alignItems:"center",gap:5,background:l.pagado?"#DCFCE7":"#F3F4F6",color:l.pagado?"#166534":"#6B7280",border:"none",borderRadius:20,padding:"4px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>💰 {l.pagado?"Pagada ✓":"Pendiente pago"}</button>
                       </div>
                       <div style={{display:"flex",gap:8}}>
                         <button onClick={()=>openEdit(l)} style={{background:"#F9FAFB",color:"#374151",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>✏️ Editar</button>
@@ -2244,17 +2217,48 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
                     </div>
                   );
                 })}
-                {done2.length > limpiezasPage && (
-                  <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
-                    style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", marginTop: 4 }}>
-                    Ver {Math.min(LIMP_PAGE, done2.length - limpiezasPage)} limpieza{Math.min(LIMP_PAGE, done2.length - limpiezasPage) !== 1 ? "s" : ""} completadas más ▼
-                  </button>
-                )}
-                {done2.length === 0 && pending.length === 0 && limpiezas.length === 0 ? null : done2.length > 0 && visibleDone2.length === 0 && (
-                  <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
-                    style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", marginTop: 4 }}>
-                    Ver {done2.length} limpieza{done2.length !== 1 ? "s" : ""} completada{done2.length !== 1 ? "s" : ""} ▼
-                  </button>
+                {done.length > 0 && (
+                  <>
+                    {visibleDone.length === 0 ? (
+                      <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
+                        style={{width:"100%",background:"#F3F4F6",border:"none",borderRadius:12,padding:"12px 0",fontSize:13,fontWeight:700,color:"#374151",cursor:"pointer",marginTop:4}}>
+                        Ver {Math.min(LIMP_PAGE, done.length)} limpieza{Math.min(LIMP_PAGE, done.length)!==1?"s":""} completadas ▼
+                      </button>
+                    ) : (
+                      <>
+                        <p style={{fontSize:12,color:"#9CA3AF",fontWeight:600,margin:"8px 0 6px",paddingLeft:4}}>Completadas</p>
+                        {visibleDone.map(l => {
+                          const res = l.reserva_id ? reservas.find(r=>r.id===l.reserva_id) : null;
+                          return (
+                            <div key={l.id} style={{background:"#F9FAFB",borderRadius:16,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}>
+                              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+                                <div>
+                                  <p style={{margin:0,fontWeight:700,fontSize:14,color:"#6B7280"}}>🧹 {formatDate(l.fecha)}</p>
+                                  <p style={{margin:"2px 0 0",fontSize:12,color:"#9CA3AF"}}>{res?res.huesped_nombre:"Independiente"}</p>
+                                </div>
+                                {l.costo>0&&<div style={{background:"#F0FDF4",borderRadius:8,padding:"4px 10px",textAlign:"right"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>COP</p><p style={{margin:0,fontWeight:700,fontSize:13,color:"#166534"}}>${Number(l.costo).toLocaleString()}</p></div>}
+                              </div>
+                              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+                                <span style={{background:"#DBEAFE",color:"#1E40AF",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>📋 Coordinada ✓</span>
+                                <span style={{background:"#FEF3C7",color:"#D97706",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>🧹 Realizada ✓</span>
+                                <span style={{background:"#DCFCE7",color:"#166534",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>💰 Pagada ✓</span>
+                              </div>
+                              <div style={{display:"flex",gap:8}}>
+                                <button onClick={()=>openEdit(l)} style={{background:"#F9FAFB",color:"#374151",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>✏️ Editar</button>
+                                <button onClick={()=>del(l.id)} style={{background:"#FEF2F2",color:"#DC2626",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>🗑️ Eliminar</button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {done.length > limpiezasPage && (
+                          <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
+                            style={{width:"100%",background:"#F3F4F6",border:"none",borderRadius:12,padding:"12px 0",fontSize:13,fontWeight:700,color:"#374151",cursor:"pointer",marginTop:4}}>
+                            Ver {Math.min(LIMP_PAGE, done.length - limpiezasPage)} más ▼
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </>
                 )}
               </>
             );
