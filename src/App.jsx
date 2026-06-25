@@ -284,7 +284,7 @@ function ToursView({ tours, tr }) {
   if (!tours || tours.length === 0) return <p style={{ color: "#9CA3AF", textAlign: "center", padding: 20 }}>{tr?.no_tours||"No hay operadores registrados."}</p>;
   return (
     <div>
-      <p style={{ fontSize: 13, color: "#9CA3AF", fontStyle: "italic", margin: "0 0 14px" }}>
+      <p style={{ fontSize: 13, color: "#374151", fontStyle: "italic", margin: "0 0 14px" }}>
         {tr?.recomendaciones || "Algunas recomendaciones son:"}
       </p>
       {tours.map((t, i) => <TourItem key={i} t={t} tr={tr} />)}
@@ -539,7 +539,7 @@ ${JSON.stringify(toTranslate)}`
     <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#1B4332", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "env(safe-area-inset-top)" }}>
       {active === null ? (
         <>
-          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "16px 20px 24px", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "16px 20px 10px", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
             <p style={{ color: "#95D5B2", fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px" }}>Laureles · Medellín</p>
             <h1 style={{ color: "#fff", fontSize: 34, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
@@ -560,7 +560,7 @@ ${JSON.stringify(toTranslate)}`
                 {["es","en"].map(l => (
                   <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
                     style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                    {l === "en" && translating ? "..." : l.toUpperCase()}
+                    {l.toUpperCase()}{l === "en" && translating ? " ⟳" : ""}
                   </button>
                 ))}
               </div>
