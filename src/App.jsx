@@ -188,6 +188,40 @@ const INITIAL_CONTENT = {
   tours: [
     { nombre: "City Tours Medellín", codigo_pais: "+57", telefono: "3001234567", privado: true, compartido: true, detalle: "Tours por la ciudad, Pablo Escobar tour, tour de grafiti." },
   ],
+  contrato: `CONTRATO DE ALQUILER DE HOSPEDAJE TURÍSTICO
+
+El presente contrato de alquiler turístico se regirá por las siguientes condiciones para las partes:
+
+Lugar del hospedaje turístico: Medellín, Colombia
+
+Dirección exacta del hospedaje: Edificio San Remo, apartamento #602, calle 45E #72-57, Laureles-Estadio.
+
+Persona que brindará el servicio de hospedaje: Yanina Mora Alvarado, cédula 1-1532-0201, con domicilio en San José, Costa Rica.
+
+Persona que recibirá el servicio de hospedaje: [nombre], cédula [cedula], con domicilio en [domicilio].
+
+Fechas del servicio de hospedaje: del [checkin] al [checkout] y que corresponde a [noches] noches de hospedaje.
+
+Monto total a pagar por el servicio de hospedaje: [moneda][monto] a razón de [moneda][monto_noche] por noche.
+
+Forma de pago: el/la señor/a [nombre_corto] pagó el 100% del monto total correspondiente a [moneda][monto].
+
+Cantidad de personas que utilizarán el hospedaje: el hospedaje será brindado para un total de [personas] persona(s).
+
+Hora de ingreso y salida final del hospedaje (check in y check out): la hora de ingreso al hospedaje será el [checkin] a las [hora_checkin] y el check out se hará el [checkout] a las [hora_checkout]. Estas horas podrían ser modificadas, previo acuerdo de las partes.
+
+Otras condiciones acordadas:
+- Las personas que utilizarán el servicio se comprometen a no realizar ruidos excesivos.
+- No se permite el ingreso de visitantes o huéspedes no registrados.
+- Queda prohibido fumar o utilizar sustancias ilegales tanto en el apartamento como en el edificio.
+- No se permite realizar fiestas, reuniones o eventos en el apartamento.
+- Los huéspedes deberán mantener el inmueble en buenas condiciones de aseo.
+- No se permite sacar de la propiedad o dañar cualquier artículo facilitado.
+- No se permiten mascotas de ningún tipo durante la estancia.
+
+Leído el presente documento por las partes interesadas, firmamos en San José.
+
+Yanina Mora Alvarado                    [nombre]`,
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
     pago: "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in.",
@@ -666,6 +700,7 @@ function ContenidoEditor({ content, onSave }) {
     { id: "tours", label: "🗺️ Operadores de Tours" },
     { id: "contacto", label: "📞 Contacto" },
     { id: "mensajes", label: "💬 Mensajes" },
+    { id: "contrato", label: "📄 Contrato" },
   ];
 
   const inputStyle = { width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box", fontFamily: "inherit" };
@@ -935,6 +970,21 @@ function ContenidoEditor({ content, onSave }) {
           <button onClick={() => addItem("emergencias")} style={{ background: "#FEF2F2", color: "#DC2626", border: "1px dashed #FECACA", borderRadius: 12, padding: "10px 0", width: "100%", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Agregar contacto</button>
         </div>
       )}
+
+      {/* Contrato */}
+      {tab === "contrato" && (
+        <div>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>
+            Variables disponibles: <strong>[nombre]</strong>, <strong>[nombre_corto]</strong>, <strong>[cedula]</strong>, <strong>[domicilio]</strong>, <strong>[checkin]</strong>, <strong>[checkout]</strong>, <strong>[noches]</strong>, <strong>[personas]</strong>, <strong>[monto]</strong>, <strong>[monto_noche]</strong>, <strong>[moneda]</strong>, <strong>[hora_checkin]</strong>, <strong>[hora_checkout]</strong>
+          </p>
+          <textarea
+            value={local.contrato || ""}
+            onChange={e => setLocal(prev => ({ ...prev, contrato: e.target.value }))}
+            rows={20}
+            style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 12, outline: "none", boxSizing: "border-box", fontFamily: "monospace", resize: "vertical", lineHeight: 1.6 }}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -955,7 +1005,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [dashboardDetail, setDashboardDetail] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [expandedMonths, setExpandedMonths] = useState(new Set());
-  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "USD", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
+  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", cedula: "", hora_checkin: "15:00", hora_checkout: "12:00", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "USD", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
     { code: "+506", label: "🇨🇷 CR +506" },
@@ -1127,6 +1177,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     setForm({
       huesped_nombre: r.huesped_nombre || "", huesped_email: r.huesped_email || "",
       telefono: r.telefono || "", codigo_pais: r.codigo_pais || "+506",
+      cedula: r.cedula || "", hora_checkin: r.hora_checkin || "15:00", hora_checkout: r.hora_checkout || "12:00",
       check_in: r.check_in || "", check_out: r.check_out || "",
       noches: r.noches || 0, cantidad_huespedes: r.cantidad_huespedes || 1,
       monto_noche: r.monto_noche || 0, monto_total: r.monto_total || 0,
@@ -1216,7 +1267,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     window.open(url, "_blank");
   }
 
-  const navItems = [["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["reportes","📈","Reportes"],["resenas","⭐","Reseñas"],["contenido","✏️","Contenido"],["cuenta","⚙️","Cuenta"]];
+  const navItems = [["reservas","🏠","Reservas"],["limpieza","🧹","Limpieza"],["reportes","📈","Reportes"],["resenas","⭐","Reseñas"],["contenido","✏️","Contenido"],["contratos","📄","Contratos"],["cuenta","⚙️","Cuenta"]];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -1393,6 +1444,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   </div>
                 </div>
                 <div style={{ marginBottom: 10 }}>
+                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cédula / Pasaporte</label>
+                  <input type="text" value={form.cedula} onChange={e => updForm("cedula", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Ej: 1-0751-0500" />
+                </div>
+                <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cantidad de huéspedes</label>
                   <input type="number" min="1" max="10" value={form.cantidad_huespedes || ""} onChange={e => updForm("cantidad_huespedes", e.target.value === "" ? "" : Number(e.target.value))} onBlur={e => { if (!e.target.value) updForm("cantidad_huespedes", 1); }} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                 </div>
@@ -1410,6 +1465,16 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 </div>
                 <div style={{ background: "#F0FDF4", borderRadius: 10, padding: "8px 12px", marginBottom: 10, display: "flex", gap: 16 }}>
                   <span style={{ fontSize: 13, color: "#166534" }}>🌙 <strong>{form.noches}</strong> noches</span>
+                </div>
+                <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>⏰ Hora check-in</label>
+                    <input type="time" value={form.hora_checkin} onChange={e => updForm("hora_checkin", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>⏰ Hora check-out</label>
+                    <input type="time" value={form.hora_checkout} onChange={e => updForm("hora_checkout", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+                  </div>
                 </div>
 
                 {/* Traslape warning */}
@@ -1882,6 +1947,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
 
         {view === "contenido" && (
           <ContenidoEditor content={content} onSave={onContentSave} />
+        )}
+
+        {view === "contratos" && (
+          <ContratosView token={onLogoutToken} reservas={reservas} content={content} />
         )}
 
         {view === "cuenta" && (
@@ -2534,6 +2603,112 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
           })()}
         </div>
       )}
+    </div>
+  );
+}
+
+
+// ─── CONTRATOS VIEW ───────────────────────────────────────────────
+function ContratosView({ token, reservas, content }) {
+  const [preview, setPreview] = useState(null);
+  const MONEDAS = { CRC: "₡", USD: "$" };
+
+  function fmt(n, moneda) { return (MONEDAS[moneda]||"$") + Number(n||0).toLocaleString(); }
+
+  function formatDateLong(str) {
+    if (!str) return "";
+    const [y, m, d] = str.split("-");
+    const months = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    return `${parseInt(d)} de ${months[parseInt(m)-1]} del ${y}`;
+  }
+
+  function formatHora(t) {
+    if (!t) return "";
+    const [h, m] = t.split(":");
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? "pm" : "am";
+    const h12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+    return `${h12}:${m} ${ampm}`;
+  }
+
+  function generateContrato(r) {
+    const template = content?.contrato || "";
+    const sym = MONEDAS[r.moneda] || "$";
+    const personas = ["uno","dos","tres","cuatro","cinco","seis"][Number(r.cantidad_huespedes||1)-1] || r.cantidad_huespedes;
+    return template
+      .replace(/\[nombre\]/g, r.huesped_nombre || "")
+      .replace(/\[nombre_corto\]/g, (r.huesped_nombre||"").split(" ")[0])
+      .replace(/\[cedula\]/g, r.cedula || "___________")
+      .replace(/\[domicilio\]/g, r.domicilio || "___________")
+      .replace(/\[checkin\]/g, formatDateLong(r.check_in))
+      .replace(/\[checkout\]/g, formatDateLong(r.check_out))
+      .replace(/\[noches\]/g, String(r.noches || 0).padStart(2, "0"))
+      .replace(/\[personas\]/g, personas)
+      .replace(/\[monto\]/g, Number(r.monto_total||0).toLocaleString())
+      .replace(/\[monto_noche\]/g, Number(r.monto_noche||0).toLocaleString())
+      .replace(/\[moneda\]/g, sym)
+      .replace(/\[hora_checkin\]/g, formatHora(r.hora_checkin) || "3:00 pm")
+      .replace(/\[hora_checkout\]/g, formatHora(r.hora_checkout) || "12:00 pm");
+  }
+
+  function printContrato(r) {
+    const text = generateContrato(r);
+    const win = window.open("", "_blank");
+    win.document.write(`
+      <html><head><title>Contrato - ${r.huesped_nombre}</title>
+      <style>
+        body { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.8; margin: 2cm; color: #111; }
+        h1 { font-size: 14pt; text-align: center; text-transform: uppercase; margin-bottom: 24px; }
+        p { margin: 8px 0; text-align: justify; }
+        .firma { margin-top: 60px; display: flex; justify-content: space-between; }
+        .firma-line { border-top: 1px solid #000; width: 200px; padding-top: 8px; text-align: center; font-size: 11pt; }
+        @media print { body { margin: 1.5cm; } }
+      </style></head><body>
+      ${text.split("\n").map((line, i) => {
+        if (i === 0) return \`<h1>\${line}</h1>\`;
+        if (line.trim() === "") return "<br/>";
+        return \`<p>\${line}</p>\`;
+      }).join("")}
+      </body></html>
+    `);
+    win.document.close();
+    setTimeout(() => win.print(), 500);
+  }
+
+  const completadas = reservas.filter(r => ["activa","confirmada","completada"].includes(r.estado));
+
+  return (
+    <div>
+      <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Contratos</p>
+      {completadas.length === 0 && (
+        <div style={{ background: "#fff", borderRadius: 16, padding: 32, textAlign: "center", color: "#9CA3AF" }}>
+          <p style={{ fontSize: 32, margin: "0 0 8px" }}>📄</p>
+          <p style={{ margin: 0 }}>No hay reservas para generar contratos</p>
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {completadas.map(r => (
+          <div key={r.id} style={{ background: "#fff", borderRadius: 16, padding: 14, boxShadow: "0 1px 6px rgba(0,0,0,0.07)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+              <div>
+                <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
+                <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.check_in} → {r.check_out} · {r.noches} noches</p>
+                {r.cedula && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>🪪 {r.cedula}</p>}
+                {!r.cedula && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#DC2626" }}>⚠️ Sin cédula — edita la reserva</p>}
+              </div>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button onClick={() => printContrato(r)}
+                  style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  📄 Generar PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p style={{ fontSize: 12, color: "#9CA3AF", marginTop: 16 }}>
+        💡 Edita el texto del contrato en <strong>Contenido → 📄 Contrato</strong>
+      </p>
     </div>
   );
 }
