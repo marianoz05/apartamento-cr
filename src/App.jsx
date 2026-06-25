@@ -260,7 +260,7 @@ function TourItem({ t, tr }) {
     t.compartido ? (tr?.compartido||"Compartido") : null,
   ].filter(Boolean).join(" · ");
   return (
-    <div style={{ background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10 }}>
+    <div style={{ background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10 }}>
       <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 17 }}>🗺️ {t.nombre}</p>
       {tipoLabel && (
         <p style={{ margin: "0 0 8px", fontSize: 12, color: "#5C3D2E", fontWeight: 600 }}>
@@ -320,7 +320,7 @@ function RestaurantesView({ restaurantes, lang, tr: trProp }) {
         ))}
       </div>
       {sorted.map((r, i) => (
-        <div key={i} style={{ background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div key={i} style={{ background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
             <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
@@ -430,7 +430,7 @@ ${JSON.stringify(toTranslate)}`
       render: () => (
         <div>
           {c.ubicacion?.direccion && (
-            <div style={{ background: "#EFF6FF", borderRadius: 14, padding: 14, marginBottom: 10 }}>
+            <div style={{ background: "#fff", borderRadius: 14, padding: 14, marginBottom: 10 }}>
               <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.1em" }}>Dirección</p>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#5C3D2E" }}>{c.ubicacion.direccion}</p>
               {c.ubicacion?.edificio && <p style={{ margin: "6px 0 0", fontSize: 13, color: "#374151" }}>🏢 {c.ubicacion.edificio}</p>}
@@ -461,7 +461,7 @@ ${JSON.stringify(toTranslate)}`
               <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#2D6A4F", textTransform: "uppercase", letterSpacing: "0.12em" }}>{tr.clave}</p>
               <p style={{ margin: 0, fontWeight: 800, fontSize: 24, letterSpacing: "0.2em", color: "#111827" }}>{c.wifi.clave}</p>
             </div>
-            <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 16, padding: 20, marginTop: 8, textAlign: "center" }}>
+            <div style={{ background: "#fff", border: "1px solid #A7F3D0", borderRadius: 16, padding: 20, marginTop: 8, textAlign: "center" }}>
               <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#5C3D2E" }}>{tr.escanea}</p>
               <p style={{ margin: "0 0 14px", fontSize: 12, color: "#6B7280" }}>{tr.escanea_sub}</p>
               <img src={qrUrl} alt="QR WiFi" style={{ width: 180, height: 180, borderRadius: 12, display: "block", margin: "0 auto" }} />
@@ -475,7 +475,7 @@ ${JSON.stringify(toTranslate)}`
       render: () => (
         <div>
           {c.normas.map((n, i) => (
-            <div key={i} style={{ display: "flex", gap: 12, background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10 }}>
+            <div key={i} style={{ display: "flex", gap: 12, background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10 }}>
               <span style={{ fontSize: 22 }}>{n.icon}</span>
               <div>
                 <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{n.titulo}</p>
@@ -495,7 +495,7 @@ ${JSON.stringify(toTranslate)}`
       render: () => (
         <div>
           {c.transporte.map((t, i) => (
-            <div key={i} style={{ background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10 }}>
+            <div key={i} style={{ background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{t.icon} {t.titulo}</p>
               <p style={{ margin: "6px 0 0", fontSize: 14, color: "#6B7280" }}>{t.desc}</p>
             </div>
@@ -511,7 +511,7 @@ ${JSON.stringify(toTranslate)}`
       id: "contacto", icon: "📞", title: tr.contacto, color: "#6B4C3B",
       render: () => (
         <div>
-          <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 14, padding: 16, marginBottom: 12 }}>
+          <div style={{ background: "#fff", border: "1px solid #FECACA", borderRadius: 14, padding: 16, marginBottom: 12 }}>
             <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#DC2626", textTransform: "uppercase", letterSpacing: "0.1em" }}>{tr.anfitron}</p>
             <p style={{ margin: "0 0 8px", fontWeight: 800, fontSize: 18 }}>{c.contacto.anfitrion_nombre}</p>
             <a href={`https://wa.me/${c.contacto.anfitrion_tel.replace(/[\s\-+]/g, "")}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#25D366", color: "#fff", padding: "8px 16px", borderRadius: 10, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
@@ -519,7 +519,7 @@ ${JSON.stringify(toTranslate)}`
             </a>
           </div>
           {c.contacto.emergencias.map((e, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F9FAFB", borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#fff", borderRadius: 14, padding: "12px 16px", marginBottom: 8 }}>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <span style={{ fontSize: 20 }}>{e.icon}</span>
                 <p style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>{e.label}</p>
@@ -556,16 +556,17 @@ ${JSON.stringify(toTranslate)}`
               ))}
             </div>
           </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#1B4332", borderBottom: "none" }}>
-            <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.2)", borderRadius: 20, padding: 3 }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10, paddingRight: 16, paddingBottom: 12 }}>
+            <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: 3 }}>
               {["es","en"].map(l => (
                 <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
-                  style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#3D7A5F":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                   {l === "en" && translating ? "..." : l.toUpperCase()}
                 </button>
               ))}
             </div>
           </div>
+
           <div style={{ background: "#E8F5EE", flex: 1, minHeight: "100%" }}>
           <div style={{ padding: "14px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {sections.map((s) => (
@@ -590,7 +591,7 @@ ${JSON.stringify(toTranslate)}`
                 <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0 }}>{sec.icon} {sec.title}</h2>
               </div>
             </div>
-            <div style={{ padding: "20px 16px 40px" }}>{sec.render()}</div>
+            <div style={{ padding: "20px 16px 40px", background: "#E8F5EE", minHeight: "100%" }}>{sec.render()}</div>
           </>
         );
       })()}
