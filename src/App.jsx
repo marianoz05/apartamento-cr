@@ -539,7 +539,7 @@ ${JSON.stringify(toTranslate)}`
     <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#1B4332", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "env(safe-area-inset-top)" }}>
       {active === null ? (
         <>
-          <div style={{ background: "linear-gradient(160deg, #4A7C65 0%, #5A9478 60%, #6BAB88 100%)", padding: "16px 20px 24px", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "16px 20px 24px", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
             <p style={{ color: "#95D5B2", fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px" }}>Laureles · Medellín</p>
             <h1 style={{ color: "#fff", fontSize: 34, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
@@ -556,7 +556,7 @@ ${JSON.stringify(toTranslate)}`
               ))}
             </div>
           </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#5A9478", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#7BAF96", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
             <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.2)", borderRadius: 20, padding: 3 }}>
               {["es","en"].map(l => (
                 <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
