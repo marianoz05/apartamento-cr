@@ -2075,6 +2075,8 @@ function ResenasPublicas() {
       tagline: "Moderno · Fresco · Central",
       desc: "Estancia exclusiva y cómoda en Medellín, a solo 5 minutos a pie de gimnasios, restaurantes, supermercados y transporte público. Un equilibrio perfecto entre comodidad, seguridad y estilo.",
       features: [["🛏️","2 cuartos"],["🚿","2 baños"],["📐","91 m²"],["👥","1 a 6 personas"],["📶","Internet alta velocidad"],["📍","Laureles, Medellín"]],
+      sala: "Sala y Comedor", cuarto: "Cuarto", cocina: "Cocina", bano: "Baño",
+      min_nights: "Estadía mínima: 3 noches", capacity: "Capacidad: 1 a 6 personas",
       whatsapp: "💬 Consultar disponibilidad por WhatsApp",
       rules_title: "Reglas de la casa",
       rules: [["🚭","No fumar"],["🚫","No sustancias ilegales"],["🎉","No fiestas"],["🔇","No ruido excesivo"],["❌","No turismo sexual"]],
@@ -2092,6 +2094,8 @@ function ResenasPublicas() {
       tagline: "Modern · Fresh · Central",
       desc: "Exclusive and comfortable stay in Medellín, just 5 minutes walk from gyms, restaurants, supermarkets and public transport. A perfect balance of comfort, safety and style.",
       features: [["🛏️","2 bedrooms"],["🚿","2 bathrooms"],["📐","91 m²"],["👥","1 to 6 guests"],["📶","High-speed internet"],["📍","Laureles, Medellín"]],
+      sala: "Living & Dining Room", cuarto: "Bedroom", cocina: "Kitchen", bano: "Bathroom",
+      min_nights: "Minimum stay: 3 nights", capacity: "Capacity: 1 to 6 guests",
       whatsapp: "💬 Check availability on WhatsApp",
       rules_title: "House rules",
       rules: [["🚭","No smoking"],["🚫","No illegal substances"],["🎉","No parties"],["🔇","No excessive noise"],["❌","No sexual tourism"]],
@@ -2126,12 +2130,41 @@ function ResenasPublicas() {
 
       <div style={{maxWidth:560,margin:"0 auto",paddingBottom:40}}>
         {/* Main photo */}
-        <img src="/flyer.jpg" alt="Apartamento CR Medellín"
-          style={{width:"100%",display:"block",objectFit:"contain",background:"#fff"}}
+        <img src="/Comedor.jpg" alt="Sala y Comedor"
+          style={{width:"100%",display:"block",height:260,objectFit:"cover"}}
           onError={e=>{e.target.style.display="none";}}/>
 
+        {/* Apartment info */}
+        <div style={{background:"#fff",padding:"20px 16px 16px"}}>
+          <h2 style={{margin:"0 0 6px",fontSize:22,fontWeight:800,color:"#111827"}}>{t.title}</h2>
+          <p style={{margin:"0 0 14px",fontSize:14,color:"#374151",lineHeight:1.7}}>{t.desc}</p>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
+            {t.features.map(([icon,label],i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:8,background:"#F9FAFB",borderRadius:10,padding:"10px 12px"}}>
+                <span style={{fontSize:18}}>{icon}</span>
+                <span style={{fontSize:13,fontWeight:600,color:"#374151"}}>{label}</span>
+              </div>
+            ))}
+          </div>
+          {/* Photo gallery */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:16,borderRadius:12,overflow:"hidden"}}>
+            {[
+              ["/Cuarto_page.jpg", t.cuarto],
+              ["/Cocina_page.jpg", t.cocina],
+              ["/Bano_page.jpg", t.bano],
+            ].map(([src,label],i)=>(
+              <div key={i} style={{position:"relative"}}>
+                <img src={src} alt={label} style={{width:"100%",height:100,objectFit:"cover",display:"block"}}
+                  onError={e=>{e.target.style.display="none";}}/>
+                <p style={{margin:0,fontSize:10,fontWeight:700,textAlign:"center",padding:"4px 2px",background:"#F3F4F6",color:"#374151"}}>{label}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{margin:"0 0 4px",fontSize:12,color:"#6B7280"}}>⏱️ {t.min_nights} · {t.capacity}</p>
+        </div>
+
         {/* WhatsApp CTA */}
-        <div style={{background:"#fff",padding:"16px",borderBottom:"1px solid #F3F4F6"}}>
+        <div style={{background:"#fff",padding:"0 16px 16px",borderBottom:"1px solid #F3F4F6"}}>
           <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
             style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
             {t.whatsapp}
