@@ -2656,7 +2656,7 @@ function ContratosView({ token, reservas, content }) {
     const bodyHtml = text.split("\n").map((line, i) => {
       if (i === 0) return "<h1>" + line + "</h1>";
       if (line.trim() === "") return "<br/>";
-      return "<p>" + line.replace(/</g,"&lt;").replace(/>/g,"&gt;") + "</p>";
+      return "<p>" + line + "</p>";
     }).join("");
     const html = "<html><head><title>Contrato - " + r.huesped_nombre + "</title>"
       + "<style>body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
@@ -2667,7 +2667,7 @@ function ContratosView({ token, reservas, content }) {
     const win = window.open("", "_blank");
     win.document.write(html);
     win.document.close();
-    setTimeout(() => win.print(), 500);
+    setTimeout(() => win.print(), 800);
   }
 
   const completadas = reservas.filter(r => ["activa","confirmada","completada"].includes(r.estado));
