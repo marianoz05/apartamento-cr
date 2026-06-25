@@ -2655,19 +2655,19 @@ function ContratosView({ token, reservas, content }) {
     const text = generateContrato(r);
     const bodyHtml = text.split("\n").map((line, i) => {
       if (i === 0) return "<h1>" + line + "</h1>";
-      if (line.trim() === "") return "<br/>";
+      if (!line.trim()) return "<p>&nbsp;</p>";
       return "<p>" + line + "</p>";
     }).join("");
-    const html = "<html><head><title>Contrato - " + r.huesped_nombre + "</title>"
-      + "<style>body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
+    const style = "body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
       + "h1{font-size:14pt;text-align:center;text-transform:uppercase;margin-bottom:24px}"
-      + "p{margin:8px 0;text-align:justify}"
-      + "@media print{body{margin:1.5cm}}</style></head><body>"
-      + bodyHtml + "</body></html>";
-    const win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-    setTimeout(() => win.print(), 800);
+      + "p{margin:6px 0;text-align:justify}"
+      + "@media print{body{margin:1.5cm}}";
+    const html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Contrato</title><style>"
+      + style + "</style></head><body>" + bodyHtml + "</body></html>";
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, "_blank");
+    setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 1000);
   }
 
   const completadas = reservas.filter(r => ["activa","confirmada","completada"].includes(r.estado));
