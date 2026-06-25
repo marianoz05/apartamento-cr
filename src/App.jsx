@@ -556,7 +556,7 @@ ${JSON.stringify(toTranslate)}`
               ))}
             </div>
           </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#7BAF96", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#1B4332", borderBottom: "none" }}>
             <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.2)", borderRadius: 20, padding: 3 }}>
               {["es","en"].map(l => (
                 <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
@@ -566,6 +566,7 @@ ${JSON.stringify(toTranslate)}`
               ))}
             </div>
           </div>
+          <div style={{ background: "#E8F5EE", flex: 1, minHeight: "100%" }}>
           <div style={{ padding: "14px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {sections.map((s) => (
               <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 16, padding: "14px 12px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
@@ -575,7 +576,8 @@ ${JSON.stringify(toTranslate)}`
               </button>
             ))}
           </div>
-          <p style={{ textAlign: "center", color: "#bbb", fontSize: 11, padding: "0 0 32px" }}>Apartamento CR · Laureles, Medellín</p>
+          <p style={{ textAlign: "center", color: "#6B7280", fontSize: 11, padding: "0 0 32px" }}>Apartamento CR · Laureles, Medellín</p>
+          </div>
         </>
       ) : (() => {
         const sec = sections.find(s => s.id === active);
