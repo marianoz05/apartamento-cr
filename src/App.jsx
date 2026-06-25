@@ -523,15 +523,7 @@ ${JSON.stringify(toTranslate)}`
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
             <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px", paddingTop: "env(safe-area-inset-top)" }}>Laureles · Medellín</p>
             <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
-            <p style={{ color: "#B7E4C7", fontSize: 13, margin: "0 0 12px" }}>{tr.bienvenido}, {reserva.huesped_nombre.split(" ")[0]} 🌿</p>
-            <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: 3, marginBottom: 16 }}>
-              {["es","en"].map(l => (
-                <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
-                  style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                  {l === "en" && translating ? "..." : l.toUpperCase()}
-                </button>
-              ))}
-            </div>
+            <p style={{ color: "#B7E4C7", fontSize: 13, margin: "0 0 16px" }}>{tr.bienvenido}, {reserva.huesped_nombre.split(" ")[0]} 🌿</p>
             <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 12, padding: "10px 14px", display: "inline-flex", gap: 16 }}>
               {[[tr.checkin, formatDate(reserva.check_in)], [tr.checkout, formatDate(reserva.check_out)], [tr.noches, reserva.noches]].map(([lbl, val], i, arr) => (
                 <div key={i} style={{ display: "flex", gap: 16, alignItems: "center" }}>
@@ -541,6 +533,16 @@ ${JSON.stringify(toTranslate)}`
                   </div>
                   {i < arr.length - 1 && <div style={{ width: 1, height: 28, background: "rgba(255,255,255,0.2)" }} />}
                 </div>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#F7F5F0", borderBottom: "1px solid #E5E7EB" }}>
+            <div style={{ display: "inline-flex", gap: 2, background: "#E5E7EB", borderRadius: 20, padding: 3 }}>
+              {["es","en"].map(l => (
+                <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
+                  style={{ background: lang===l?"#1B4332":"transparent", color: lang===l?"#fff":"#374151", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  {l === "en" && translating ? "..." : l.toUpperCase()}
+                </button>
               ))}
             </div>
           </div>
