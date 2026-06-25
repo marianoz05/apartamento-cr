@@ -439,8 +439,8 @@ ${JSON.stringify(toTranslate)}`
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=1B4332&margin=10`;
         return (
           <div>
-            <Card label={tr.red} value={c.wifi.nombre} accent="#2D6A4F" />
-            <Card label={tr.clave} value={c.wifi.clave} accent="#2D6A4F" />
+            <Card label={tr.red} value={c.wifi.nombre} accent="#2D6A4F" large />
+            <Card label={tr.clave} value={c.wifi.clave} accent="#2D6A4F" large />
             <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 16, padding: 20, marginTop: 8, textAlign: "center" }}>
               <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>{tr.escanea}</p>
               <p style={{ margin: "0 0 14px", fontSize: 12, color: "#6B7280" }}>{tr.escanea_sub}</p>
@@ -561,7 +561,7 @@ ${JSON.stringify(toTranslate)}`
         const sec = sections.find(s => s.id === active);
         return (
           <>
-            <div style={{ background: sec.color, padding: "20px 16px 24px", paddingTop: "max(20px, env(safe-area-inset-top))", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ background: sec.color, padding: "14px 16px", paddingTop: "max(14px, env(safe-area-inset-top))", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 10 }}>
               <button onClick={() => { setActive(null); scrollTop(); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" }}>Apartamento CR</p>
