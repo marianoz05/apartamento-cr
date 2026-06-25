@@ -2175,7 +2175,7 @@ function ResenasPublicas() {
         <img
           src={lang === "en" ? "/Restrictions.PNG" : "/Restricciones.PNG"}
           alt={t.rules_title}
-          style={{width:"100%",display:"block",objectFit:"cover"}}
+          style={{width:"100%",display:"block",objectFit:"cover",marginTop:-4}}
           onError={e=>{e.target.style.display="none";}}
         />
 
