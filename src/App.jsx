@@ -184,13 +184,8 @@ const INITIAL_CONTENT = {
     { icon: "🚲", titulo: "EnCicla", desc: "Bicicletas públicas. Estación a 4 min. Gratis con registro." },
     { icon: "✈️", titulo: "Aeropuerto JMC", desc: "~45 min en Uber. No uses taxis de la calle." },
   ],
-  laureles: [
-    { icon: "🌳", lugar: "Parque de Laureles", desc: "El parque central. Ideal para caminar en la mañana." },
-    { icon: "🛍️", lugar: "Carrera 70", desc: "La calle más animada. Restaurantes, bares, cafés, tiendas." },
-    { icon: "⚽", lugar: "Estadio Atanasio Girardot", desc: "A 10 min. Si hay partido de Nacional o DIM, ve." },
-    { icon: "🎨", lugar: "MAMM — Museo de Arte Moderno", desc: "A 15 min. Entrada libre los domingos." },
-    { icon: "🌆", lugar: "El Poblado", desc: "El barrio más turístico. 15 min en Uber. Ideal para la noche." },
-    { icon: "🚡", lugar: "Metro Cable", desc: "Sube a los cerros y ve la ciudad entera. Única experiencia." },
+  tours: [
+    { nombre: "City Tours Medellín", codigo_pais: "+57", telefono: "3001234567", privado: true, compartido: true, detalle: "Tours por la ciudad, Pablo Escobar tour, tour de grafiti." },
   ],
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
@@ -376,16 +371,26 @@ function GuestPortal({ reserva, content }) {
       )
     },
     {
-      id: "laureles", icon: "🌿", title: "Qué hacer en Laureles", color: "#78350F",
+      id: "tours", icon: "🗺️", title: "Operadores de Tours", color: "#78350F",
       render: () => (
         <div>
-          {c.laureles.map((l, i) => (
-            <div key={i} style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10, display: "flex", gap: 12 }}>
-              <span style={{ fontSize: 24 }}>{l.icon}</span>
-              <div>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{l.lugar}</p>
-                <p style={{ margin: "2px 0 0", fontSize: 13, color: "#6B7280" }}>{l.desc}</p>
+          {(c.tours||[]).length === 0 && <p style={{ color: "#9CA3AF", textAlign: "center", padding: 20 }}>No hay operadores registrados.</p>}
+          {(c.tours||[]).map((t, i) => (
+            <div key={i} style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>🗺️ {t.nombre}</p>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {t.privado && <span style={{ background: "#EDE9FE", color: "#6D28D9", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>🔒 Privado</span>}
+                  {t.compartido && <span style={{ background: "#DBEAFE", color: "#1E40AF", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>👥 Compartido</span>}
+                </div>
               </div>
+              {t.detalle && <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.detalle}</p>}
+              {t.telefono && (
+                <a href={`https://wa.me/${(t.codigo_pais||"+57").replace("+","")}${t.telefono.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#25D366", color: "#fff", padding: "8px 14px", borderRadius: 10, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
+                  💬 Contactar por WhatsApp
+                </a>
+              )}
             </div>
           ))}
         </div>
@@ -505,7 +510,7 @@ function ContenidoEditor({ content, onSave }) {
         normas: { icon: "✅", titulo: "Nueva norma", desc: "Descripción" },
         restaurantes: { nombre: "Nuevo restaurante", tipo: "Tipo de comida", distancia: "0 min", distancia_m: 0, precio: "$$" },
         transporte: { icon: "🚗", titulo: "Nuevo medio", desc: "Descripción" },
-        laureles: { icon: "📍", lugar: "Nuevo lugar", desc: "Descripción" },
+        tours: { nombre: "", codigo_pais: "+57", telefono: "", privado: false, compartido: false, detalle: "" },
         emergencias: { icon: "📞", label: "Nuevo contacto", num: "000" },
       };
       if (section === "emergencias") next.contacto.emergencias.push(templates.emergencias);
@@ -535,7 +540,7 @@ function ContenidoEditor({ content, onSave }) {
     { id: "normas", label: "📋 Normas" },
     { id: "restaurantes", label: "🍽️ Restaurantes" },
     { id: "transporte", label: "🚇 Transporte" },
-    { id: "laureles", label: "🌿 Qué hacer" },
+    { id: "tours", label: "🗺️ Operadores de Tours" },
     { id: "contacto", label: "📞 Contacto" },
     { id: "mensajes", label: "💬 Mensajes" },
   ];
@@ -660,7 +665,11 @@ function ContenidoEditor({ content, onSave }) {
           {local.transporte.map((t, i) => (
             <div key={i} style={cardStyle}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#374151" }}>{t.titulo || `Transporte ${i + 1}`}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#374151" }}>{t.titulo || `Transporte ${i + 1}`}</p>
+                  <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); if (i > 0) { [next.transporte[i-1], next.transporte[i]] = [next.transporte[i], next.transporte[i-1]]; } return next; }); }} disabled={i===0} style={{ background: i===0?"#F9FAFB":"#EFF6FF", color: i===0?"#D1D5DB":"#2563EB", border:"none", borderRadius:6, padding:"2px 7px", fontSize:13, cursor:i===0?"default":"pointer", fontWeight:700 }}>▲</button>
+                  <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); if (i < next.transporte.length-1) { [next.transporte[i], next.transporte[i+1]] = [next.transporte[i+1], next.transporte[i]]; } return next; }); }} disabled={i===local.transporte.length-1} style={{ background: i===local.transporte.length-1?"#F9FAFB":"#EFF6FF", color: i===local.transporte.length-1?"#D1D5DB":"#2563EB", border:"none", borderRadius:6, padding:"2px 7px", fontSize:13, cursor:i===local.transporte.length-1?"default":"pointer", fontWeight:700 }}>▼</button>
+                </div>
                 <button onClick={() => removeItem("transporte", i)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer" }}>Eliminar</button>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
@@ -683,32 +692,45 @@ function ContenidoEditor({ content, onSave }) {
         </div>
       )}
 
-      {/* Qué hacer */}
-      {tab === "laureles" && (
+      {/* Operadores de Tours */}
+      {tab === "tours" && (
         <div>
-          {local.laureles.map((l, i) => (
+          {(local.tours||[]).map((t, i) => (
             <div key={i} style={cardStyle}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#374151" }}>{l.lugar || `Lugar ${i + 1}`}</p>
-                <button onClick={() => removeItem("laureles", i)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer" }}>Eliminar</button>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#374151" }}>{t.nombre || `Operador ${i+1}`}</p>
+                <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); next.tours.splice(i,1); return next; }); }} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer" }}>Eliminar</button>
               </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <div style={{ width: 60 }}>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Ícono</label>
-                  <input value={l.icon} onChange={e => updArr("laureles", i, "icon", e.target.value)} style={{ ...inputStyle, textAlign: "center", fontSize: 18 }} />
+              <FieldInput label="Nombre del operador" value={t.nombre||""} onChange={v => updArr("tours", i, "nombre", v)} />
+              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                <div style={{ width: 130 }}>
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>País</label>
+                  <select value={t.codigo_pais||"+57"} onChange={e => updArr("tours", i, "codigo_pais", e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 12, outline: "none", background: "#fff" }}>
+                    {[{c:"+57",l:"🇨🇴 CO +57"},{c:"+506",l:"🇨🇷 CR +506"},{c:"+52",l:"🇲🇽 MX +52"},{c:"+1",l:"🇺🇸 US +1"},{c:"+54",l:"🇦🇷 AR +54"},{c:"+55",l:"🇧🇷 BR +55"},{c:"+34",l:"🇪🇸 ES +34"}].map(p=><option key={p.c} value={p.c}>{p.l}</option>)}
+                  </select>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Nombre del lugar</label>
-                  <input value={l.lugar} onChange={e => updArr("laureles", i, "lugar", e.target.value)} style={inputStyle} />
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Teléfono</label>
+                  <input value={t.telefono||""} onChange={e => updArr("tours", i, "telefono", e.target.value)} style={inputStyle} placeholder="3001234567" />
                 </div>
               </div>
-              <div style={{ marginTop: 8 }}>
-                <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Descripción</label>
-                <input value={l.desc} onChange={e => updArr("laureles", i, "desc", e.target.value)} style={inputStyle} />
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 6 }}>Tipo de tour</label>
+                <div style={{ display: "flex", gap: 12 }}>
+                  {[["privado","🔒 Privado"],["compartido","👥 Compartido"]].map(([key, label]) => (
+                    <div key={key} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <button onClick={() => updArr("tours", i, key, !t[key])} style={{ width: 22, height: 22, borderRadius: 6, border: t[key]?"none":"2px solid #D1D5DB", background: t[key]?"#1B4332":"#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        {t[key] && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
+                      </button>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
+              <FieldInput label="Detalle / descripción" value={t.detalle||""} onChange={v => updArr("tours", i, "detalle", v)} multiline />
             </div>
           ))}
-          <button onClick={() => addItem("laureles")} style={{ background: "#FFF7ED", color: "#C2410C", border: "1px dashed #FED7AA", borderRadius: 12, padding: "10px 0", width: "100%", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Agregar lugar</button>
+          <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); if (!next.tours) next.tours=[]; next.tours.push({ nombre:"", codigo_pais:"+57", telefono:"", privado:false, compartido:false, detalle:"" }); return next; }); }} style={{ background: "#F0FDF4", color: "#16A34A", border: "1px dashed #86EFAC", borderRadius: 12, padding: "10px 0", width: "100%", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Agregar operador</button>
         </div>
       )}
 
