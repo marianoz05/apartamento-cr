@@ -2661,13 +2661,16 @@ function ContratosView({ token, reservas, content }) {
     const style = "body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
       + "h1{font-size:14pt;text-align:center;text-transform:uppercase;margin-bottom:24px}"
       + "p{margin:6px 0;text-align:justify}"
-      + "@media print{body{margin:1.5cm}}";
-    const html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Contrato</title><style>"
-      + style + "</style></head><body>" + bodyHtml + "</body></html>";
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const win = window.open(url, "_blank");
-    setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 1000);
+      + "@media print{.no-print{display:none}body{margin:1.5cm}}";
+    const html = "<!DOCTYPE html><html><head><meta charset=\'utf-8\'><title>Contrato</title><style>"
+      + style + "</style></head><body>" + bodyHtml
+      + "<div class=\'no-print\' style=\'position:fixed;bottom:20px;right:20px\'>"
+      + "<button onclick=\'window.print()\' style=\'background:#1B4332;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:bold\'>🖨️ Imprimir / Guardar PDF</button>"
+      + "</div></body></html>";
+    const win = window.open("about:blank", "_blank");
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
   }
 
   const completadas = reservas.filter(r => ["activa","confirmada","pendiente"].includes(r.estado));
