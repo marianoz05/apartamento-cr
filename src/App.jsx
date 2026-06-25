@@ -2170,12 +2170,14 @@ function ResenasPublicas() {
             {t.whatsapp}
           </a>
         </div>
-        <img
-          src={lang === "en" ? "/Restrictions.PNG" : "/Restricciones.PNG"}
-          alt={t.rules_title}
-          style={{width:"100%",display:"block",objectFit:"cover"}}
-          onError={e=>{e.target.style.display="none";}}
-        />
+        <div style={{background:"#fff",padding:"0 16px 16px"}}>
+          <img
+            src={lang === "en" ? "/Restrictions.PNG" : "/Restricciones.PNG"}
+            alt={t.rules_title}
+            style={{width:"100%",display:"block",maxHeight:140,objectFit:"contain",borderRadius:12}}
+            onError={e=>{e.target.parentNode.style.display="none";}}
+          />
+        </div>
 
         {/* Rating summary */}
         {promedio&&(
