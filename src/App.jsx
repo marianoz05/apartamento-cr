@@ -2164,18 +2164,16 @@ function ResenasPublicas() {
         </div>
 
         {/* WhatsApp CTA */}
-        <div style={{background:"#fff",padding:"0 16px 16px",borderBottom:"1px solid #F3F4F6"}}>
+        <div style={{background:"#fff",padding:"0 16px 0"}}>
           <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
             style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
             {t.whatsapp}
           </a>
         </div>
-
-        {/* House rules image */}
         <img
           src={lang === "en" ? "/Restrictions.PNG" : "/Restricciones.PNG"}
           alt={t.rules_title}
-          style={{width:"100%",display:"block",objectFit:"cover",marginTop:-4}}
+          style={{width:"100%",display:"block",objectFit:"cover"}}
           onError={e=>{e.target.style.display="none";}}
         />
 
