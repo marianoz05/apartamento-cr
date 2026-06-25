@@ -255,15 +255,18 @@ function FieldInput({ label, value, onChange, multiline }) {
 function TourItem({ t, tr }) {
   const [copied, setCopied] = useState(false);
   const numFormateado = t.telefono ? `${t.codigo_pais||"+57"} ${t.telefono}` : null;
+  const tipoLabel = [
+    t.privado ? (tr?.privado||"Privado") : null,
+    t.compartido ? (tr?.compartido||"Compartido") : null,
+  ].filter(Boolean).join(" · ");
   return (
     <div style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-        <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>🗺️ {t.nombre}</p>
-        <div style={{ display: "flex", gap: 4 }}>
-          {t.privado && <span style={{ background: "#EDE9FE", color: "#6D28D9", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>🔒 {tr?.privado||"Privado"}</span>}
-          {t.compartido && <span style={{ background: "#DBEAFE", color: "#1E40AF", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>👥 {tr?.compartido||"Compartido"}</span>}
-        </div>
-      </div>
+      <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 15 }}>🗺️ {t.nombre}</p>
+      {tipoLabel && (
+        <p style={{ margin: "0 0 8px", fontSize: 12, color: "#78350F", fontWeight: 600 }}>
+          {tr?.tipo_tour||"Tipo de tour"}: {tipoLabel}
+        </p>
+      )}
       {t.detalle && <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.detalle}</p>}
       {numFormateado && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#F9FAFB", borderRadius: 10, padding: "8px 12px" }}>
@@ -279,7 +282,14 @@ function TourItem({ t, tr }) {
 }
 function ToursView({ tours, tr }) {
   if (!tours || tours.length === 0) return <p style={{ color: "#9CA3AF", textAlign: "center", padding: 20 }}>{tr?.no_tours||"No hay operadores registrados."}</p>;
-  return <div>{tours.map((t, i) => <TourItem key={i} t={t} tr={tr} />)}</div>;
+  return (
+    <div>
+      <p style={{ fontSize: 13, color: "#9CA3AF", fontStyle: "italic", margin: "0 0 14px" }}>
+        {tr?.recomendaciones || "Algunas recomendaciones son:"}
+      </p>
+      {tours.map((t, i) => <TourItem key={i} t={t} tr={tr} />)}
+    </div>
+  );
 }
 
 // ─── RESTAURANTES VIEW ───────────────────────────────────────────
@@ -391,6 +401,8 @@ ${JSON.stringify(toTranslate)}`
       privado: "Privado", compartido: "Compartido",
       copiar: "📋 Copiar", copiado: "✓ Copiado",
       no_tours: "No hay operadores registrados.",
+      recomendaciones: "Algunas recomendaciones son:",
+      tipo_tour: "Tipo de tour",
       caminando: "caminando",
     },
     en: {
@@ -406,6 +418,8 @@ ${JSON.stringify(toTranslate)}`
       privado: "Private", compartido: "Shared",
       copiar: "📋 Copy", copiado: "✓ Copied",
       no_tours: "No operators registered.",
+      recomendaciones: "Some recommendations are:",
+      tipo_tour: "Tour type",
       caminando: "walking",
     }
   }[lang];
