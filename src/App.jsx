@@ -426,7 +426,7 @@ function GuestPortal({ reserva, content }) {
         const sec = sections.find(s => s.id === active);
         return (
           <>
-            <div style={{ background: sec.color, padding: "20px 16px 24px", display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ background: sec.color, padding: "20px 16px 24px", paddingTop: "max(20px, env(safe-area-inset-top))", display: "flex", alignItems: "center", gap: 12 }}>
               <button onClick={() => { setActive(null); scrollTop(); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" }}>Apartamento CR</p>
