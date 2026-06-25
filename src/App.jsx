@@ -255,6 +255,48 @@ function FieldInput({ label, value, onChange, multiline }) {
   );
 }
 
+// ─── RESTAURANTES VIEW ───────────────────────────────────────────
+function RestaurantesView({ restaurantes }) {
+  const [sortR, setSortR] = useState("distancia");
+  const [sortDir, setSortDir] = useState("asc");
+  function fmtDist(m) {
+    if (!m && m !== 0) return null;
+    return m >= 1000 ? `${(m/1000).toFixed(1)} km` : `${m} m`;
+  }
+  const sorted = [...restaurantes].sort((a, b) => {
+    if (sortR === "distancia") {
+      const da = Number(a.distancia_m || 9999), db = Number(b.distancia_m || 9999);
+      return sortDir === "asc" ? da - db : db - da;
+    } else {
+      const pa = (a.precio||"$$").length, pb = (b.precio||"$$").length;
+      return sortDir === "asc" ? pa - pb : pb - pa;
+    }
+  });
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        {[["distancia","📍 Distancia"],["precio","💰 Precio"]].map(([key, label]) => (
+          <button key={key} onClick={() => { if (sortR === key) setSortDir(d => d === "asc" ? "desc" : "asc"); else { setSortR(key); setSortDir("asc"); } }}
+            style={{ display: "flex", alignItems: "center", gap: 4, background: sortR === key ? "#7F1D1D" : "#F3F4F6", color: sortR === key ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+            {label} {sortR === key ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+          </button>
+        ))}
+      </div>
+      {sorted.map((r, i) => (
+        <div key={i} style={{ background: "#FEF2F2", borderRadius: 14, padding: 14, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
+            <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
+            {fmtDist(r.distancia_m) && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {fmtDist(r.distancia_m)} caminando</p>}
+            {!r.distancia_m && r.distancia && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} caminando</p>}
+          </div>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#D97706" }}>{r.precio || r.estrellas}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── GUEST PORTAL ────────────────────────────────────────────────
 function GuestPortal({ reserva, content }) {
   const [active, setActive] = useState(null);
@@ -318,46 +360,7 @@ function GuestPortal({ reserva, content }) {
     },
     {
       id: "restaurantes", icon: "🍽️", title: "Restaurantes cercanos", color: "#7F1D1D",
-      render: () => {
-        const [sortR, setSortR] = React.useState("distancia");
-        const [sortDir, setSortDir] = React.useState("asc");
-        function fmtDist(m) {
-          if (!m && m !== 0) return null;
-          return m >= 1000 ? `${(m/1000).toFixed(1)} km` : `${m} m`;
-        }
-        const sorted = [...c.restaurantes].sort((a, b) => {
-          if (sortR === "distancia") {
-            const da = Number(a.distancia_m || 9999), db = Number(b.distancia_m || 9999);
-            return sortDir === "asc" ? da - db : db - da;
-          } else {
-            const pa = (a.precio||"$$").length, pb = (b.precio||"$$").length;
-            return sortDir === "asc" ? pa - pb : pb - pa;
-          }
-        });
-        return (
-          <div>
-            <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-              {[["distancia","📍 Distancia"],["precio","💰 Precio"]].map(([key, label]) => (
-                <button key={key} onClick={() => { if (sortR === key) setSortDir(d => d === "asc" ? "desc" : "asc"); else { setSortR(key); setSortDir("asc"); } }}
-                  style={{ display: "flex", alignItems: "center", gap: 4, background: sortR === key ? "#7F1D1D" : "#F3F4F6", color: sortR === key ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                  {label} {sortR === key ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
-                </button>
-              ))}
-            </div>
-            {sorted.map((r, i) => (
-              <div key={i} style={{ background: "#FEF2F2", borderRadius: 14, padding: 14, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
-                  <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
-                  {fmtDist(r.distancia_m) && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {fmtDist(r.distancia_m)} caminando</p>}
-                  {!r.distancia_m && r.distancia && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} caminando</p>}
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#D97706" }}>{r.precio || r.estrellas}</span>
-              </div>
-            ))}
-          </div>
-        );
-      }
+      render: () => <RestaurantesView restaurantes={c.restaurantes} />
     },
     {
       id: "transporte", icon: "🚇", title: "Cómo moverse", color: "#1E3A5F",
