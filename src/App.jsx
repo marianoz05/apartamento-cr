@@ -250,6 +250,37 @@ function FieldInput({ label, value, onChange, multiline }) {
   );
 }
 
+// ─── TOURS VIEW ──────────────────────────────────────────────────
+function TourItem({ t, tr }) {
+  const [copied, setCopied] = useState(false);
+  const waLink = t.telefono ? `https://wa.me/${(t.codigo_pais||"+57").replace("+","")}${t.telefono.replace(/[^0-9]/g,"")}` : null;
+  return (
+    <div style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+        <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>🗺️ {t.nombre}</p>
+        <div style={{ display: "flex", gap: 4 }}>
+          {t.privado && <span style={{ background: "#EDE9FE", color: "#6D28D9", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>🔒 {tr?.privado||"Privado"}</span>}
+          {t.compartido && <span style={{ background: "#DBEAFE", color: "#1E40AF", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>👥 {tr?.compartido||"Compartido"}</span>}
+        </div>
+      </div>
+      {t.detalle && <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.detalle}</p>}
+      {waLink && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#F9FAFB", borderRadius: 10, padding: "8px 12px" }}>
+          <span style={{ fontSize: 12, color: "#374151", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>💬 {waLink}</span>
+          <button onClick={() => { navigator.clipboard?.writeText(waLink); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
+            style={{ background: copied?"#DCFCE7":"#E5E7EB", color: copied?"#166534":"#374151", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
+            {copied ? (tr?.copiado||"✓ Copiado") : (tr?.copiar||"📋 Copiar")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+function ToursView({ tours, tr }) {
+  if (!tours || tours.length === 0) return <p style={{ color: "#9CA3AF", textAlign: "center", padding: 20 }}>{tr?.no_tours||"No hay operadores registrados."}</p>;
+  return <div>{tours.map((t, i) => <TourItem key={i} t={t} tr={tr} />)}</div>;
+}
+
 // ─── RESTAURANTES VIEW ───────────────────────────────────────────
 function RestaurantesView({ restaurantes, lang, tr: trProp }) {
   const [sortR, setSortR] = useState("distancia");
@@ -406,36 +437,7 @@ function GuestPortal({ reserva, content }) {
     },
     {
       id: "tours", icon: "🗺️", title: tr.tours, color: "#78350F",
-      render: () => (
-        <div>
-          {(c.tours||[]).length === 0 && <p style={{ color: "#9CA3AF", textAlign: "center", padding: 20 }}>{tr.no_tours}</p>}
-          {(c.tours||[]).map((t, i) => (
-            <div key={i} style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>🗺️ {t.nombre}</p>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {t.privado && <span style={{ background: "#EDE9FE", color: "#6D28D9", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>🔒 {tr.privado}</span>}
-                  {t.compartido && <span style={{ background: "#DBEAFE", color: "#1E40AF", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>👥 {tr.compartido}</span>}
-                </div>
-              </div>
-              {t.detalle && <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.detalle}</p>}
-              {t.telefono && (() => {
-                const waLink = `https://wa.me/${(t.codigo_pais||"+57").replace("+","")}${t.telefono.replace(/[^0-9]/g,"")}`;
-                const [copied, setCopied] = React.useState(false);
-                return (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#F9FAFB", borderRadius: 10, padding: "8px 12px" }}>
-                    <span style={{ fontSize: 12, color: "#374151", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>💬 {waLink}</span>
-                    <button onClick={() => { navigator.clipboard?.writeText(waLink); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
-                      style={{ background: copied?"#DCFCE7":"#E5E7EB", color: copied?"#166534":"#374151", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
-                      {copied ? "✓ Copiado" : "📋 Copiar"}
-                    </button>
-                  </div>
-                );
-              })()}
-            </div>
-          ))}
-        </div>
-      )
+      render: () => <ToursView tours={c.tours||[]} tr={tr} />
     },
     {
       id: "contacto", icon: "📞", title: tr.contacto, color: "#7F1D1D",
@@ -958,7 +960,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       if (Array.isArray(data)) setLimpiezas(data);
     });
     sb.getResenas(onLogoutToken).then(data => {
-      if (Array.isArray(data)) setResenaIds(new Set(data.map(r => r.reserva_id).filter(Boolean)));
+      if (Array.isArray(data)) setResenaIds(new Set(data.map(r => String(r.reserva_id)).filter(Boolean)));
     });
     sb.getReservas(onLogoutToken).then(data => {
       if (Array.isArray(data)) {
@@ -1144,6 +1146,9 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   useEffect(() => {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
+    sb.getResenas(onLogoutToken).then(data => {
+      if (Array.isArray(data)) setResenaIds(new Set(data.map(r => String(r.reserva_id)).filter(Boolean)));
+    });
   }, [view]);
 
   useEffect(() => {
@@ -1584,7 +1589,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                       </div>
                                                     )}
                                                   </div>
-                                                  {r.estado === "completada" && r.telefono && (
+                                                  {r.estado === "completada" && r.telefono && !resenaIds.has(String(r.id)) && (
                                                     <button onClick={() => {
                                                       const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
                                                       const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
@@ -1746,7 +1751,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                             </div>
                                                           )}
                                                         </div>
-                                                        {r.estado === "completada" && r.telefono && (
+                                                        {r.estado === "completada" && r.telefono && !resenaIds.has(String(r.id)) && (
                                                           <button onClick={() => {
                                                             const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
                                                             const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
