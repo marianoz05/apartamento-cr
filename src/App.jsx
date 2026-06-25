@@ -2171,18 +2171,13 @@ function ResenasPublicas() {
           </a>
         </div>
 
-        {/* House rules icons */}
-        <div style={{background:"#fff",padding:"16px",borderBottom:"1px solid #F3F4F6"}}>
-          <p style={{fontWeight:700,fontSize:14,color:"#111827",margin:"0 0 12px"}}>{t.rules_title}</p>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
-            {t.rules.map(([icon,label],i)=>(
-              <div key={i} style={{textAlign:"center"}}>
-                <div style={{fontSize:28,marginBottom:4}}>{icon}</div>
-                <p style={{margin:0,fontSize:10,color:"#6B7280",fontWeight:600,lineHeight:1.3}}>{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* House rules image */}
+        <img
+          src={lang === "en" ? "/Restrictions.PNG" : "/Restricciones.PNG"}
+          alt={t.rules_title}
+          style={{width:"100%",display:"block",objectFit:"cover"}}
+          onError={e=>{e.target.style.display="none";}}
+        />
 
         {/* Rating summary */}
         {promedio&&(
