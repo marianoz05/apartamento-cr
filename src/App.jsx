@@ -260,10 +260,10 @@ function TourItem({ t, tr }) {
     t.compartido ? (tr?.compartido||"Compartido") : null,
   ].filter(Boolean).join(" · ");
   return (
-    <div style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10 }}>
-      <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 15 }}>🗺️ {t.nombre}</p>
+    <div style={{ background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10 }}>
+      <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 17 }}>🗺️ {t.nombre}</p>
       {tipoLabel && (
-        <p style={{ margin: "0 0 8px", fontSize: 12, color: "#78350F", fontWeight: 600 }}>
+        <p style={{ margin: "0 0 8px", fontSize: 12, color: "#5C3D2E", fontWeight: 600 }}>
           {tr?.tipo_tour||"Tipo de tour"}: {tipoLabel}
         </p>
       )}
@@ -320,7 +320,7 @@ function RestaurantesView({ restaurantes, lang, tr: trProp }) {
         ))}
       </div>
       {sorted.map((r, i) => (
-        <div key={i} style={{ background: "#FEF2F2", borderRadius: 14, padding: 14, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div key={i} style={{ background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
             <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
@@ -391,7 +391,7 @@ ${JSON.stringify(toTranslate)}`
     es: {
       checkin: "Check-in", checkout: "Check-out", noches: "Noches",
       bienvenido: "Bienvenido/a",
-      ubicacion: "Ubicación", wifi: "Acceso WiFi", normas: "Normas del apartamento",
+      ubicacion: "Ubicación", wifi: "Acceso WiFi", normas: "Normas del Apartamento",
       restaurantes: "Restaurantes cercanos", transporte: "Cómo moverse",
       tours: "Operadores de Tours", contacto: "Contacto de emergencia",
       direccion: "Dirección", escanea: "📱 Escanea para conectarte",
@@ -426,13 +426,13 @@ ${JSON.stringify(toTranslate)}`
 
   const sections = [
     {
-      id: "ubicacion", icon: "📍", title: tr.ubicacion, color: "#1E3A5F",
+      id: "ubicacion", icon: "📍", title: tr.ubicacion, color: "#6B4C3B",
       render: () => (
         <div>
           {c.ubicacion?.direccion && (
             <div style={{ background: "#EFF6FF", borderRadius: 14, padding: 14, marginBottom: 10 }}>
               <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#2563EB", textTransform: "uppercase", letterSpacing: "0.1em" }}>Dirección</p>
-              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1E3A5F" }}>{c.ubicacion.direccion}</p>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#5C3D2E" }}>{c.ubicacion.direccion}</p>
               {c.ubicacion?.edificio && <p style={{ margin: "6px 0 0", fontSize: 13, color: "#374151" }}>🏢 {c.ubicacion.edificio}</p>}
               {c.ubicacion?.numero && <p style={{ margin: "4px 0 0", fontSize: 13, color: "#374151" }}>🚪 Apto. {c.ubicacion.numero}</p>}
             </div>
@@ -447,7 +447,7 @@ ${JSON.stringify(toTranslate)}`
       )
     },
     {
-      id: "wifi", icon: "📶", title: tr.wifi, color: "#1B4332",
+      id: "wifi", icon: "📶", title: tr.wifi, color: "#6B4C3B",
       render: () => {
         const qrData = `WIFI:T:WPA;S:${c.wifi.nombre};P:${c.wifi.clave};;`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=1B4332&margin=10`;
@@ -462,7 +462,7 @@ ${JSON.stringify(toTranslate)}`
               <p style={{ margin: 0, fontWeight: 800, fontSize: 24, letterSpacing: "0.2em", color: "#111827" }}>{c.wifi.clave}</p>
             </div>
             <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 16, padding: 20, marginTop: 8, textAlign: "center" }}>
-              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>{tr.escanea}</p>
+              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#5C3D2E" }}>{tr.escanea}</p>
               <p style={{ margin: "0 0 14px", fontSize: 12, color: "#6B7280" }}>{tr.escanea_sub}</p>
               <img src={qrUrl} alt="QR WiFi" style={{ width: 180, height: 180, borderRadius: 12, display: "block", margin: "0 auto" }} />
             </div>
@@ -471,15 +471,15 @@ ${JSON.stringify(toTranslate)}`
       }
     },
     {
-      id: "normas", icon: "📋", title: tr.normas, color: "#4C1D95",
+      id: "normas", icon: "📋", title: tr.normas, color: "#6B4C3B",
       render: () => (
         <div>
           {c.normas.map((n, i) => (
-            <div key={i} style={{ display: "flex", gap: 12, background: "#FAF5FF", borderRadius: 14, padding: 14, marginBottom: 10 }}>
+            <div key={i} style={{ display: "flex", gap: 12, background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10 }}>
               <span style={{ fontSize: 22 }}>{n.icon}</span>
               <div>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{n.titulo}</p>
-                <p style={{ margin: "2px 0 0", fontSize: 13, color: "#6B7280" }}>{n.desc}</p>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{n.titulo}</p>
+                <p style={{ margin: "4px 0 0", fontSize: 14, color: "#6B7280" }}>{n.desc}</p>
               </div>
             </div>
           ))}
@@ -487,28 +487,28 @@ ${JSON.stringify(toTranslate)}`
       )
     },
     {
-      id: "restaurantes", icon: "🍽️", title: tr.restaurantes, color: "#7F1D1D",
+      id: "restaurantes", icon: "🍽️", title: tr.restaurantes, color: "#6B4C3B",
       render: () => <RestaurantesView restaurantes={c.restaurantes} lang={lang} tr={tr} />
     },
     {
-      id: "transporte", icon: "🚇", title: tr.transporte, color: "#1E3A5F",
+      id: "transporte", icon: "🚇", title: tr.transporte, color: "#6B4C3B",
       render: () => (
         <div>
           {c.transporte.map((t, i) => (
-            <div key={i} style={{ background: "#EFF6FF", borderRadius: 14, padding: 14, marginBottom: 10 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{t.icon} {t.titulo}</p>
-              <p style={{ margin: "4px 0 0", fontSize: 13, color: "#4B5563" }}>{t.desc}</p>
+            <div key={i} style={{ background: "#FDF8F5", borderRadius: 14, padding: 16, marginBottom: 10 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{t.icon} {t.titulo}</p>
+              <p style={{ margin: "6px 0 0", fontSize: 14, color: "#6B7280" }}>{t.desc}</p>
             </div>
           ))}
         </div>
       )
     },
     {
-      id: "tours", icon: "🗺️", title: tr.tours, color: "#78350F",
+      id: "tours", icon: "🗺️", title: tr.tours, color: "#6B4C3B",
       render: () => <ToursView tours={c.tours||[]} tr={tr} />
     },
     {
-      id: "contacto", icon: "📞", title: tr.contacto, color: "#7F1D1D",
+      id: "contacto", icon: "📞", title: tr.contacto, color: "#6B4C3B",
       render: () => (
         <div>
           <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 14, padding: 16, marginBottom: 12 }}>
@@ -539,7 +539,7 @@ ${JSON.stringify(toTranslate)}`
     <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#1B4332", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "env(safe-area-inset-top)" }}>
       {active === null ? (
         <>
-          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "16px 20px 24px", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(160deg, #4A7C65 0%, #5A9478 60%, #6BAB88 100%)", padding: "16px 20px 24px", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
             <p style={{ color: "#95D5B2", fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px" }}>Laureles · Medellín</p>
             <h1 style={{ color: "#fff", fontSize: 34, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
@@ -556,11 +556,11 @@ ${JSON.stringify(toTranslate)}`
               ))}
             </div>
           </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#F7F5F0", borderBottom: "1px solid #E5E7EB" }}>
-            <div style={{ display: "inline-flex", gap: 2, background: "#E5E7EB", borderRadius: 20, padding: 3 }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", padding: "8px 16px", background: "#5A9478", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.2)", borderRadius: 20, padding: 3 }}>
               {["es","en"].map(l => (
                 <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
-                  style={{ background: lang===l?"#1B4332":"transparent", color: lang===l?"#fff":"#374151", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#3D7A5F":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                   {l === "en" && translating ? "..." : l.toUpperCase()}
                 </button>
               ))}
@@ -862,7 +862,7 @@ function ContenidoEditor({ content, onSave }) {
             Edita las plantillas de WhatsApp. Variables: <strong>[nombre]</strong>, <strong>[checkin]</strong>, <strong>[checkout]</strong>, <strong>[link]</strong>, <strong>[saldo]</strong>, <strong>[moneda]</strong>, <strong>[link_resena]</strong>
           </p>
           <div style={{ background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: 14, padding: 14, marginBottom: 12 }}>
-            <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#1B4332" }}>🌿 Bienvenida + link del portal</p>
+            <p style={{ fontWeight: 700, fontSize: 14, margin: "0 0 10px", color: "#5C3D2E" }}>🌿 Bienvenida + link del portal</p>
             <textarea
               value={local.mensajes?.bienvenida || ""}
               onChange={e => setLocal(prev => ({ ...prev, mensajes: { ...prev.mensajes, bienvenida: e.target.value } }))}
@@ -1452,7 +1452,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                   </div>
                   <div style={{ flex: 1 }}>
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Total</label>
-                    <div style={{ padding: "8px 12px", borderRadius: 8, background: "#F9FAFB", border: "1px solid #E5E7EB", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>{fmt(form.monto_total, form.moneda)}</div>
+                    <div style={{ padding: "8px 12px", borderRadius: 8, background: "#F9FAFB", border: "1px solid #E5E7EB", fontSize: 13, fontWeight: 700, color: "#5C3D2E" }}>{fmt(form.monto_total, form.moneda)}</div>
                   </div>
                 </div>
 
@@ -1549,7 +1549,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                       return (
                         <div key={mk} style={{ marginBottom: 8 }}>
                           {mk === currentMonth ? (
-                            <p style={{ fontWeight: 700, fontSize: 13, color: "#1B4332", margin: "0 0 8px" }}>📅 {label} · {groupList.length} reserva{groupList.length !== 1 ? "s" : ""}</p>
+                            <p style={{ fontWeight: 700, fontSize: 13, color: "#5C3D2E", margin: "0 0 8px" }}>📅 {label} · {groupList.length} reserva{groupList.length !== 1 ? "s" : ""}</p>
                           ) : (
                             <button onClick={() => setExpandedMonths(prev => { const n = new Set(prev); n.has(mk) ? n.delete(mk) : n.add(mk); return n; })}
                               style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "10px 14px", cursor: "pointer", marginBottom: isOpen ? 8 : 0 }}>
@@ -1641,7 +1641,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                           </a>
                                                         )}
                                                         {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
-                                                          <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
+                                                          <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#5C3D2E" }}>
                                                             🌿 Bienvenida + link del portal
                                                           </button>
                                                         )}
@@ -1803,7 +1803,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                                 </a>
                                                               )}
                                                               {r.telefono && r.check_out >= new Date().toISOString().split("T")[0] && (
-                                                                <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#1B4332" }}>
+                                                                <button onClick={() => { sendWhatsApp(r, "bienvenida"); setWaMenu(null); }} style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", fontSize: 13, textAlign: "left", cursor: "pointer", borderBottom: "1px solid #F3F4F6", fontWeight: 600, color: "#5C3D2E" }}>
                                                                   🌿 Bienvenida + link del portal
                                                                 </button>
                                                               )}
