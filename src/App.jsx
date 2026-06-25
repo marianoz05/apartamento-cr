@@ -2653,24 +2653,19 @@ function ContratosView({ token, reservas, content }) {
 
   function printContrato(r) {
     const text = generateContrato(r);
+    const bodyHtml = text.split("\n").map((line, i) => {
+      if (i === 0) return "<h1>" + line + "</h1>";
+      if (line.trim() === "") return "<br/>";
+      return "<p>" + line.replace(/</g,"&lt;").replace(/>/g,"&gt;") + "</p>";
+    }).join("");
+    const html = "<html><head><title>Contrato - " + r.huesped_nombre + "</title>"
+      + "<style>body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
+      + "h1{font-size:14pt;text-align:center;text-transform:uppercase;margin-bottom:24px}"
+      + "p{margin:8px 0;text-align:justify}"
+      + "@media print{body{margin:1.5cm}}</style></head><body>"
+      + bodyHtml + "</body></html>";
     const win = window.open("", "_blank");
-    win.document.write(`
-      <html><head><title>Contrato - ${r.huesped_nombre}</title>
-      <style>
-        body { font-family: Arial, sans-serif; font-size: 12pt; line-height: 1.8; margin: 2cm; color: #111; }
-        h1 { font-size: 14pt; text-align: center; text-transform: uppercase; margin-bottom: 24px; }
-        p { margin: 8px 0; text-align: justify; }
-        .firma { margin-top: 60px; display: flex; justify-content: space-between; }
-        .firma-line { border-top: 1px solid #000; width: 200px; padding-top: 8px; text-align: center; font-size: 11pt; }
-        @media print { body { margin: 1.5cm; } }
-      </style></head><body>
-      ${text.split("\n").map((line, i) => {
-        if (i === 0) return \`<h1>\${line}</h1>\`;
-        if (line.trim() === "") return "<br/>";
-        return \`<p>\${line}</p>\`;
-      }).join("")}
-      </body></html>
-    `);
+    win.document.write(html);
     win.document.close();
     setTimeout(() => win.print(), 500);
   }
