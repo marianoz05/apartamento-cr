@@ -391,12 +391,12 @@ function GuestPortal({ reserva, content }) {
   function scrollTop() { if (scrollRef.current) scrollRef.current.scrollTop = 0; }
 
   return (
-    <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F7F5F0", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+    <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F7F5F0", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: 0 }}>
       {active === null ? (
         <>
-          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "36px 20px 28px", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "36px 20px 28px", paddingTop: "max(36px, env(safe-area-inset-top))", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
-            <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px" }}>Laureles · Medellín</p>
+            <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px", paddingTop: "env(safe-area-inset-top)" }}>Laureles · Medellín</p>
             <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
             <p style={{ color: "#B7E4C7", fontSize: 13, margin: "0 0 16px" }}>Bienvenido/a, {reserva.huesped_nombre.split(" ")[0]} 🌿</p>
             <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 12, padding: "10px 14px", display: "inline-flex", gap: 16 }}>
@@ -563,7 +563,11 @@ function ContenidoEditor({ content, onSave }) {
           {local.normas.map((n, i) => (
             <div key={i} style={cardStyle}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#374151" }}>Norma {i + 1}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#374151" }}>Norma {i + 1}</p>
+                  <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); if (i > 0) { [next.normas[i-1], next.normas[i]] = [next.normas[i], next.normas[i-1]]; } return next; }); }} disabled={i === 0} style={{ background: i===0?"#F9FAFB":"#EFF6FF", color: i===0?"#D1D5DB":"#2563EB", border: "none", borderRadius: 6, padding: "2px 7px", fontSize: 13, cursor: i===0?"default":"pointer", fontWeight: 700 }}>▲</button>
+                  <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); if (i < next.normas.length-1) { [next.normas[i], next.normas[i+1]] = [next.normas[i+1], next.normas[i]]; } return next; }); }} disabled={i === local.normas.length-1} style={{ background: i===local.normas.length-1?"#F9FAFB":"#EFF6FF", color: i===local.normas.length-1?"#D1D5DB":"#2563EB", border: "none", borderRadius: 6, padding: "2px 7px", fontSize: 13, cursor: i===local.normas.length-1?"default":"pointer", fontWeight: 700 }}>▼</button>
+                </div>
                 <button onClick={() => removeItem("normas", i)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer" }}>Eliminar</button>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
@@ -2186,8 +2190,7 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
             const isPending = l => !(l.coordinado && l.realizada && l.pagado);
             const pending = sorted.filter(isPending);
             const done = sorted.filter(l => !isPending(l));
-            const visibleDone = done.slice(0, limpiezasPage);
-            const items = [...pending, ...visibleDone];
+            const items = pending;
             return <>{items.map(l=>{
             const res=l.reserva_id?getR(l.reserva_id):null;
             return(
@@ -2215,12 +2218,46 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
           {(() => {
             const sorted2 = [...limpiezas].sort((a,b) => a.fecha > b.fecha ? 1 : -1);
             const done2 = sorted2.filter(l => l.coordinado && l.realizada && l.pagado);
-            return done2.length > limpiezasPage ? (
-              <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
-                style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", marginTop: 4 }}>
-                Ver {Math.min(LIMP_PAGE, done2.length - limpiezasPage)} limpieza{Math.min(LIMP_PAGE, done2.length - limpiezasPage) !== 1 ? "s" : ""} completadas más ▼
-              </button>
-            ) : null;
+            const visibleDone2 = done2.slice(0, limpiezasPage);
+            return (
+              <>
+                {visibleDone2.map(l => {
+                  const res = l.reserva_id ? reservas.find(r=>r.id===l.reserva_id) : null;
+                  return (
+                    <div key={l.id} style={{background:"#F9FAFB",borderRadius:16,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,0.05)",opacity:0.8}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                        <div>
+                          <p style={{margin:0,fontWeight:700,fontSize:14}}>🧹 {formatDate(l.fecha)}</p>
+                          <p style={{margin:"2px 0 0",fontSize:12,color:"#6B7280"}}>{res?`${res.huesped_nombre}`:"Independiente"}</p>
+                        </div>
+                        {l.costo>0&&<div style={{background:"#F0FDF4",borderRadius:8,padding:"4px 10px",textAlign:"right"}}><p style={{margin:0,fontSize:10,color:"#6B7280"}}>COP</p><p style={{margin:0,fontWeight:700,fontSize:13,color:"#166534"}}>${Number(l.costo).toLocaleString()}</p></div>}
+                      </div>
+                      <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+                        <span style={{background:"#DBEAFE",color:"#1E40AF",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>📋 Coordinada ✓</span>
+                        <span style={{background:"#FEF3C7",color:"#D97706",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>🧹 Realizada ✓</span>
+                        <span style={{background:"#DCFCE7",color:"#166534",borderRadius:20,padding:"3px 10px",fontSize:11,fontWeight:700}}>💰 Pagada ✓</span>
+                      </div>
+                      <div style={{display:"flex",gap:8}}>
+                        <button onClick={()=>openEdit(l)} style={{background:"#F9FAFB",color:"#374151",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>✏️ Editar</button>
+                        <button onClick={()=>del(l.id)} style={{background:"#FEF2F2",color:"#DC2626",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer"}}>🗑️ Eliminar</button>
+                      </div>
+                    </div>
+                  );
+                })}
+                {done2.length > limpiezasPage && (
+                  <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
+                    style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", marginTop: 4 }}>
+                    Ver {Math.min(LIMP_PAGE, done2.length - limpiezasPage)} limpieza{Math.min(LIMP_PAGE, done2.length - limpiezasPage) !== 1 ? "s" : ""} completadas más ▼
+                  </button>
+                )}
+                {done2.length === 0 && pending.length === 0 && limpiezas.length === 0 ? null : done2.length > 0 && visibleDone2.length === 0 && (
+                  <button onClick={() => setLimpiezasPage(p => p + LIMP_PAGE)}
+                    style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", marginTop: 4 }}>
+                    Ver {done2.length} limpieza{done2.length !== 1 ? "s" : ""} completada{done2.length !== 1 ? "s" : ""} ▼
+                  </button>
+                )}
+              </>
+            );
           })()}
         </div>
       )}
