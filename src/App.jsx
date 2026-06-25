@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 // ─── SUPABASE CONFIG ──────────────────────────────────────────────
 const SUPABASE_URL = "https://cxjumlciielwwhunvmym.supabase.co";
+const CLAUDE_API_KEY = import.meta.env.VITE_CLAUDE_KEY;
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4anVtbGNpaWVsd3dodW52bXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxNjcxMjUsImV4cCI6MjA5Nzc0MzEyNX0.VNPmOT3NLvdf0RIA53FdR4n6dpcz-SWS_9Nggmc9g2U";
 
 const sb = {
@@ -327,7 +328,54 @@ function RestaurantesView({ restaurantes, lang, tr: trProp }) {
 function GuestPortal({ reserva, content }) {
   const [active, setActive] = useState(null);
   const [lang, setLang] = useState("es");
-  const c = content;
+  const [translatedContent, setTranslatedContent] = useState(null);
+  const [translating, setTranslating] = useState(false);
+  const c = lang === "en" && translatedContent ? translatedContent : content;
+
+  async function translateContent() {
+    if (translatedContent || translating) return;
+    setTranslating(true);
+    try {
+      const toTranslate = {
+        normas: content.normas,
+        restaurantes: content.restaurantes,
+        transporte: content.transporte,
+        tours: content.tours || [],
+        laureles: content.laureles || [],
+        ubicacion: content.ubicacion,
+        contacto: { anfitrion_nombre: content.contacto.anfitrion_nombre, emergencias: content.contacto.emergencias },
+      };
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": CLAUDE_API_KEY,
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 4000,
+          messages: [{
+            role: "user",
+            content: `Translate the following JSON content from Spanish to English. Keep all keys exactly the same, only translate the text values (titulo, desc, nombre, tipo, label, direccion, edificio, detalle fields). Return ONLY valid JSON, no explanation.
+
+${JSON.stringify(toTranslate)}`
+          }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.[0]?.text || "";
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const translated = JSON.parse(jsonMatch[0]);
+        setTranslatedContent({ ...content, ...translated });
+      }
+    } catch(e) {
+      console.error("Translation error:", e);
+    }
+    setTranslating(false);
+  }
 
   const tr = {
     es: {
@@ -475,7 +523,10 @@ function GuestPortal({ reserva, content }) {
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
             <div style={{ position: "absolute", top: 12, right: 12, display: "flex", gap: 2, background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: 3 }}>
               {["es","en"].map(l => (
-                <button key={l} onClick={() => setLang(l)} style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>{l.toUpperCase()}</button>
+                <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
+                  style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  {l === "en" && translating ? "..." : l.toUpperCase()}
+                </button>
               ))}
             </div>
             <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px", paddingTop: "env(safe-area-inset-top)" }}>Laureles · Medellín</p>
