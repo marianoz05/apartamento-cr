@@ -253,7 +253,7 @@ function FieldInput({ label, value, onChange, multiline }) {
 // ─── TOURS VIEW ──────────────────────────────────────────────────
 function TourItem({ t, tr }) {
   const [copied, setCopied] = useState(false);
-  const waLink = t.telefono ? `https://wa.me/${(t.codigo_pais||"+57").replace("+","")}${t.telefono.replace(/[^0-9]/g,"")}` : null;
+  const numFormateado = t.telefono ? `${t.codigo_pais||"+57"} ${t.telefono}` : null;
   return (
     <div style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
@@ -264,10 +264,10 @@ function TourItem({ t, tr }) {
         </div>
       </div>
       {t.detalle && <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.detalle}</p>}
-      {waLink && (
+      {numFormateado && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#F9FAFB", borderRadius: 10, padding: "8px 12px" }}>
-          <span style={{ fontSize: 12, color: "#374151", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>💬 {waLink}</span>
-          <button onClick={() => { navigator.clipboard?.writeText(waLink); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
+          <span style={{ fontSize: 13, color: "#374151", flex: 1, fontWeight: 600 }}>📞 {numFormateado}</span>
+          <button onClick={() => { navigator.clipboard?.writeText(numFormateado); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
             style={{ background: copied?"#DCFCE7":"#E5E7EB", color: copied?"#166534":"#374151", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
             {copied ? (tr?.copiado||"✓ Copiado") : (tr?.copiar||"📋 Copiar")}
           </button>
