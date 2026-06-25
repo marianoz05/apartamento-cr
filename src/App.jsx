@@ -516,20 +516,20 @@ ${JSON.stringify(toTranslate)}`
   function scrollTop() { if (scrollRef.current) scrollRef.current.scrollTop = 0; }
 
   return (
-    <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F7F5F0", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: 0 }}>
+    <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#1B4332", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "env(safe-area-inset-top)" }}>
       {active === null ? (
         <>
-          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "16px 20px 24px", paddingTop: "max(16px, env(safe-area-inset-top))", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "16px 20px 24px", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
-            <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px", paddingTop: "env(safe-area-inset-top)" }}>Laureles · Medellín</p>
-            <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
-            <p style={{ color: "#B7E4C7", fontSize: 13, margin: "0 0 16px" }}>{tr.bienvenido}, {reserva.huesped_nombre.split(" ")[0]} 🌿</p>
+            <p style={{ color: "#95D5B2", fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px" }}>Laureles · Medellín</p>
+            <h1 style={{ color: "#fff", fontSize: 34, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
+            <p style={{ color: "#B7E4C7", fontSize: 15, margin: "0 0 16px" }}>{tr.bienvenido}, {reserva.huesped_nombre.split(" ")[0]} 🌿</p>
             <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 12, padding: "10px 14px", display: "inline-flex", gap: 16 }}>
               {[[tr.checkin, formatDate(reserva.check_in)], [tr.checkout, formatDate(reserva.check_out)], [tr.noches, reserva.noches]].map(([lbl, val], i, arr) => (
                 <div key={i} style={{ display: "flex", gap: 16, alignItems: "center" }}>
                   <div>
-                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{lbl}</p>
-                    <p style={{ color: "#fff", fontSize: 14, fontWeight: 700, margin: 0 }}>{val}</p>
+                    <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 11, margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{lbl}</p>
+                    <p style={{ color: "#fff", fontSize: 16, fontWeight: 700, margin: 0 }}>{val}</p>
                   </div>
                   {i < arr.length - 1 && <div style={{ width: 1, height: 28, background: "rgba(255,255,255,0.2)" }} />}
                 </div>
@@ -546,12 +546,12 @@ ${JSON.stringify(toTranslate)}`
               ))}
             </div>
           </div>
-          <div style={{ padding: "20px 16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div style={{ padding: "14px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {sections.map((s) => (
-              <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 18, padding: "18px 14px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
-                <span style={{ fontSize: 26 }}>{s.icon}</span>
-                <p style={{ margin: "8px 0 2px", fontWeight: 700, fontSize: 13, color: "#1a1a1a", lineHeight: 1.3 }}>{s.title}</p>
-                <span style={{ fontSize: 16, color: "#d1d5db" }}>›</span>
+              <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 16, padding: "14px 12px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
+                <span style={{ fontSize: 28 }}>{s.icon}</span>
+                <p style={{ margin: "8px 0 2px", fontWeight: 700, fontSize: 15, color: "#1a1a1a", lineHeight: 1.3 }}>{s.title}</p>
+                <span style={{ fontSize: 18, color: "#d1d5db" }}>›</span>
               </button>
             ))}
           </div>
