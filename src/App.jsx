@@ -381,7 +381,7 @@ ${JSON.stringify(toTranslate)}`
     es: {
       checkin: "Check-in", checkout: "Check-out", noches: "Noches",
       bienvenido: "Bienvenido/a",
-      ubicacion: "Ubicación", wifi: "Acceso WiFi", normas: "Normas de la casa",
+      ubicacion: "Ubicación", wifi: "Acceso WiFi", normas: "Normas del apartamento",
       restaurantes: "Restaurantes cercanos", transporte: "Cómo moverse",
       tours: "Operadores de Tours", contacto: "Contacto de emergencia",
       direccion: "Dirección", escanea: "📱 Escanea para conectarte",
@@ -396,7 +396,7 @@ ${JSON.stringify(toTranslate)}`
     en: {
       checkin: "Check-in", checkout: "Check-out", noches: "Nights",
       bienvenido: "Welcome",
-      ubicacion: "Location", wifi: "WiFi Access", normas: "House rules",
+      ubicacion: "Location", wifi: "WiFi Access", normas: "Apartment rules",
       restaurantes: "Nearby restaurants", transporte: "Getting around",
       tours: "Tour Operators", contacto: "Emergency contacts",
       direccion: "Address", escanea: "📱 Scan to connect",
@@ -551,7 +551,7 @@ ${JSON.stringify(toTranslate)}`
               <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 16, padding: "14px 12px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
                 <span style={{ fontSize: 28 }}>{s.icon}</span>
                 <p style={{ margin: "8px 0 2px", fontWeight: 700, fontSize: 15, color: "#1a1a1a", lineHeight: 1.3 }}>{s.title}</p>
-                <span style={{ fontSize: 18, color: "#d1d5db" }}>›</span>
+                
               </button>
             ))}
           </div>
