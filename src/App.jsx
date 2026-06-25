@@ -318,20 +318,46 @@ function GuestPortal({ reserva, content }) {
     },
     {
       id: "restaurantes", icon: "🍽️", title: "Restaurantes cercanos", color: "#7F1D1D",
-      render: () => (
-        <div>
-          {c.restaurantes.map((r, i) => (
-            <div key={i} style={{ background: "#FEF2F2", borderRadius: 14, padding: 14, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
-                <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
-                <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} caminando</p>
-              </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: "#D97706" }}>{r.precio || r.estrellas}</span>
+      render: () => {
+        const [sortR, setSortR] = React.useState("distancia");
+        const [sortDir, setSortDir] = React.useState("asc");
+        function fmtDist(m) {
+          if (!m && m !== 0) return null;
+          return m >= 1000 ? `${(m/1000).toFixed(1)} km` : `${m} m`;
+        }
+        const sorted = [...c.restaurantes].sort((a, b) => {
+          if (sortR === "distancia") {
+            const da = Number(a.distancia_m || 9999), db = Number(b.distancia_m || 9999);
+            return sortDir === "asc" ? da - db : db - da;
+          } else {
+            const pa = (a.precio||"$$").length, pb = (b.precio||"$$").length;
+            return sortDir === "asc" ? pa - pb : pb - pa;
+          }
+        });
+        return (
+          <div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+              {[["distancia","📍 Distancia"],["precio","💰 Precio"]].map(([key, label]) => (
+                <button key={key} onClick={() => { if (sortR === key) setSortDir(d => d === "asc" ? "desc" : "asc"); else { setSortR(key); setSortDir("asc"); } }}
+                  style={{ display: "flex", alignItems: "center", gap: 4, background: sortR === key ? "#7F1D1D" : "#F3F4F6", color: sortR === key ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  {label} {sortR === key ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
-      )
+            {sorted.map((r, i) => (
+              <div key={i} style={{ background: "#FEF2F2", borderRadius: 14, padding: 14, marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
+                  <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
+                  {fmtDist(r.distancia_m) && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {fmtDist(r.distancia_m)} caminando</p>}
+                  {!r.distancia_m && r.distancia && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} caminando</p>}
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#D97706" }}>{r.precio || r.estrellas}</span>
+              </div>
+            ))}
+          </div>
+        );
+      }
     },
     {
       id: "transporte", icon: "🚇", title: "Cómo moverse", color: "#1E3A5F",
@@ -474,7 +500,7 @@ function ContenidoEditor({ content, onSave }) {
       const next = JSON.parse(JSON.stringify(prev));
       const templates = {
         normas: { icon: "✅", titulo: "Nueva norma", desc: "Descripción" },
-        restaurantes: { nombre: "Nuevo restaurante", tipo: "Tipo de comida", distancia: "0 min", precio: "$$" },
+        restaurantes: { nombre: "Nuevo restaurante", tipo: "Tipo de comida", distancia: "0 min", distancia_m: 0, precio: "$$" },
         transporte: { icon: "🚗", titulo: "Nuevo medio", desc: "Descripción" },
         laureles: { icon: "📍", lugar: "Nuevo lugar", desc: "Descripción" },
         emergencias: { icon: "📞", label: "Nuevo contacto", num: "000" },
@@ -603,8 +629,12 @@ function ContenidoEditor({ content, onSave }) {
               <FieldInput label="Tipo de comida" value={r.tipo} onChange={v => updArr("restaurantes", i, "tipo", v)} />
               <div style={{ display: "flex", gap: 8 }}>
                 <div style={{ flex: 1 }}>
-                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Distancia</label>
-                  <input value={r.distancia} onChange={e => updArr("restaurantes", i, "distancia", e.target.value)} style={inputStyle} placeholder="ej: 5 min" />
+                  <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Distancia (metros)</label>
+                  <div style={{ display: "flex", alignItems: "center", border: "1px solid #E5E7EB", borderRadius: 8, overflow: "hidden" }}>
+                    <input type="number" min="0" value={r.distancia_m || ""} onChange={e => updArr("restaurantes", i, "distancia_m", e.target.value === "" ? "" : Number(e.target.value))} style={{ flex: 1, padding: "8px 12px", border: "none", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="ej: 150" />
+                    <span style={{ padding: "8px 10px", background: "#F9FAFB", fontSize: 12, color: "#6B7280", borderLeft: "1px solid #E5E7EB" }}>m</span>
+                  </div>
+                  <p style={{ margin: "3px 0 0", fontSize: 10, color: "#9CA3AF" }}>{r.distancia_m >= 1000 ? `${(r.distancia_m/1000).toFixed(1)} km` : r.distancia_m ? `${r.distancia_m} m` : ""}</p>
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Precio</label>
