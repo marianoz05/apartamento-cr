@@ -1884,16 +1884,63 @@ function ResenasPublicas() {
   const [resenas, setResenas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [resenaPage, setResenaPage] = useState(10);
+  const [lang, setLang] = useState("es");
   useEffect(()=>{sb.getResenas(null).then(data=>{if(Array.isArray(data))setResenas(data.filter(r=>!r.oculta));setLoading(false);});},[]);
+
+  const t = {
+    es: {
+      subtitle: "Laureles · Medellín",
+      title: "Apartamento Medellín",
+      tagline: "Moderno · Fresco · Central",
+      desc: "Estancia exclusiva y cómoda en Medellín, a solo 5 minutos a pie de gimnasios, restaurantes, supermercados y transporte público. Un equilibrio perfecto entre comodidad, seguridad y estilo.",
+      features: [["🛏️","2 cuartos"],["🚿","2 baños"],["📐","91 m²"],["👥","1 a 6 personas"],["📶","Internet alta velocidad"],["📍","Laureles, Medellín"]],
+      whatsapp: "💬 Consultar disponibilidad por WhatsApp",
+      rules_title: "Reglas de la casa",
+      rules: [["🚭","No fumar"],["🚫","No sustancias ilegales"],["🎉","No fiestas"],["🔇","No ruido excesivo"],["❌","No turismo sexual"]],
+      reviews_title: "Lo que dicen nuestros huéspedes",
+      verified: (n) => `${n} reseña${n!==1?"s":""} verificadas`,
+      verified_sub: "De huéspedes que se hospedaron aquí",
+      no_reviews: "Aún no hay reseñas publicadas.",
+      ver_mas: (n) => `Ver ${n} reseña${n!==1?"s":""} más ▼`,
+      footer: "Apartamento CR · Laureles, Medellín",
+      min_stay: "Estadía mínima: 3 noches",
+    },
+    en: {
+      subtitle: "Laureles · Medellín",
+      title: "Medellín Apartment",
+      tagline: "Modern · Fresh · Central",
+      desc: "Exclusive and comfortable stay in Medellín, just 5 minutes walk from gyms, restaurants, supermarkets and public transport. A perfect balance of comfort, safety and style.",
+      features: [["🛏️","2 bedrooms"],["🚿","2 bathrooms"],["📐","91 m²"],["👥","1 to 6 guests"],["📶","High-speed internet"],["📍","Laureles, Medellín"]],
+      whatsapp: "💬 Check availability on WhatsApp",
+      rules_title: "House rules",
+      rules: [["🚭","No smoking"],["🚫","No illegal substances"],["🎉","No parties"],["🔇","No excessive noise"],["❌","No sexual tourism"]],
+      reviews_title: "What our guests say",
+      verified: (n) => `${n} verified review${n!==1?"s":""}`,
+      verified_sub: "From guests who stayed here",
+      no_reviews: "No reviews published yet.",
+      ver_mas: (n) => `See ${n} more review${n!==1?"s":""} ▼`,
+      footer: "Apartamento CR · Laureles, Medellín",
+      min_stay: "Minimum stay: 3 nights",
+    }
+  }[lang];
   const promedio = resenas.length>0?(resenas.reduce((s,r)=>s+r.calificacion,0)/resenas.length).toFixed(1):null;
   function Stars({n,size=18}){return<span>{[1,2,3,4,5].map(i=><span key={i} style={{fontSize:size,color:i<=n?"#F59E0B":"#E5E7EB"}}>★</span>)}</span>;}
   return (
     <div style={{fontFamily:"Inter,sans-serif",background:"#F7F5F0",minHeight:"100vh"}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(160deg,#1B4332,#2D6A4F)",padding:"36px 20px 24px",textAlign:"center"}}>
-        <p style={{color:"#95D5B2",fontSize:11,fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",margin:"0 0 6px"}}>Laureles · Medellín</p>
-        <h1 style={{color:"#fff",fontSize:28,fontWeight:800,margin:"0 0 4px"}}>Apartamento Medellín</h1>
-        <p style={{color:"#B7E4C7",fontSize:14,margin:0}}>Moderno · Fresco · Central</p>
+      <div style={{background:"linear-gradient(160deg,#1B4332,#2D6A4F)",padding:"36px 20px 24px",textAlign:"center",position:"relative"}}>
+        {/* Language toggle */}
+        <div style={{position:"absolute",top:12,right:12,display:"flex",gap:2,background:"rgba(255,255,255,0.15)",borderRadius:20,padding:3}}>
+          {["es","en"].map(l=>(
+            <button key={l} onClick={()=>setLang(l)}
+              style={{background:lang===l?"#fff":"transparent",color:lang===l?"#1B4332":"#fff",border:"none",borderRadius:16,padding:"4px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
+        <p style={{color:"#95D5B2",fontSize:11,fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",margin:"0 0 6px"}}>{t.subtitle}</p>
+        <h1 style={{color:"#fff",fontSize:28,fontWeight:800,margin:"0 0 4px"}}>{t.title}</h1>
+        <p style={{color:"#B7E4C7",fontSize:14,margin:0}}>{t.tagline}</p>
       </div>
 
       <div style={{maxWidth:560,margin:"0 auto",paddingBottom:40}}>
@@ -1906,8 +1953,21 @@ function ResenasPublicas() {
         <div style={{background:"#fff",padding:"16px",borderBottom:"1px solid #F3F4F6"}}>
           <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
             style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
-            💬 Consultar disponibilidad por WhatsApp
+            {t.whatsapp}
           </a>
+        </div>
+
+        {/* House rules icons */}
+        <div style={{background:"#fff",padding:"16px",borderBottom:"1px solid #F3F4F6"}}>
+          <p style={{fontWeight:700,fontSize:14,color:"#111827",margin:"0 0 12px"}}>{t.rules_title}</p>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
+            {t.rules.map(([icon,label],i)=>(
+              <div key={i} style={{textAlign:"center"}}>
+                <div style={{fontSize:28,marginBottom:4}}>{icon}</div>
+                <p style={{margin:0,fontSize:10,color:"#6B7280",fontWeight:600,lineHeight:1.3}}>{label}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Rating summary */}
@@ -1918,20 +1978,20 @@ function ResenasPublicas() {
               <Stars n={Math.round(promedio)} size={16}/>
             </div>
             <div>
-              <p style={{margin:0,fontWeight:700,fontSize:14,color:"#111827"}}>{resenas.length} reseña{resenas.length!==1?"s":""} verificadas</p>
-              <p style={{margin:"4px 0 0",fontSize:12,color:"#6B7280"}}>De huéspedes que se hospedaron aquí</p>
+              <p style={{margin:0,fontWeight:700,fontSize:14,color:"#111827"}}>{t.verified(resenas.length)}</p>
+              <p style={{margin:"4px 0 0",fontSize:12,color:"#6B7280"}}>{t.verified_sub}</p>
             </div>
           </div>
         )}
 
         {/* Reviews */}
         <div style={{padding:"16px 16px 0"}}>
-          <p style={{fontWeight:700,fontSize:16,color:"#111827",margin:"0 0 12px"}}>Lo que dicen nuestros huéspedes</p>
+          <p style={{fontWeight:700,fontSize:16,color:"#111827",margin:"0 0 12px"}}>{t.reviews_title}</p>
           {loading&&<p style={{textAlign:"center",color:"#9CA3AF"}}>Cargando...</p>}
           {!loading&&resenas.length===0&&(
             <div style={{textAlign:"center",padding:32,color:"#9CA3AF",background:"#fff",borderRadius:16}}>
               <p style={{fontSize:32,margin:"0 0 8px"}}>⭐</p>
-              <p style={{margin:0}}>Aún no hay reseñas publicadas.</p>
+              <p style={{margin:0}}>{t.no_reviews}</p>
             </div>
           )}
           {resenas.slice(0, resenaPage).map(r=>(
@@ -1949,11 +2009,11 @@ function ResenasPublicas() {
           {resenaPage < resenas.length && (
             <button onClick={() => setResenaPage(p => p + 10)}
               style={{ width: "100%", background: "#F3F4F6", border: "none", borderRadius: 12, padding: "12px 0", fontSize: 13, fontWeight: 700, color: "#374151", cursor: "pointer", margin: "0 0 8px" }}>
-              Ver {Math.min(10, resenas.length - resenaPage)} reseña{Math.min(10, resenas.length - resenaPage) !== 1 ? "s" : ""} más ▼
+              {t.ver_mas(Math.min(10, resenas.length - resenaPage))}
             </button>
           )}
         </div>
-        <p style={{textAlign:"center",color:"#bbb",fontSize:11,padding:"16px 0 0"}}>Apartamento CR · Laureles, Medellín</p>
+        <p style={{textAlign:"center",color:"#bbb",fontSize:11,padding:"16px 0 0"}}>{t.footer}</p>
       </div>
     </div>
   );
