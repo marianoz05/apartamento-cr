@@ -381,7 +381,7 @@ ${JSON.stringify(toTranslate)}`
     es: {
       checkin: "Check-in", checkout: "Check-out", noches: "Noches",
       bienvenido: "Bienvenido/a",
-      ubicacion: "Ubicación", wifi: "WiFi y Acceso", normas: "Normas de la casa",
+      ubicacion: "Ubicación", wifi: "Acceso WiFi", normas: "Normas de la casa",
       restaurantes: "Restaurantes cercanos", transporte: "Cómo moverse",
       tours: "Operadores de Tours", contacto: "Contacto de emergencia",
       direccion: "Dirección", escanea: "📱 Escanea para conectarte",
@@ -396,7 +396,7 @@ ${JSON.stringify(toTranslate)}`
     en: {
       checkin: "Check-in", checkout: "Check-out", noches: "Nights",
       bienvenido: "Welcome",
-      ubicacion: "Location", wifi: "WiFi & Access", normas: "House rules",
+      ubicacion: "Location", wifi: "WiFi Access", normas: "House rules",
       restaurantes: "Nearby restaurants", transporte: "Getting around",
       tours: "Tour Operators", contacto: "Emergency contacts",
       direccion: "Address", escanea: "📱 Scan to connect",
@@ -519,7 +519,7 @@ ${JSON.stringify(toTranslate)}`
     <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F7F5F0", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: 0 }}>
       {active === null ? (
         <>
-          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "36px 20px 28px", paddingTop: "max(36px, env(safe-area-inset-top))", position: "relative", overflow: "hidden" }}>
+          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "16px 20px 24px", paddingTop: "max(16px, env(safe-area-inset-top))", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
             <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px", paddingTop: "env(safe-area-inset-top)" }}>Laureles · Medellín</p>
             <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
