@@ -251,7 +251,7 @@ function FieldInput({ label, value, onChange, multiline }) {
 }
 
 // ─── RESTAURANTES VIEW ───────────────────────────────────────────
-function RestaurantesView({ restaurantes }) {
+function RestaurantesView({ restaurantes, lang, tr: trProp }) {
   const [sortR, setSortR] = useState("distancia");
   const [sortDir, setSortDir] = useState("asc");
   function fmtDist(m) {
@@ -282,8 +282,8 @@ function RestaurantesView({ restaurantes }) {
           <div>
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
             <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
-            {fmtDist(r.distancia_m) && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {fmtDist(r.distancia_m)} caminando</p>}
-            {!r.distancia_m && r.distancia && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} caminando</p>}
+            {fmtDist(r.distancia_m) && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {fmtDist(r.distancia_m)} {trProp?.caminando||"caminando"}</p>}
+            {!r.distancia_m && r.distancia && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} {trProp?.caminando||"caminando"}</p>}
           </div>
           <span style={{ fontSize: 12, fontWeight: 700, color: "#D97706" }}>{r.precio || r.estrellas}</span>
         </div>
@@ -295,11 +295,45 @@ function RestaurantesView({ restaurantes }) {
 // ─── GUEST PORTAL ────────────────────────────────────────────────
 function GuestPortal({ reserva, content }) {
   const [active, setActive] = useState(null);
+  const [lang, setLang] = useState("es");
   const c = content;
+
+  const tr = {
+    es: {
+      checkin: "Check-in", checkout: "Check-out", noches: "Noches",
+      bienvenido: "Bienvenido/a",
+      ubicacion: "Ubicación", wifi: "WiFi y Acceso", normas: "Normas de la casa",
+      restaurantes: "Restaurantes cercanos", transporte: "Cómo moverse",
+      tours: "Operadores de Tours", contacto: "Contacto de emergencia",
+      direccion: "Dirección", escanea: "📱 Escanea para conectarte",
+      escanea_sub: "Apunta la cámara de tu celular al código",
+      red: "Red WiFi", clave: "Contraseña",
+      anfitron: "Anfitrión", escribir_wa: "💬 Escribir por WhatsApp",
+      privado: "Privado", compartido: "Compartido",
+      copiar: "📋 Copiar", copiado: "✓ Copiado",
+      no_tours: "No hay operadores registrados.",
+      caminando: "caminando",
+    },
+    en: {
+      checkin: "Check-in", checkout: "Check-out", noches: "Nights",
+      bienvenido: "Welcome",
+      ubicacion: "Location", wifi: "WiFi & Access", normas: "House rules",
+      restaurantes: "Nearby restaurants", transporte: "Getting around",
+      tours: "Tour Operators", contacto: "Emergency contacts",
+      direccion: "Address", escanea: "📱 Scan to connect",
+      escanea_sub: "Point your phone camera at the code",
+      red: "WiFi Network", clave: "Password",
+      anfitron: "Host", escribir_wa: "💬 Message on WhatsApp",
+      privado: "Private", compartido: "Shared",
+      copiar: "📋 Copy", copiado: "✓ Copied",
+      no_tours: "No operators registered.",
+      caminando: "walking",
+    }
+  }[lang];
 
   const sections = [
     {
-      id: "ubicacion", icon: "📍", title: "Ubicación", color: "#1E3A5F",
+      id: "ubicacion", icon: "📍", title: tr.ubicacion, color: "#1E3A5F",
       render: () => (
         <div>
           {c.ubicacion?.direccion && (
@@ -320,17 +354,17 @@ function GuestPortal({ reserva, content }) {
       )
     },
     {
-      id: "wifi", icon: "📶", title: "WiFi y Acceso", color: "#1B4332",
+      id: "wifi", icon: "📶", title: tr.wifi, color: "#1B4332",
       render: () => {
         const qrData = `WIFI:T:WPA;S:${c.wifi.nombre};P:${c.wifi.clave};;`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=1B4332&margin=10`;
         return (
           <div>
-            <Card label="Red WiFi" value={c.wifi.nombre} accent="#2D6A4F" />
-            <Card label="Contraseña" value={c.wifi.clave} accent="#2D6A4F" />
+            <Card label={tr.red} value={c.wifi.nombre} accent="#2D6A4F" />
+            <Card label={tr.clave} value={c.wifi.clave} accent="#2D6A4F" />
             <div style={{ background: "#F0FDF4", border: "1px solid #A7F3D0", borderRadius: 16, padding: 20, marginTop: 8, textAlign: "center" }}>
-              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>📱 Escanea para conectarte</p>
-              <p style={{ margin: "0 0 14px", fontSize: 12, color: "#6B7280" }}>Apunta la cámara de tu celular al código</p>
+              <p style={{ margin: "0 0 4px", fontSize: 13, fontWeight: 700, color: "#1B4332" }}>{tr.escanea}</p>
+              <p style={{ margin: "0 0 14px", fontSize: 12, color: "#6B7280" }}>{tr.escanea_sub}</p>
               <img src={qrUrl} alt="QR WiFi" style={{ width: 180, height: 180, borderRadius: 12, display: "block", margin: "0 auto" }} />
             </div>
           </div>
@@ -338,7 +372,7 @@ function GuestPortal({ reserva, content }) {
       }
     },
     {
-      id: "normas", icon: "📋", title: "Normas de la casa", color: "#4C1D95",
+      id: "normas", icon: "📋", title: tr.normas, color: "#4C1D95",
       render: () => (
         <div>
           {c.normas.map((n, i) => (
@@ -354,11 +388,11 @@ function GuestPortal({ reserva, content }) {
       )
     },
     {
-      id: "restaurantes", icon: "🍽️", title: "Restaurantes cercanos", color: "#7F1D1D",
-      render: () => <RestaurantesView restaurantes={c.restaurantes} />
+      id: "restaurantes", icon: "🍽️", title: tr.restaurantes, color: "#7F1D1D",
+      render: () => <RestaurantesView restaurantes={c.restaurantes} lang={lang} tr={tr} />
     },
     {
-      id: "transporte", icon: "🚇", title: "Cómo moverse", color: "#1E3A5F",
+      id: "transporte", icon: "🚇", title: tr.transporte, color: "#1E3A5F",
       render: () => (
         <div>
           {c.transporte.map((t, i) => (
@@ -371,40 +405,47 @@ function GuestPortal({ reserva, content }) {
       )
     },
     {
-      id: "tours", icon: "🗺️", title: "Operadores de Tours", color: "#78350F",
+      id: "tours", icon: "🗺️", title: tr.tours, color: "#78350F",
       render: () => (
         <div>
-          {(c.tours||[]).length === 0 && <p style={{ color: "#9CA3AF", textAlign: "center", padding: 20 }}>No hay operadores registrados.</p>}
+          {(c.tours||[]).length === 0 && <p style={{ color: "#9CA3AF", textAlign: "center", padding: 20 }}>{tr.no_tours}</p>}
           {(c.tours||[]).map((t, i) => (
             <div key={i} style={{ background: "#FFF7ED", borderRadius: 14, padding: 14, marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
                 <p style={{ margin: 0, fontWeight: 700, fontSize: 15 }}>🗺️ {t.nombre}</p>
                 <div style={{ display: "flex", gap: 4 }}>
-                  {t.privado && <span style={{ background: "#EDE9FE", color: "#6D28D9", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>🔒 Privado</span>}
-                  {t.compartido && <span style={{ background: "#DBEAFE", color: "#1E40AF", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>👥 Compartido</span>}
+                  {t.privado && <span style={{ background: "#EDE9FE", color: "#6D28D9", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>🔒 {tr.privado}</span>}
+                  {t.compartido && <span style={{ background: "#DBEAFE", color: "#1E40AF", borderRadius: 20, padding: "2px 8px", fontSize: 10, fontWeight: 700 }}>👥 {tr.compartido}</span>}
                 </div>
               </div>
               {t.detalle && <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.detalle}</p>}
-              {t.telefono && (
-                <a href={`https://wa.me/${(t.codigo_pais||"+57").replace("+","")}${t.telefono.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer"
-                  style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#25D366", color: "#fff", padding: "8px 14px", borderRadius: 10, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-                  💬 Contactar por WhatsApp
-                </a>
-              )}
+              {t.telefono && (() => {
+                const waLink = `https://wa.me/${(t.codigo_pais||"+57").replace("+","")}${t.telefono.replace(/[^0-9]/g,"")}`;
+                const [copied, setCopied] = React.useState(false);
+                return (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#F9FAFB", borderRadius: 10, padding: "8px 12px" }}>
+                    <span style={{ fontSize: 12, color: "#374151", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>💬 {waLink}</span>
+                    <button onClick={() => { navigator.clipboard?.writeText(waLink); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
+                      style={{ background: copied?"#DCFCE7":"#E5E7EB", color: copied?"#166534":"#374151", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
+                      {copied ? "✓ Copiado" : "📋 Copiar"}
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           ))}
         </div>
       )
     },
     {
-      id: "contacto", icon: "📞", title: "Contacto de emergencia", color: "#7F1D1D",
+      id: "contacto", icon: "📞", title: tr.contacto, color: "#7F1D1D",
       render: () => (
         <div>
           <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 14, padding: 16, marginBottom: 12 }}>
-            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#DC2626", textTransform: "uppercase", letterSpacing: "0.1em" }}>Anfitrión</p>
+            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#DC2626", textTransform: "uppercase", letterSpacing: "0.1em" }}>{tr.anfitron}</p>
             <p style={{ margin: "0 0 8px", fontWeight: 800, fontSize: 18 }}>{c.contacto.anfitrion_nombre}</p>
             <a href={`https://wa.me/${c.contacto.anfitrion_tel.replace(/[\s\-+]/g, "")}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#25D366", color: "#fff", padding: "8px 16px", borderRadius: 10, fontWeight: 700, fontSize: 13, textDecoration: "none" }}>
-              💬 Escribir por WhatsApp
+{tr.escribir_wa}
             </a>
           </div>
           {c.contacto.emergencias.map((e, i) => (
@@ -430,11 +471,16 @@ function GuestPortal({ reserva, content }) {
         <>
           <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "36px 20px 28px", paddingTop: "max(36px, env(safe-area-inset-top))", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
+            <div style={{ position: "absolute", top: 12, right: 12, display: "flex", gap: 2, background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: 3 }}>
+              {["es","en"].map(l => (
+                <button key={l} onClick={() => setLang(l)} style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>{l.toUpperCase()}</button>
+              ))}
+            </div>
             <p style={{ color: "#95D5B2", fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px", paddingTop: "env(safe-area-inset-top)" }}>Laureles · Medellín</p>
             <h1 style={{ color: "#fff", fontSize: 32, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
-            <p style={{ color: "#B7E4C7", fontSize: 13, margin: "0 0 16px" }}>Bienvenido/a, {reserva.huesped_nombre.split(" ")[0]} 🌿</p>
+            <p style={{ color: "#B7E4C7", fontSize: 13, margin: "0 0 16px" }}>{tr.bienvenido}, {reserva.huesped_nombre.split(" ")[0]} 🌿</p>
             <div style={{ background: "rgba(255,255,255,0.12)", borderRadius: 12, padding: "10px 14px", display: "inline-flex", gap: 16 }}>
-              {[["Check-in", formatDate(reserva.check_in)], ["Check-out", formatDate(reserva.check_out)], ["Noches", reserva.noches]].map(([lbl, val], i, arr) => (
+              {[[tr.checkin, formatDate(reserva.check_in)], [tr.checkout, formatDate(reserva.check_out)], [tr.noches, reserva.noches]].map(([lbl, val], i, arr) => (
                 <div key={i} style={{ display: "flex", gap: 16, alignItems: "center" }}>
                   <div>
                     <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.1em" }}>{lbl}</p>
