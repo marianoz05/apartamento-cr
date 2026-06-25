@@ -1445,7 +1445,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                 </div>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cédula / Pasaporte</label>
-                  <input type="text" value={form.cedula} onChange={e => updForm("cedula", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Ej: 1-0751-0500" />
+                  <input type="text" value={form.cedula} onChange={e => updForm("cedula", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Ej: 1-1111-1111" />
                 </div>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cantidad de huéspedes</label>
@@ -2670,7 +2670,7 @@ function ContratosView({ token, reservas, content }) {
     setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 1000);
   }
 
-  const completadas = reservas.filter(r => ["activa","confirmada","completada"].includes(r.estado));
+  const completadas = reservas.filter(r => ["activa","confirmada","pendiente"].includes(r.estado));
 
   return (
     <div>
