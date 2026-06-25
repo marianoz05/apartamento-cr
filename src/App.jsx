@@ -555,18 +555,17 @@ ${JSON.stringify(toTranslate)}`
                 </div>
               ))}
             </div>
-          </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10, paddingRight: 16, paddingBottom: 12 }}>
-            <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: 3 }}>
-              {["es","en"].map(l => (
-                <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
-                  style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                  {l === "en" && translating ? "..." : l.toUpperCase()}
-                </button>
-              ))}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+              <div style={{ display: "inline-flex", gap: 2, background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: 3 }}>
+                {["es","en"].map(l => (
+                  <button key={l} onClick={() => { setLang(l); if (l === "en") translateContent(); }}
+                    style={{ background: lang===l?"#fff":"transparent", color: lang===l?"#1B4332":"#fff", border: "none", borderRadius: 16, padding: "4px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                    {l === "en" && translating ? "..." : l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
           <div style={{ background: "#E8F5EE", flex: 1, minHeight: "100%" }}>
           <div style={{ padding: "14px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {sections.map((s) => (
@@ -584,7 +583,7 @@ ${JSON.stringify(toTranslate)}`
         const sec = sections.find(s => s.id === active);
         return (
           <>
-            <div style={{ background: sec.color, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 10 }}>
+            <div style={{ background: "#1B4332", padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 10 }}>
               <button onClick={() => { setActive(null); scrollTop(); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" }}>Apartamento CR</p>
