@@ -998,7 +998,7 @@ function ContenidoEditor({ content, onSave }) {
       {tab === "contrato" && (
         <div>
           <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 8, background: "#F0FDF4", borderRadius: 8, padding: "8px 12px" }}>
-            Variables: <strong>[nombre]</strong> <strong>[nombre_corto]</strong> <strong>[cedula]</strong> <strong>[domicilio]</strong> <strong>[checkin]</strong> <strong>[checkout]</strong> <strong>[noches]</strong> <strong>[personas]</strong> <strong>[monto]</strong> <strong>[monto_noche]</strong> <strong>[moneda]</strong> <strong>[hora_checkin]</strong> <strong>[hora_checkout]</strong>
+            Variables: <strong>[nombre]</strong> <strong>[nombre_corto]</strong> <strong>[cedula]</strong> <strong>[domicilio]</strong> <strong>[checkin]</strong> <strong>[checkout]</strong> <strong>[noches]</strong> <strong>[personas]</strong> <strong>[moneda]</strong> <strong>[monto]</strong> <strong>[monto_letras]</strong> <strong>[monto_noche]</strong> <strong>[monto_noche_letras]</strong> <strong>[fecha_pago]</strong> <strong>[forma_pago]</strong> <strong>[hora_checkin]</strong> <strong>[hora_checkout]</strong>
           </p>
           <ContratoEditor
             value={local.contrato || INITIAL_CONTENT.contrato}
@@ -2625,6 +2625,28 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
 }
 
 
+// ─── NUMBER TO WORDS ─────────────────────────────────────────────────
+function numberToWords(n, moneda) {
+  const unidades = ["","uno","dos","tres","cuatro","cinco","seis","siete","ocho","nueve","diez","once","doce","trece","catorce","quince","dieciséis","diecisiete","dieciocho","diecinueve","veinte","veintiuno","veintidós","veintitrés","veinticuatro","veinticinco","veintiséis","veintisiete","veintiocho","veintinueve"];
+  const decenas = ["","","veinte","treinta","cuarenta","cincuenta","sesenta","setenta","ochenta","noventa"];
+  const centenas = ["","ciento","doscientos","trescientos","cuatrocientos","quinientos","seiscientos","setecientos","ochocientos","novecientos"];
+  const monedaNombre = moneda === "CRC" ? "colones costarricenses" : "dólares americanos";
+  n = Math.round(Number(n) || 0);
+  if (n === 0) return "cero " + monedaNombre;
+  if (n === 100) return "cien " + monedaNombre;
+  let words = "";
+  if (n >= 1000) {
+    const miles = Math.floor(n / 1000);
+    words += (miles === 1 ? "mil" : (miles < 30 ? unidades[miles] : (decenas[Math.floor(miles/10)] + (miles%10 ? " y " + unidades[miles%10] : ""))) + " mil");
+    n = n % 1000;
+    if (n > 0) words += " ";
+  }
+  if (n >= 100) { words += centenas[Math.floor(n/100)]; n = n % 100; if (n > 0) words += " "; }
+  if (n >= 30) { words += decenas[Math.floor(n/10)]; if (n%10) words += " y " + unidades[n%10]; }
+  else if (n > 0) words += unidades[n];
+  return words.trim() + " " + monedaNombre;
+}
+
 // ─── CONTRATOS VIEW ───────────────────────────────────────────────
 function ContratosView({ token, reservas, content }) {
   const [modal, setModal] = useState(null); // { reserva, cedula, domicilio, fecha_firma }
@@ -2667,6 +2689,9 @@ function ContratosView({ token, reservas, content }) {
       .replace(/\[cedula\]/g, extra?.cedula || "___________")
       .replace(/\[domicilio\]/g, extra?.domicilio || "___________")
       .replace(/\[forma_pago\]/g, pagoFormaPago)
+      .replace(/\[monto_letras\]/g, numberToWords(r.monto_total, r.moneda))
+      .replace(/\[monto_noche_letras\]/g, numberToWords(r.monto_noche, r.moneda))
+      .replace(/\[fecha_pago\]/g, pagoFecha ? formatDateLong(pagoFecha) : "___")
       .replace(/\[checkin\]/g, formatDateLong(r.check_in))
       .replace(/\[checkout\]/g, formatDateLong(r.check_out))
       .replace(/\[noches\]/g, String(r.noches || 0).padStart(2, "0"))
