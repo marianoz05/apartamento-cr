@@ -2714,10 +2714,10 @@ function ContratosView({ token, reservas, content }) {
       + "ul{margin:8px 0;padding-left:20px}li{margin:4px 0}"
       + "table{width:100%;border-collapse:collapse}td{padding:8px}"
       + ".no-print{position:fixed;bottom:20px;right:20px}"
-      + "@media print{.no-print{display:none}body{margin:1.5cm}}";
+      + "@media print{#btnbar{display:none!important}body{margin:1.5cm}}";
     const html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Contrato - " + r.huesped_nombre + "</title><style>"
       + style + "</style></head><body>" + text
-      + "<div class='no-print' style='position:fixed;bottom:24px;right:24px;display:flex;gap:10px'>"+ "<button onclick='window.print()' style='background:#1B4332;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700'>🖨️ Imprimir / Guardar PDF</button>"+ "<button onclick='window.close()' style='background:#F3F4F6;color:#374151;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700'>✕ Cerrar</button>"+ "</div>"
+      + "<div id=\"btnbar\" style=\"position:fixed;bottom:0;left:0;right:0;background:#f8f8f8;border-top:1px solid #ddd;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px\">"+ "<span style=\"font-size:12px;color:#666\">💡 En el diálogo de impresión, selecciona <strong>Guardar como PDF</strong> como destino</span>"+ "<div style=\"display:flex;gap:8px\">"+ "<button onclick=\"window.print()\" style=\"background:#1B4332;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700\">🖨️ Guardar PDF</button>"+ "<button onclick=\"window.close()\" style=\"background:#F3F4F6;color:#374151;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700\">✕ Cerrar</button>"+ "</div></div>"+ "<div style=\"height:70px\"></div>"
       + "</body></html>";
     const win = window.open("about:blank", "_blank");
     win.document.open();
