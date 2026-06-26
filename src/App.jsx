@@ -2834,11 +2834,9 @@ function ContratosView({ token, reservas, content }) {
               <div>
                 <p style={{ margin: 0, fontWeight: 800, fontSize: 15 }}>{r.huesped_nombre}</p>
                 <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>{r.check_in} → {r.check_out} · {r.noches} noches</p>
-                {r.cedula && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6B7280" }}>🪪 {r.cedula}</p>}
-                {!r.cedula && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#DC2626" }}>⚠️ Sin cédula — edita la reserva</p>}
               </div>
               <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => setModal({ r, cedula: "", domicilio: "", hora_checkin: r.hora_checkin||"15:00", hora_checkout: r.hora_checkout||"12:00", fecha_firma: new Date().toISOString().split("T")[0] })}
+                <button onClick={() => setModal({ r, cedula: r.cedula||"", domicilio: r.domicilio||"", hora_checkin: r.hora_checkin||"15:00", hora_checkout: r.hora_checkout||"12:00", fecha_firma: new Date().toISOString().split("T")[0] })}
                   style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                   📄 Generar PDF
                 </button>
@@ -2867,17 +2865,9 @@ function ContratosView({ token, reservas, content }) {
                   placeholder={ph} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
               </div>
             ))}
-            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>⏰ Hora check-in</label>
-                <input type="time" value={modal.hora_checkin} onChange={e => setModal(m => ({ ...m, hora_checkin: e.target.value }))}
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>⏰ Hora check-out</label>
-                <input type="time" value={modal.hora_checkout} onChange={e => setModal(m => ({ ...m, hora_checkout: e.target.value }))}
-                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
-              </div>
+            <div style={{ background: "#F0FDF4", borderRadius: 8, padding: "8px 12px", marginBottom: 12, fontSize: 12, color: "#166534" }}>
+              ⏰ Check-in: <strong>{modal.hora_checkin || "15:00"}</strong> · Check-out: <strong>{modal.hora_checkout || "12:00"}</strong>
+              <span style={{ color: "#6B7280", marginLeft: 8 }}>(según la reserva)</span>
             </div>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>📅 Fecha de firma</label>
@@ -2886,7 +2876,19 @@ function ContratosView({ token, reservas, content }) {
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={() => setModal(null)} style={{ flex: 1, background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 10, padding: "12px 0", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Cancelar</button>
-              <button onClick={() => { printContrato({ ...modal.r, hora_checkin: modal.hora_checkin, hora_checkout: modal.hora_checkout }, modal); setModal(null); }}
+              <button onClick={() => {
+                  if (!modal.cedula.trim()) { alert("La cédula / pasaporte es requerida"); return; }
+                  if (!modal.domicilio.trim()) { alert("El domicilio es requerido"); return; }
+                  if (!modal.fecha_firma) { alert("La fecha de firma es requerida"); return; }
+                  // Save cedula and domicilio to reserva in Supabase
+                  fetch(SUPABASE_URL + "/rest/v1/reservas?id=eq." + modal.r.id, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + token },
+                    body: JSON.stringify({ cedula: modal.cedula, domicilio: modal.domicilio })
+                  });
+                  printContrato({ ...modal.r, hora_checkin: modal.hora_checkin, hora_checkout: modal.hora_checkout }, modal);
+                  setModal(null);
+                }}
                 style={{ flex: 2, background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "12px 0", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
                 📄 Generar PDF
               </button>
