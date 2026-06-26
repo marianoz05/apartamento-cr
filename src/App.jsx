@@ -2706,23 +2706,114 @@ function ContratosView({ token, reservas, content }) {
       .replace(/\[anio\]/g, extra?.fecha_firma ? new Date(extra.fecha_firma+"T12:00:00").getFullYear().toString() : "___");
   }
 
-  function printContrato(r, extra) {
+  async function printContrato(r, extra) {
     const text = generateContrato(r, extra);
-    const style = "body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
-      + "h2{font-size:14pt;text-align:center;margin-bottom:20px}"
-      + "p{margin:8px 0;text-align:justify}"
-      + "ul{margin:8px 0;padding-left:20px}li{margin:4px 0}"
-      + "table{width:100%;border-collapse:collapse}td{padding:8px}"
-      + ".no-print{position:fixed;bottom:20px;right:20px}"
-      + "@media print{#btnbar{display:none!important}body{margin:1.5cm}}";
-    const html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Contrato - " + r.huesped_nombre + "</title><style>"
-      + style + "</style></head><body>" + text
-      + "<div id=\"btnbar\" style=\"position:fixed;bottom:0;left:0;right:0;background:#f8f8f8;border-top:1px solid #ddd;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px\">"+ "<span style=\"font-size:12px;color:#666\">💡 En el diálogo de impresión, selecciona <strong>Guardar como PDF</strong> como destino</span>"+ "<div style=\"display:flex;gap:8px\">"+ "<button onclick=\"window.print()\" style=\"background:#1B4332;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700\">🖨️ Guardar PDF</button>"+ "<button onclick=\"window.close()\" style=\"background:#F3F4F6;color:#374151;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700\">✕ Cerrar</button>"+ "</div></div>"+ "<div style=\"height:70px\"></div>"
-      + "</body></html>";
-    const win = window.open("about:blank", "_blank");
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
+    // Load jsPDF
+    if (!window.jspdf) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "mm", format: "a4" });
+    const margin = 20;
+    const pageW = 210;
+    const contentW = pageW - margin * 2;
+    let y = margin;
+    const lh = 6;
+
+    // Parse HTML
+    const tmp = document.createElement("div");
+    tmp.innerHTML = text;
+
+    function wrap(txt, w) { return doc.splitTextToSize(txt, w); }
+
+    function checkPage(h) { if (y + h > 275) { doc.addPage(); y = margin; } }
+
+    function renderParagraph(node, bold) {
+      doc.setFontSize(10.5);
+      const parts = [];
+      node.childNodes.forEach(ch => {
+        if (ch.nodeType === 3) parts.push({ t: ch.textContent, b: bold });
+        else if (ch.tagName === "STRONG") parts.push({ t: ch.textContent, b: true });
+        else parts.push({ t: ch.textContent || "", b: bold });
+      });
+      const full = parts.map(p => p.t).join("");
+      if (!full.trim()) return;
+      const lines = wrap(full, contentW);
+      lines.forEach(line => {
+        checkPage(lh);
+        // Find if line starts with bold content
+        const boldEnd = parts[0]?.b ? parts[0].t.length : 0;
+        if (boldEnd > 0 && lines.indexOf(line) === 0) {
+          const bPart = full.substring(0, boldEnd > line.length ? line.length : boldEnd);
+          const nPart = line.substring(bPart.length);
+          doc.setFont("helvetica", "bold");
+          const bw = doc.getTextWidth(bPart);
+          doc.text(bPart, margin, y);
+          if (nPart) { doc.setFont("helvetica", "normal"); doc.text(nPart, margin + bw, y); }
+        } else {
+          doc.setFont("helvetica", "normal");
+          doc.text(line, margin, y, { align: "justify" });
+        }
+        y += lh;
+      });
+      y += 1;
+    }
+
+    function processNode(node) {
+      if (!node.tagName) return;
+      const tag = node.tagName.toLowerCase();
+      const txt = (node.innerText || node.textContent || "").trim();
+
+      if (tag === "h2") {
+        y += 3; checkPage(10);
+        doc.setFontSize(12); doc.setFont("helvetica", "bold");
+        const lines = wrap(txt, contentW);
+        lines.forEach(l => { checkPage(lh); doc.text(l, pageW/2, y, { align: "center" }); y += lh; });
+        y += 4;
+      } else if (tag === "p") {
+        renderParagraph(node, false);
+      } else if (tag === "ul" || tag === "ol") {
+        const items = node.querySelectorAll("li");
+        items.forEach((li, i) => {
+          const bullet = tag === "ol" ? String.fromCharCode(97+i) + "." : "•";
+          const liTxt = (li.innerText || li.textContent || "").trim();
+          doc.setFontSize(10.5); doc.setFont("helvetica", "normal");
+          const lines = wrap(liTxt, contentW - 6);
+          lines.forEach((l, li2) => {
+            checkPage(lh);
+            if (li2 === 0) doc.text(bullet + " " + l, margin + 3, y);
+            else doc.text(l, margin + 6, y);
+            y += lh;
+          });
+          y += 1;
+        });
+      } else if (tag === "table") {
+        y += 8; checkPage(14);
+        const tds = Array.from(node.querySelectorAll("td"));
+        const col1 = (tds[0]?.innerText || tds[0]?.textContent || "").trim();
+        const col2 = (tds[tds.length-1]?.innerText || tds[tds.length-1]?.textContent || "").trim();
+        doc.setLineWidth(0.3);
+        doc.line(margin, y, margin + contentW*0.42, y);
+        doc.line(margin + contentW*0.58, y, margin + contentW, y);
+        y += 5;
+        doc.setFontSize(10.5); doc.setFont("helvetica", "normal");
+        doc.text(col1, margin + contentW*0.21, y, { align: "center" });
+        doc.text(col2, margin + contentW*0.79, y, { align: "center" });
+        y += lh;
+      } else if (tag === "br") {
+        y += lh * 0.5;
+      } else {
+        node.childNodes.forEach(ch => processNode(ch));
+      }
+    }
+
+    tmp.childNodes.forEach(n => processNode(n));
+    doc.save("Contrato_" + (r.huesped_nombre || "").replace(/\s+/g, "_") + ".pdf");
   }
 
   const completadas = reservas.filter(r => ["activa","confirmada","pendiente"].includes(r.estado));
