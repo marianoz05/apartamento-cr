@@ -993,43 +993,6 @@ function ContenidoEditor({ content, onSave }) {
           <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 8, background: "#F0FDF4", borderRadius: 8, padding: "8px 12px" }}>
             Variables: <strong>[nombre]</strong> <strong>[nombre_corto]</strong> <strong>[cedula]</strong> <strong>[domicilio]</strong> <strong>[checkin]</strong> <strong>[checkout]</strong> <strong>[noches]</strong> <strong>[personas]</strong> <strong>[monto]</strong> <strong>[monto_noche]</strong> <strong>[moneda]</strong> <strong>[hora_checkin]</strong> <strong>[hora_checkout]</strong>
           </p>
-          {/* Toolbar */}
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8, background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: "8px 8px 0 0", padding: 8 }}>
-            {[
-              { cmd: "bold", label: "B", style: { fontWeight: 800 } },
-              { cmd: "italic", label: "I", style: { fontStyle: "italic" } },
-              { cmd: "underline", label: "U", style: { textDecoration: "underline" } },
-            ].map(({ cmd, label, style: st }) => (
-              <button key={cmd} onMouseDown={e => { e.preventDefault(); document.execCommand(cmd, false, null); }}
-                style={{ ...st, background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, width: 30, height: 30, cursor: "pointer", fontSize: 13 }}>
-                {label}
-              </button>
-            ))}
-            <div style={{ width: 1, background: "#E5E7EB", margin: "0 4px" }} />
-            {[
-              { cmd: "justifyLeft", label: "≡L" },
-              { cmd: "justifyCenter", label: "≡C" },
-              { cmd: "justifyFull", label: "≡J" },
-            ].map(({ cmd, label }) => (
-              <button key={cmd} onMouseDown={e => { e.preventDefault(); document.execCommand(cmd, false, null); }}
-                style={{ background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, width: 30, height: 30, cursor: "pointer", fontSize: 11 }}>
-                {label}
-              </button>
-            ))}
-            <div style={{ width: 1, background: "#E5E7EB", margin: "0 4px" }} />
-            <button onMouseDown={e => { e.preventDefault(); document.execCommand("insertUnorderedList", false, null); }}
-              style={{ background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, padding: "0 8px", height: 30, cursor: "pointer", fontSize: 11 }}>
-              • Lista
-            </button>
-            <button onMouseDown={e => { e.preventDefault(); document.execCommand("insertHorizontalRule", false, null); }}
-              style={{ background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, padding: "0 8px", height: 30, cursor: "pointer", fontSize: 11 }}>
-              — Línea
-            </button>
-            <button onClick={() => { if (window.confirm("¿Restaurar el template original del contrato?")) { setLocal(prev => ({ ...prev, contrato: prev._contratoOriginal || prev.contrato })); } }}
-              style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "0 8px", height: 30, cursor: "pointer", fontSize: 11, color: "#DC2626", marginLeft: "auto" }}>
-              ↺ Restaurar
-            </button>
-          </div>
           <ContratoEditor
             value={local.contrato || ""}
             onChange={v => setLocal(prev => ({ ...prev, contrato: v }))}
