@@ -994,7 +994,7 @@ function ContenidoEditor({ content, onSave }) {
             Variables: <strong>[nombre]</strong> <strong>[nombre_corto]</strong> <strong>[cedula]</strong> <strong>[domicilio]</strong> <strong>[checkin]</strong> <strong>[checkout]</strong> <strong>[noches]</strong> <strong>[personas]</strong> <strong>[monto]</strong> <strong>[monto_noche]</strong> <strong>[moneda]</strong> <strong>[hora_checkin]</strong> <strong>[hora_checkout]</strong>
           </p>
           <ContratoEditor
-            value={local.contrato || ""}
+            value={local.contrato || INITIAL_CONTENT.contrato}
             onChange={v => setLocal(prev => ({ ...prev, contrato: v }))}
           />
         </div>
