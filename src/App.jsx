@@ -2686,7 +2686,7 @@ function ContratosView({ token, reservas, content }) {
       + "@media print{.no-print{display:none}body{margin:1.5cm}}";
     const html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Contrato - " + r.huesped_nombre + "</title><style>"
       + style + "</style></head><body>" + text
-      + "<div class='no-print'><button onclick='window.print()' style='background:#1B4332;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700'>🖨️ Imprimir / Guardar PDF</button></div>"
+      + "<div class='no-print' style='position:fixed;bottom:24px;right:24px;display:flex;gap:10px'>"+ "<button onclick='window.print()' style='background:#1B4332;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700'>🖨️ Imprimir / Guardar PDF</button>"+ "<button onclick='window.close()' style='background:#F3F4F6;color:#374151;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700'>✕ Cerrar</button>"+ "</div>"
       + "</body></html>";
     const win = window.open("about:blank", "_blank");
     win.document.open();
