@@ -188,40 +188,7 @@ const INITIAL_CONTENT = {
   tours: [
     { nombre: "City Tours Medellín", codigo_pais: "+57", telefono: "3001234567", privado: true, compartido: true, detalle: "Tours por la ciudad, Pablo Escobar tour, tour de grafiti." },
   ],
-  contrato: `CONTRATO DE ALQUILER DE HOSPEDAJE TURÍSTICO
-
-El presente contrato de alquiler turístico se regirá por las siguientes condiciones para las partes:
-
-Lugar del hospedaje turístico: Medellín, Colombia
-
-Dirección exacta del hospedaje: Edificio San Remo, apartamento #602, calle 45E #72-57, Laureles-Estadio.
-
-Persona que brindará el servicio de hospedaje: Yanina Mora Alvarado, cédula 1-1532-0201, con domicilio en San José, Costa Rica.
-
-Persona que recibirá el servicio de hospedaje: [nombre], cédula [cedula], con domicilio en [domicilio].
-
-Fechas del servicio de hospedaje: del [checkin] al [checkout] y que corresponde a [noches] noches de hospedaje.
-
-Monto total a pagar por el servicio de hospedaje: [moneda][monto] a razón de [moneda][monto_noche] por noche.
-
-Forma de pago: el/la señor/a [nombre_corto] pagó el 100% del monto total correspondiente a [moneda][monto].
-
-Cantidad de personas que utilizarán el hospedaje: el hospedaje será brindado para un total de [personas] persona(s).
-
-Hora de ingreso y salida final del hospedaje (check in y check out): la hora de ingreso al hospedaje será el [checkin] a las [hora_checkin] y el check out se hará el [checkout] a las [hora_checkout]. Estas horas podrían ser modificadas, previo acuerdo de las partes.
-
-Otras condiciones acordadas:
-- Las personas que utilizarán el servicio se comprometen a no realizar ruidos excesivos.
-- No se permite el ingreso de visitantes o huéspedes no registrados.
-- Queda prohibido fumar o utilizar sustancias ilegales tanto en el apartamento como en el edificio.
-- No se permite realizar fiestas, reuniones o eventos en el apartamento.
-- Los huéspedes deberán mantener el inmueble en buenas condiciones de aseo.
-- No se permite sacar de la propiedad o dañar cualquier artículo facilitado.
-- No se permiten mascotas de ningún tipo durante la estancia.
-
-Leído el presente documento por las partes interesadas, firmamos en San José.
-
-Yanina Mora Alvarado                    [nombre]`,
+  contrato: `<h2 style="text-align:center;text-transform:uppercase">CONTRATO DE ALQUILER DE HOSPEDAJE TURÍSTICO</h2><p>El presente contrato de alquiler turístico se regirá por las siguientes condiciones para las partes:</p><p><strong>Lugar del hospedaje turístico:</strong> Medellín, Colombia</p><p><strong>Dirección exacta del hospedaje:</strong> Edificio San Remo, apartamento #602, calle 45E #72-57, Laureles-Estadio.</p><p><strong>Persona que brindará el servicio de hospedaje:</strong> Yanina Mora Alvarado, cédula 1-1532-0201, con domicilio en San José, Costa Rica.</p><p><strong>Persona que recibirá el servicio de hospedaje:</strong> [nombre], cédula <u>[cedula]</u>, con domicilio en [domicilio].</p><p><strong>Fechas del servicio de hospedaje:</strong> del [checkin] al [checkout] y que corresponde a [noches] noches de hospedaje.</p><p><strong>Monto total a pagar por el servicio de hospedaje:</strong> [moneda][monto] a razón de [moneda][monto_noche] por noche.</p><p><strong>Forma de pago:</strong> el/la señor/a [nombre_corto] pagó el 100% del monto total correspondiente a [moneda][monto].</p><p><strong>Cantidad de personas que utilizarán el hospedaje:</strong> el hospedaje será brindado para un total de [personas] persona(s).</p><p><strong>Hora de ingreso y salida final del hospedaje:</strong> la hora de ingreso al hospedaje será el [checkin] a las [hora_checkin] y el check out se hará el [checkout] a las [hora_checkout]. Estas horas podrían ser modificadas, previo acuerdo de las partes.</p><p><strong>Otras condiciones acordadas:</strong></p><ul><li>Las personas que utilizarán el servicio se comprometen a no realizar ruidos excesivos.</li><li>No se permite el ingreso de visitantes o huéspedes no registrados.</li><li>Queda prohibido fumar o utilizar sustancias ilegales tanto en el apartamento como en el edificio.</li><li>No se permite realizar fiestas, reuniones o eventos en el apartamento.</li><li>Los huéspedes deberán mantener el inmueble en buenas condiciones de aseo.</li><li>No se permite sacar de la propiedad o dañar cualquier artículo facilitado.</li><li>No se permiten mascotas de ningún tipo durante la estancia.</li></ul><p>Leído el presente documento por las partes interesadas, firmamos en San José.</p><br/><br/><table style="width:100%;margin-top:40px"><tr><td style="width:50%;text-align:center;border-top:1px solid #000;padding-top:8px"><strong>Yanina Mora Alvarado</strong></td><td style="width:50%;text-align:center;border-top:1px solid #000;padding-top:8px"><strong>[nombre]</strong></td></tr></table>`,
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
     pago: "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in.",
@@ -974,14 +941,53 @@ function ContenidoEditor({ content, onSave }) {
       {/* Contrato */}
       {tab === "contrato" && (
         <div>
-          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 12 }}>
-            Variables disponibles: <strong>[nombre]</strong>, <strong>[nombre_corto]</strong>, <strong>[cedula]</strong>, <strong>[domicilio]</strong>, <strong>[checkin]</strong>, <strong>[checkout]</strong>, <strong>[noches]</strong>, <strong>[personas]</strong>, <strong>[monto]</strong>, <strong>[monto_noche]</strong>, <strong>[moneda]</strong>, <strong>[hora_checkin]</strong>, <strong>[hora_checkout]</strong>
+          <p style={{ fontSize: 12, color: "#6B7280", marginBottom: 8, background: "#F0FDF4", borderRadius: 8, padding: "8px 12px" }}>
+            Variables: <strong>[nombre]</strong> <strong>[nombre_corto]</strong> <strong>[cedula]</strong> <strong>[domicilio]</strong> <strong>[checkin]</strong> <strong>[checkout]</strong> <strong>[noches]</strong> <strong>[personas]</strong> <strong>[monto]</strong> <strong>[monto_noche]</strong> <strong>[moneda]</strong> <strong>[hora_checkin]</strong> <strong>[hora_checkout]</strong>
           </p>
-          <textarea
-            value={local.contrato || ""}
-            onChange={e => setLocal(prev => ({ ...prev, contrato: e.target.value }))}
-            rows={20}
-            style={{ width: "100%", padding: "10px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 12, outline: "none", boxSizing: "border-box", fontFamily: "monospace", resize: "vertical", lineHeight: 1.6 }}
+          {/* Toolbar */}
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8, background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: "8px 8px 0 0", padding: 8 }}>
+            {[
+              { cmd: "bold", label: "B", style: { fontWeight: 800 } },
+              { cmd: "italic", label: "I", style: { fontStyle: "italic" } },
+              { cmd: "underline", label: "U", style: { textDecoration: "underline" } },
+            ].map(({ cmd, label, style: st }) => (
+              <button key={cmd} onMouseDown={e => { e.preventDefault(); document.execCommand(cmd, false, null); }}
+                style={{ ...st, background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, width: 30, height: 30, cursor: "pointer", fontSize: 13 }}>
+                {label}
+              </button>
+            ))}
+            <div style={{ width: 1, background: "#E5E7EB", margin: "0 4px" }} />
+            {[
+              { cmd: "justifyLeft", label: "≡L" },
+              { cmd: "justifyCenter", label: "≡C" },
+              { cmd: "justifyFull", label: "≡J" },
+            ].map(({ cmd, label }) => (
+              <button key={cmd} onMouseDown={e => { e.preventDefault(); document.execCommand(cmd, false, null); }}
+                style={{ background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, width: 30, height: 30, cursor: "pointer", fontSize: 11 }}>
+                {label}
+              </button>
+            ))}
+            <div style={{ width: 1, background: "#E5E7EB", margin: "0 4px" }} />
+            <button onMouseDown={e => { e.preventDefault(); document.execCommand("insertUnorderedList", false, null); }}
+              style={{ background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, padding: "0 8px", height: 30, cursor: "pointer", fontSize: 11 }}>
+              • Lista
+            </button>
+            <button onMouseDown={e => { e.preventDefault(); document.execCommand("insertHorizontalRule", false, null); }}
+              style={{ background: "#fff", border: "1px solid #D1D5DB", borderRadius: 6, padding: "0 8px", height: 30, cursor: "pointer", fontSize: 11 }}>
+              — Línea
+            </button>
+            <button onClick={() => { if (window.confirm("¿Restaurar el template original del contrato?")) { setLocal(prev => ({ ...prev, contrato: prev._contratoOriginal || prev.contrato })); } }}
+              style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "0 8px", height: 30, cursor: "pointer", fontSize: 11, color: "#DC2626", marginLeft: "auto" }}>
+              ↺ Restaurar
+            </button>
+          </div>
+          <div
+            id="contrato-editor"
+            contentEditable
+            suppressContentEditableWarning
+            dangerouslySetInnerHTML={{ __html: local.contrato || "" }}
+            onInput={e => setLocal(prev => ({ ...prev, contrato: e.currentTarget.innerHTML }))}
+            style={{ minHeight: 400, padding: "14px 16px", border: "1px solid #E5E7EB", borderTop: "none", borderRadius: "0 0 8px 8px", fontSize: 13, lineHeight: 1.8, outline: "none", background: "#fff", fontFamily: "Arial, sans-serif" }}
           />
         </div>
       )}
@@ -2653,20 +2659,17 @@ function ContratosView({ token, reservas, content }) {
 
   function printContrato(r) {
     const text = generateContrato(r);
-    const bodyHtml = text.split("\n").map((line, i) => {
-      if (i === 0) return "<h1>" + line + "</h1>";
-      if (!line.trim()) return "<p>&nbsp;</p>";
-      return "<p>" + line + "</p>";
-    }).join("");
     const style = "body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
-      + "h1{font-size:14pt;text-align:center;text-transform:uppercase;margin-bottom:24px}"
-      + "p{margin:6px 0;text-align:justify}"
+      + "h2{font-size:14pt;text-align:center;margin-bottom:20px}"
+      + "p{margin:8px 0;text-align:justify}"
+      + "ul{margin:8px 0;padding-left:20px}li{margin:4px 0}"
+      + "table{width:100%;border-collapse:collapse}td{padding:8px}"
+      + ".no-print{position:fixed;bottom:20px;right:20px}"
       + "@media print{.no-print{display:none}body{margin:1.5cm}}";
-    const html = "<!DOCTYPE html><html><head><meta charset=\'utf-8\'><title>Contrato</title><style>"
-      + style + "</style></head><body>" + bodyHtml
-      + "<div class=\'no-print\' style=\'position:fixed;bottom:20px;right:20px\'>"
-      + "<button onclick=\'window.print()\' style=\'background:#1B4332;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:bold\'>🖨️ Imprimir / Guardar PDF</button>"
-      + "</div></body></html>";
+    const html = "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Contrato - " + r.huesped_nombre + "</title><style>"
+      + style + "</style></head><body>" + text
+      + "<div class='no-print'><button onclick='window.print()' style='background:#1B4332;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;cursor:pointer;font-weight:700'>🖨️ Imprimir / Guardar PDF</button></div>"
+      + "</body></html>";
     const win = window.open("about:blank", "_blank");
     win.document.open();
     win.document.write(html);
