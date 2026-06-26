@@ -599,6 +599,55 @@ ${JSON.stringify(toTranslate)}`
   );
 }
 
+// ─── CONTRATO EDITOR ─────────────────────────────────────────────────
+function ContratoEditor({ value, onChange }) {
+  const ref = useRef(null);
+  const lastValue = useRef(value);
+
+  useEffect(() => {
+    if (ref.current && value !== lastValue.current) {
+      ref.current.innerHTML = value;
+      lastValue.current = value;
+    }
+  }, [value]);
+
+  function exec(cmd, val) {
+    ref.current.focus();
+    document.execCommand(cmd, false, val || null);
+    onChange(ref.current.innerHTML);
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", background: "#F9FAFB", border: "1px solid #E5E7EB", borderRadius: "8px 8px 0 0", padding: 8 }}>
+        {[["bold","B",{fontWeight:800}],["italic","I",{fontStyle:"italic"}],["underline","U",{textDecoration:"underline"}]].map(([cmd,label,st])=>(
+          <button key={cmd} onMouseDown={e=>{e.preventDefault();exec(cmd);}}
+            style={{...st,background:"#fff",border:"1px solid #D1D5DB",borderRadius:6,width:30,height:30,cursor:"pointer",fontSize:13}}>{label}</button>
+        ))}
+        <div style={{width:1,background:"#E5E7EB",margin:"0 4px"}}/>
+        {[["justifyLeft","≡L"],["justifyCenter","≡C"],["justifyFull","≡J"]].map(([cmd,label])=>(
+          <button key={cmd} onMouseDown={e=>{e.preventDefault();exec(cmd);}}
+            style={{background:"#fff",border:"1px solid #D1D5DB",borderRadius:6,width:30,height:30,cursor:"pointer",fontSize:11}}>{label}</button>
+        ))}
+        <div style={{width:1,background:"#E5E7EB",margin:"0 4px"}}/>
+        <button onMouseDown={e=>{e.preventDefault();exec("insertUnorderedList");}} style={{background:"#fff",border:"1px solid #D1D5DB",borderRadius:6,padding:"0 8px",height:30,cursor:"pointer",fontSize:11}}>• Lista</button>
+        <select onChange={e=>{if(e.target.value){exec("fontSize",e.target.value);e.target.value="";}}}
+          style={{background:"#fff",border:"1px solid #D1D5DB",borderRadius:6,padding:"0 6px",height:30,cursor:"pointer",fontSize:11,marginLeft:"auto"}}>
+          <option value="">Tamaño</option>
+          {[["Pequeño","2"],["Normal","3"],["Grande","4"],["Título","5"]].map(([l,v])=><option key={v} value={v}>{l}</option>)}
+        </select>
+      </div>
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={e => { lastValue.current = e.currentTarget.innerHTML; onChange(e.currentTarget.innerHTML); }}
+        style={{ minHeight: 400, padding: "14px 16px", border: "1px solid #E5E7EB", borderTop: "none", borderRadius: "0 0 8px 8px", fontSize: 13, lineHeight: 1.8, outline: "none", background: "#fff", fontFamily: "Arial, sans-serif" }}
+      />
+    </div>
+  );
+}
+
 // ─── CONTENIDO EDITOR ────────────────────────────────────────────
 function ContenidoEditor({ content, onSave }) {
   const [local, setLocal] = useState(JSON.parse(JSON.stringify(content)));
@@ -981,13 +1030,9 @@ function ContenidoEditor({ content, onSave }) {
               ↺ Restaurar
             </button>
           </div>
-          <div
-            id="contrato-editor"
-            contentEditable
-            suppressContentEditableWarning
-            dangerouslySetInnerHTML={{ __html: local.contrato || "" }}
-            onInput={e => setLocal(prev => ({ ...prev, contrato: e.currentTarget.innerHTML }))}
-            style={{ minHeight: 400, padding: "14px 16px", border: "1px solid #E5E7EB", borderTop: "none", borderRadius: "0 0 8px 8px", fontSize: 13, lineHeight: 1.8, outline: "none", background: "#fff", fontFamily: "Arial, sans-serif" }}
+          <ContratoEditor
+            value={local.contrato || ""}
+            onChange={v => setLocal(prev => ({ ...prev, contrato: v }))}
           />
         </div>
       )}
