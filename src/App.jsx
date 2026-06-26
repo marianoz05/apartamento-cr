@@ -605,6 +605,13 @@ function ContratoEditor({ value, onChange }) {
   const lastValue = useRef(value);
 
   useEffect(() => {
+    if (ref.current) {
+      ref.current.innerHTML = value;
+      lastValue.current = value;
+    }
+  }, []);
+
+  useEffect(() => {
     if (ref.current && value !== lastValue.current) {
       ref.current.innerHTML = value;
       lastValue.current = value;
