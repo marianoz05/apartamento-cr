@@ -188,7 +188,7 @@ const INITIAL_CONTENT = {
   tours: [
     { nombre: "City Tours Medellín", codigo_pais: "+57", telefono: "3001234567", privado: true, compartido: true, detalle: "Tours por la ciudad, Pablo Escobar tour, tour de grafiti." },
   ],
-  contrato: "<h2 style=\"text-align:center;text-decoration:underline;font-size:13pt;font-family:Arial\">CONTRATO DE ALQUILER DE HOSPEDAJE TURÍSTICO</h2><p style=\"text-align:justify\">El presente contrato de alquiler turístico se regirá por las siguientes condiciones para las partes:</p><p style=\"text-align:justify\"><strong>Lugar del hospedaje turístico</strong>: Medellín, Colombia</p><p style=\"text-align:justify\"><strong>Dirección exacta del hospedaje:</strong> Edificio San Remo, apartamento #602, calle 45E #72-57, Laureles-Estadio.</p><p style=\"text-align:justify\"><strong>Persona que brindará el servicio de hospedaje</strong>: Yanina Mora Alvarado, cédula 1-1532-0201, con domicilio en San José, Costa Rica.</p><p style=\"text-align:justify\"><strong>Persona que recibirá el servicio de hospedaje</strong>: [nombre], cédula [cedula], con domicilio en [domicilio].</p><p style=\"text-align:justify\"><strong>Fechas del servicio de hospedaje</strong>: del [checkin] al [checkout] y que corresponde a [noches] noches de hospedaje.</p><p style=\"text-align:justify\"><strong>Monto total a pagar por el servicio de hospedaje</strong>: [moneda][monto], a razón de [moneda][monto_noche] por noche.</p><p style=\"text-align:justify\"><strong>Forma de pago</strong>: la/el señor/a [nombre_corto] pagó el 100% del monto total correspondiente a [moneda][monto].</p><p style=\"text-align:justify\"><strong>Cantidad de personas que utilizarán el hospedaje</strong>: el hospedaje será brindado para un total de [personas] personas. En caso de que se requiera adicionar más huéspedes, la persona que contrata el servicio de hospedaje deberá coordinarlo previamente con la Sra. Mora con el fin de realizar el ajuste en el monto respectivo. En caso de que se requiera disminuir la cantidad de personas a utilizar el servicio, el monto total no será modificado.</p><p style=\"text-align:justify\"><strong>Condiciones del servicio de hospedaje</strong>: la Sra. Mora se compromete a brindar el servicio de hospedaje en buenas condiciones de aseo y con el menaje necesario durante los días requeridos. Entre los servicios que se proporcionarán a las personas que utilicen el hospedaje están: muebles de sala, televisores, muebles de comedor y cocina con su respectivo equipamiento, camas en sus dos habitaciones con su respectivo baño, servicio de internet, entre otras facilidades. Todo en excelentes condiciones.</p><p style=\"text-align:justify\">Por su parte, la persona que contrata el servicio de hospedaje se compromete a entregar el apartamento y su equipamiento y utensilios en las mismas condiciones en que fueron recibidos. Cualquier daño o pérdida causada por los huéspedes deberá ser informada inmediatamente a los propietarios. Los artículos dañados o deberán ser pagados en un máximo de dos días hábiles, de acuerdo con el monto indicado por los dueños.</p><p style=\"text-align:justify\"><strong>Hora de ingreso y salida final del hospedaje (check in y check out)</strong>: la hora de ingreso al hospedaje será el [checkin] a las [hora_checkin] y el check out se hará el [checkout] a las [hora_checkout]. Estas horas podrían ser modificadas, previo acuerdo de las partes.</p><p><strong>Otras condiciones acordadas:</strong></p><ol type=\"a\" style=\"text-align:justify\"><li>Las personas que utilizarán el servicio de hospedaje aquí definido se comprometen a no realizar ruidos excesivos que alteren la tranquilidad de los demás residentes del condominio.</li><li>No se permite el ingreso de visitantes o huéspedes no registrados.</li><li>Queda prohibido fumar o utilizar sustancias ilegales tanto en el apartamento como en el edificio.</li><li>No se permite realizar fiestas, reuniones o eventos en el apartamento.</li><li>Los huéspedes deberán mantener el inmueble en buenas condiciones de aseo durante todo el tiempo del hospedaje.</li><li>No se permite sacar de la propiedad o dañar cualquier mueble, utensilio, electrodoméstico o artículo facilitado por la Sra. Mora para la estadía.</li><li>No se permiten mascotas de ningún tipo durante la estancia.</li><li>La señora Mora no será responsable por las lesiones, daños o pérdidas que pudiese sufrir la/s persona/s que contrata/n el servicio de hospedaje, sus familiares o terceros dentro del inmueble, causados por accidentes, robos, fenómenos naturales o incendios.</li></ol><p style=\"text-align:justify\">Leído el presente documento por las partes interesadas, firmamos en San José, a los [dia] días del mes de [mes] de [anio].</p><br/><br/><br/><table style=\"width:100%\"><tr><td style=\"width:45%;border-top:1px solid #000;padding-top:6px;text-align:center\">Yanina Mora Alvarado</td><td style=\"width:10%\"></td><td style=\"width:45%;border-top:1px solid #000;padding-top:6px;text-align:center\">[nombre]</td></tr></table>",
+  contrato: "<h2 style=\"text-align:center;text-decoration:underline;font-size:13pt;font-family:Arial\">CONTRATO DE ALQUILER DE HOSPEDAJE TURÍSTICO</h2><p style=\"text-align:justify\">El presente contrato de alquiler turístico se regirá por las siguientes condiciones para las partes:</p><p style=\"text-align:justify\"><strong>Lugar del hospedaje turístico</strong>: Medellín, Colombia</p><p style=\"text-align:justify\"><strong>Dirección exacta del hospedaje:</strong> Edificio San Remo, apartamento #602, calle 45E #72-57, Laureles-Estadio.</p><p style=\"text-align:justify\"><strong>Persona que brindará el servicio de hospedaje</strong>: Yanina Mora Alvarado, cédula 1-1532-0201, con domicilio en San José, Costa Rica.</p><p style=\"text-align:justify\"><strong>Persona que recibirá el servicio de hospedaje</strong>: [nombre], cédula [cedula], con domicilio en [domicilio].</p><p style=\"text-align:justify\"><strong>Fechas del servicio de hospedaje</strong>: del [checkin] al [checkout] y que corresponde a [noches] noches de hospedaje.</p><p style=\"text-align:justify\"><strong>Monto total a pagar por el servicio de hospedaje</strong>: [moneda][monto], a razón de [moneda][monto_noche] por noche.</p><p style=\"text-align:justify\"><strong>Forma de pago</strong>: [forma_pago]</p><p style=\"text-align:justify\"><strong>Cantidad de personas que utilizarán el hospedaje</strong>: el hospedaje será brindado para un total de [personas] personas. En caso de que se requiera adicionar más huéspedes, la persona que contrata el servicio de hospedaje deberá coordinarlo previamente con la Sra. Mora con el fin de realizar el ajuste en el monto respectivo. En caso de que se requiera disminuir la cantidad de personas a utilizar el servicio, el monto total no será modificado.</p><p style=\"text-align:justify\"><strong>Condiciones del servicio de hospedaje</strong>: la Sra. Mora se compromete a brindar el servicio de hospedaje en buenas condiciones de aseo y con el menaje necesario durante los días requeridos. Entre los servicios que se proporcionarán a las personas que utilicen el hospedaje están: muebles de sala, televisores, muebles de comedor y cocina con su respectivo equipamiento, camas en sus dos habitaciones con su respectivo baño, servicio de internet, entre otras facilidades. Todo en excelentes condiciones.</p><p style=\"text-align:justify\">Por su parte, la persona que contrata el servicio de hospedaje se compromete a entregar el apartamento y su equipamiento y utensilios en las mismas condiciones en que fueron recibidos. Cualquier daño o pérdida causada por los huéspedes deberá ser informada inmediatamente a los propietarios. Los artículos dañados o deberán ser pagados en un máximo de dos días hábiles, de acuerdo con el monto indicado por los dueños.</p><p style=\"text-align:justify\"><strong>Hora de ingreso y salida final del hospedaje (check in y check out)</strong>: la hora de ingreso al hospedaje será el [checkin] a las [hora_checkin] y el check out se hará el [checkout] a las [hora_checkout]. Estas horas podrían ser modificadas, previo acuerdo de las partes.</p><p><strong>Otras condiciones acordadas:</strong></p><ol type=\"a\" style=\"text-align:justify\"><li>Las personas que utilizarán el servicio de hospedaje aquí definido se comprometen a no realizar ruidos excesivos que alteren la tranquilidad de los demás residentes del condominio.</li><li>No se permite el ingreso de visitantes o huéspedes no registrados.</li><li>Queda prohibido fumar o utilizar sustancias ilegales tanto en el apartamento como en el edificio.</li><li>No se permite realizar fiestas, reuniones o eventos en el apartamento.</li><li>Los huéspedes deberán mantener el inmueble en buenas condiciones de aseo durante todo el tiempo del hospedaje.</li><li>No se permite sacar de la propiedad o dañar cualquier mueble, utensilio, electrodoméstico o artículo facilitado por la Sra. Mora para la estadía.</li><li>No se permiten mascotas de ningún tipo durante la estancia.</li><li>La señora Mora no será responsable por las lesiones, daños o pérdidas que pudiese sufrir la/s persona/s que contrata/n el servicio de hospedaje, sus familiares o terceros dentro del inmueble, causados por accidentes, robos, fenómenos naturales o incendios.</li></ol><p style=\"text-align:justify\">Leído el presente documento por las partes interesadas, firmamos en San José, a los [dia] días del mes de [mes] de [anio].</p><br/><br/><br/><table style=\"width:100%\"><tr><td style=\"width:45%;border-top:1px solid #000;padding-top:6px;text-align:center\">Yanina Mora Alvarado</td><td style=\"width:10%\"></td><td style=\"width:45%;border-top:1px solid #000;padding-top:6px;text-align:center\">[nombre]</td></tr></table>",
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
     pago: "Hola [nombre], tienes un saldo pendiente de [moneda][saldo] para tu reserva del [checkin].\n\nPor favor coordina el pago antes del check-in.",
@@ -1026,7 +1026,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [dashboardDetail, setDashboardDetail] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [expandedMonths, setExpandedMonths] = useState(new Set());
-  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", cedula: "", hora_checkin: "15:00", hora_checkout: "12:00", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "USD", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
+  const emptyForm = { huesped_nombre: "", huesped_email: "", telefono: "", codigo_pais: "+506", hora_checkin: "15:00", hora_checkout: "12:00", check_in: "", check_out: "", noches: 0, cantidad_huespedes: 1, monto_noche: 0, monto_total: 0, moneda: "USD", pago1_monto: 0, pago1_fecha: "", pago2_monto: 0, pago2_fecha: "", saldo: 0, llave_entregada: false, traslape_autorizado: false, estado: "pendiente" };
 
   const PAISES = [
     { code: "+506", label: "🇨🇷 CR +506" },
@@ -1198,7 +1198,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     setForm({
       huesped_nombre: r.huesped_nombre || "", huesped_email: r.huesped_email || "",
       telefono: r.telefono || "", codigo_pais: r.codigo_pais || "+506",
-      cedula: r.cedula || "", hora_checkin: r.hora_checkin || "15:00", hora_checkout: r.hora_checkout || "12:00",
+      hora_checkin: r.hora_checkin || "15:00", hora_checkout: r.hora_checkout || "12:00",
       check_in: r.check_in || "", check_out: r.check_out || "",
       noches: r.noches || 0, cantidad_huespedes: r.cantidad_huespedes || 1,
       monto_noche: r.monto_noche || 0, monto_total: r.monto_total || 0,
@@ -1463,10 +1463,6 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Teléfono</label>
                     <input type="tel" value={form.telefono} onChange={e => updForm("telefono", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
                   </div>
-                </div>
-                <div style={{ marginBottom: 10 }}>
-                  <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cédula / Pasaporte</label>
-                  <input type="text" value={form.cedula} onChange={e => updForm("cedula", e.target.value)} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} placeholder="Ej: 1-1111-1111" />
                 </div>
                 <div style={{ marginBottom: 10 }}>
                   <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>Cantidad de huéspedes</label>
@@ -2631,8 +2627,9 @@ function LimpiezaView({ token, reservas, limpiezas, setLimpiezas }) {
 
 // ─── CONTRATOS VIEW ───────────────────────────────────────────────
 function ContratosView({ token, reservas, content }) {
-  const [preview, setPreview] = useState(null);
+  const [modal, setModal] = useState(null); // { reserva, cedula, domicilio, fecha_firma }
   const MONEDAS = { CRC: "₡", USD: "$" };
+  const MONEDA_NOMBRES = { CRC: "colones costarricenses", USD: "dólares americanos" };
 
   function fmt(n, moneda) { return (MONEDAS[moneda]||"$") + Number(n||0).toLocaleString(); }
 
@@ -2652,15 +2649,24 @@ function ContratosView({ token, reservas, content }) {
     return `${h12}:${m} ${ampm}`;
   }
 
-  function generateContrato(r) {
+  function generateContrato(r, extra) {
     const template = content?.contrato || "";
     const sym = MONEDAS[r.moneda] || "$";
+    const monedaNombre = MONEDA_NOMBRES[r.moneda] || "dólares americanos";
     const personas = ["uno","dos","tres","cuatro","cinco","seis"][Number(r.cantidad_huespedes||1)-1] || r.cantidad_huespedes;
+    // Payment: use pago2 date if exists, otherwise pago1
+    const pagoFecha = r.pago2_fecha || r.pago1_fecha || "";
+    const pagoFormaPago = "la/el señor/a " + (r.huesped_nombre||"").split(" ")[0]
+      + " pagó el día " + (pagoFecha ? formatDateLong(pagoFecha) : "___")
+      + " el 100% del monto total, correspondiente a "
+      + sym + Number(r.monto_total||0).toLocaleString()
+      + ".";
     return template
       .replace(/\[nombre\]/g, r.huesped_nombre || "")
       .replace(/\[nombre_corto\]/g, (r.huesped_nombre||"").split(" ")[0])
-      .replace(/\[cedula\]/g, r.cedula || "___________")
-      .replace(/\[domicilio\]/g, r.domicilio || "___________")
+      .replace(/\[cedula\]/g, extra?.cedula || "___________")
+      .replace(/\[domicilio\]/g, extra?.domicilio || "___________")
+      .replace(/\[forma_pago\]/g, pagoFormaPago)
       .replace(/\[checkin\]/g, formatDateLong(r.check_in))
       .replace(/\[checkout\]/g, formatDateLong(r.check_out))
       .replace(/\[noches\]/g, String(r.noches || 0).padStart(2, "0"))
@@ -2670,13 +2676,13 @@ function ContratosView({ token, reservas, content }) {
       .replace(/\[moneda\]/g, sym)
       .replace(/\[hora_checkin\]/g, formatHora(r.hora_checkin) || "3:00 pm")
       .replace(/\[hora_checkout\]/g, formatHora(r.hora_checkout) || "12:00 pm")
-      .replace(/\[dia\]/g, r.check_in ? new Date(r.check_in+"T12:00:00").getDate().toString() : "___")
-      .replace(/\[mes\]/g, r.check_in ? ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][new Date(r.check_in+"T12:00:00").getMonth()] : "___")
-      .replace(/\[anio\]/g, r.check_in ? new Date(r.check_in+"T12:00:00").getFullYear().toString() : "___");
+      .replace(/\[dia\]/g, extra?.fecha_firma ? new Date(extra.fecha_firma+"T12:00:00").getDate().toString() : "___")
+      .replace(/\[mes\]/g, extra?.fecha_firma ? ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][new Date(extra.fecha_firma+"T12:00:00").getMonth()] : "___")
+      .replace(/\[anio\]/g, extra?.fecha_firma ? new Date(extra.fecha_firma+"T12:00:00").getFullYear().toString() : "___");
   }
 
-  function printContrato(r) {
-    const text = generateContrato(r);
+  function printContrato(r, extra) {
+    const text = generateContrato(r, extra);
     const style = "body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.8;margin:2cm;color:#111}"
       + "h2{font-size:14pt;text-align:center;margin-bottom:20px}"
       + "p{margin:8px 0;text-align:justify}"
@@ -2716,7 +2722,7 @@ function ContratosView({ token, reservas, content }) {
                 {!r.cedula && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#DC2626" }}>⚠️ Sin cédula — edita la reserva</p>}
               </div>
               <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => printContrato(r)}
+                <button onClick={() => setModal({ r, cedula: "", domicilio: "", hora_checkin: r.hora_checkin||"15:00", hora_checkout: r.hora_checkout||"12:00", fecha_firma: new Date().toISOString().split("T")[0] })}
                   style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 8, padding: "7px 12px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
                   📄 Generar PDF
                 </button>
@@ -2728,6 +2734,50 @@ function ContratosView({ token, reservas, content }) {
       <p style={{ fontSize: 12, color: "#9CA3AF", marginTop: 16 }}>
         💡 Edita el texto del contrato en <strong>Contenido → 📄 Contrato</strong>
       </p>
+
+      {/* Modal */}
+      {modal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 20, padding: 24, width: "100%", maxWidth: 420, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+            <p style={{ fontWeight: 800, fontSize: 16, margin: "0 0 16px" }}>📄 Datos para el contrato</p>
+            <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 16px" }}>Reserva: <strong>{modal.r.huesped_nombre}</strong> · {modal.r.check_in} → {modal.r.check_out}</p>
+            {[
+              ["Cédula / Pasaporte", "cedula", "text", "Ej: 1-1111-1111"],
+              ["Domicilio", "domicilio", "text", "Ej: San José, Costa Rica"],
+            ].map(([label, key, type, ph]) => (
+              <div key={key} style={{ marginBottom: 12 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>{label}</label>
+                <input type={type} value={modal[key]} onChange={e => setModal(m => ({ ...m, [key]: e.target.value }))}
+                  placeholder={ph} style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>⏰ Hora check-in</label>
+                <input type="time" value={modal.hora_checkin} onChange={e => setModal(m => ({ ...m, hora_checkin: e.target.value }))}
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>⏰ Hora check-out</label>
+                <input type="time" value={modal.hora_checkout} onChange={e => setModal(m => ({ ...m, hora_checkout: e.target.value }))}
+                  style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+              </div>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 }}>📅 Fecha de firma</label>
+              <input type="date" value={modal.fecha_firma} onChange={e => setModal(m => ({ ...m, fecha_firma: e.target.value }))}
+                style={{ width: "100%", padding: "8px 12px", borderRadius: 8, border: "1px solid #E5E7EB", fontSize: 13, outline: "none", boxSizing: "border-box" }} />
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={() => setModal(null)} style={{ flex: 1, background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 10, padding: "12px 0", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Cancelar</button>
+              <button onClick={() => { printContrato({ ...modal.r, hora_checkin: modal.hora_checkin, hora_checkout: modal.hora_checkout }, modal); setModal(null); }}
+                style={{ flex: 2, background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "12px 0", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+                📄 Generar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
