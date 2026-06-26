@@ -2896,7 +2896,7 @@ export default function App() {
   useEffect(() => {
     if (savedToken && !guestToken) {
       sb.getContenido(savedToken).then(c => {
-        if (c && Object.keys(c).length > 0) setContent(c);
+        if (c && Object.keys(c).length > 0) setContent({ ...INITIAL_CONTENT, ...c });
       });
     }
   }, []);
@@ -2905,7 +2905,7 @@ export default function App() {
     setToken(t);
     localStorage.setItem("cr_token", t);
     const savedContent = await sb.getContenido(t);
-    if (savedContent && Object.keys(savedContent).length > 0) setContent(savedContent);
+    if (savedContent && Object.keys(savedContent).length > 0) setContent({ ...INITIAL_CONTENT, ...savedContent });
     setScreen("admin");
     setTimeout(() => {
       if (document.activeElement) document.activeElement.blur();
