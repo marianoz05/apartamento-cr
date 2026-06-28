@@ -1050,8 +1050,17 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   function calcularEstado(r) {
     if (r.estado === "cancelada") return "cancelada";
     const hoy = new Date().toISOString().split("T")[0];
-    if (r.check_out && hoy >= r.check_out) return "completada";
-    if (r.check_in && hoy >= r.check_in && hoy < r.check_out) return "activa";
+    if (r.check_out) {
+      if (hoy > r.check_out) return "completada";
+      if (hoy === r.check_out) {
+        // On checkout day, check time
+        const now = new Date();
+        const [h, m] = (r.hora_checkout || "12:00").split(":").map(Number);
+        const checkoutTime = new Date(); checkoutTime.setHours(h, m, 0, 0);
+        if (now >= checkoutTime) return "completada";
+      }
+    }
+    if (r.check_in && hoy >= r.check_in && hoy <= r.check_out) return "activa";
     if (Number(r.saldo || 0) <= 0 && Number(r.monto_total || 0) > 0) return "confirmada";
     return "pendiente";
   }
