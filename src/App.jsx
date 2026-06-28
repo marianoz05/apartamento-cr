@@ -1110,7 +1110,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     return () => document.removeEventListener("click", close);
   }, []);
 
-  useEffect(() => {
+  function loadAllData() {
     sb.getLimpiezas(onLogoutToken).then(data => {
       if (Array.isArray(data)) setLimpiezas(data);
     });
@@ -1119,10 +1119,8 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     });
     sb.getReservas(onLogoutToken).then(data => {
       if (Array.isArray(data)) {
-        // Auto-update states based on dates and payments
         const updated = data.map(r => ({ ...r, estado: calcularEstado(r) }));
         setReservas(updated);
-        // Persist updated states back to Supabase silently
         updated.forEach(r => {
           const original = data.find(d => d.id === r.id);
           if (original && original.estado !== r.estado) {
@@ -1132,6 +1130,16 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       }
       setLoading(false);
     });
+  }
+
+  useEffect(() => {
+    loadAllData();
+    // Reload when tab becomes visible again
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") loadAllData();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, []);
 
   const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
