@@ -1438,7 +1438,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     </div>
                     <div style={{ background: "#FEF3C7", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
                       <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#D97706" }}>{limpiezasPendientePago}</p>
-                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#D97706", fontWeight: 600 }}>Pte. pago</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#D97706", fontWeight: 600 }}>Pend. pago</p>
                     </div>
                   </div>
                 </div>
