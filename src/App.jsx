@@ -1156,8 +1156,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   }).length;
   const limpiezasCoordinadas = limpiezas.filter(l => l.coordinado && !l.realizada).length;
   const limpiezasPendientePago = limpiezas.filter(l => l.realizada && !l.pagado).length;
+  const limpiezasPorCoorinar = limpiezas.filter(l => !l.coordinado).length;
   const activeNow = reservas.filter(r => r.estado === "activa").length;
   const upcoming = reservas.filter(r => r.estado === "confirmada").length;
+  const pendingCount = reservas.filter(r => r.estado === "pendiente").length;
 
   function getLimpiezaStatus(reservaId) {
     const found = limpiezas.filter(l => l.reserva_id === reservaId);
@@ -1397,18 +1399,49 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
               <p style={{ fontWeight: 800, fontSize: 18, margin: "0 0 16px", color: "#111827" }}>Reservas</p>
             )}
             {!showForm && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-                {[
-                  { label: "Reserva Activa", value: activeNow, color: "#16A34A", bg: "#DCFCE7" },
-                  { label: "Próximas Reservas", value: upcoming, color: "#2563EB", bg: "#DBEAFE" },
-                  { label: "Limpieza Coordinada", value: limpiezasCoordinadas, color: "#D97706", bg: "#FEF3C7" },
-                  { label: "Limpieza Pendiente Pago", value: limpiezasPendientePago, color: "#DC2626", bg: "#FEE2E2" },
-                ].map((s, i) => (
-                  <div key={i} style={{ background: s.bg, borderRadius: 14, padding: "14px 12px", textAlign: "center" }}>
-                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: s.color }}>{s.value}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: 11, color: s.color, fontWeight: 600 }}>{s.label}</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+                {/* Fila Reservas */}
+                <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#1B4332", borderRadius: 12, padding: "0 8px", minWidth: 28 }}>
+                    <p style={{ margin: 0, fontSize: 9, fontWeight: 800, color: "#95D5B2", letterSpacing: "0.15em", writingMode: "vertical-rl", textTransform: "uppercase", transform: "rotate(180deg)" }}>RESERVAS</p>
                   </div>
-                ))}
+                  <div style={{ flex: 1, display: "grid", gridTemplateColumns: activeNow > 0 ? "1fr 1fr 1fr" : "1fr 1fr", gap: 8 }}>
+                    {activeNow > 0 && (
+                      <div style={{ background: "#DCFCE7", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+                        <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#16A34A" }}>{activeNow}</p>
+                        <p style={{ margin: "3px 0 0", fontSize: 10, color: "#16A34A", fontWeight: 600 }}>Activa{activeNow !== 1 ? "s" : ""}</p>
+                      </div>
+                    )}
+                    <div style={{ background: "#DBEAFE", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+                      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#2563EB" }}>{upcoming}</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#2563EB", fontWeight: 600 }}>Confirmada{upcoming !== 1 ? "s" : ""}</p>
+                    </div>
+                    <div style={{ background: "#FEF3C7", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+                      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#D97706" }}>{pendingCount}</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#D97706", fontWeight: 600 }}>Pendiente{pendingCount !== 1 ? "s" : ""}</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Fila Limpiezas */}
+                <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", background: "#1B4332", borderRadius: 12, padding: "0 8px", minWidth: 28 }}>
+                    <p style={{ margin: 0, fontSize: 9, fontWeight: 800, color: "#95D5B2", letterSpacing: "0.15em", writingMode: "vertical-rl", textTransform: "uppercase", transform: "rotate(180deg)" }}>LIMPIEZAS</p>
+                  </div>
+                  <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                    <div style={{ background: "#FEE2E2", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+                      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#DC2626" }}>{limpiezasPorCoorinar}</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#DC2626", fontWeight: 600 }}>Por coordinar</p>
+                    </div>
+                    <div style={{ background: "#DBEAFE", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+                      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#2563EB" }}>{limpiezasCoordinadas}</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#2563EB", fontWeight: 600 }}>Coordinada{limpiezasCoordinadas !== 1 ? "s" : ""}</p>
+                    </div>
+                    <div style={{ background: "#FEF3C7", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+                      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#D97706" }}>{limpiezasPendientePago}</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#D97706", fontWeight: 600 }}>Pte. pago</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
