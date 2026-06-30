@@ -1438,7 +1438,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                     </div>
                     <div style={{ background: "#FEF3C7", borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
                       <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#D97706" }}>{limpiezasPendientePago}</p>
-                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#D97706", fontWeight: 600 }}>Pend. pago</p>
+                      <p style={{ margin: "3px 0 0", fontSize: 10, color: "#D97706", fontWeight: 600 }}>Pte. pago</p>
                     </div>
                   </div>
                 </div>
@@ -2196,6 +2196,31 @@ function ResenaForm({ reservaId }) {
   );
 }
 
+// ─── PHOTO GALLERY ───────────────────────────────────────────────
+function PhotoGallery({ cuarto, cocina, bano }) {
+  const [lightbox, setLightbox] = useState(null);
+  const photos = [["/Cuarto_page.jpg", cuarto],["/Cocina_page.jpg", cocina],["/Bano_page.jpg", bano]];
+  return (
+    <>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:16,borderRadius:12,overflow:"hidden"}}>
+        {photos.map(([src,label],i)=>(
+          <div key={i} style={{cursor:"pointer"}} onClick={()=>setLightbox(src)}>
+            <img src={src} alt={label} style={{width:"100%",height:100,objectFit:"cover",display:"block"}}
+              onError={e=>{e.target.style.display="none";}}/>
+            <p style={{margin:0,fontSize:10,fontWeight:700,textAlign:"center",padding:"4px 2px",background:"#F3F4F6",color:"#374151"}}>{label}</p>
+          </div>
+        ))}
+      </div>
+      {lightbox && (
+        <div onClick={()=>setLightbox(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+          <button onClick={()=>setLightbox(null)} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:40,height:40,fontSize:20,cursor:"pointer",fontWeight:700}}>✕</button>
+          <img src={lightbox} alt="" style={{maxWidth:"100%",maxHeight:"90vh",borderRadius:12,objectFit:"contain"}} onClick={e=>e.stopPropagation()}/>
+        </div>
+      )}
+    </>
+  );
+}
+
 // ─── RESENAS PUBLICAS ─────────────────────────────────────────────
 function ResenasPublicas() {
   const [resenas, setResenas] = useState([]);
@@ -2283,19 +2308,7 @@ function ResenasPublicas() {
             ))}
           </div>
           {/* Photo gallery */}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:16,borderRadius:12,overflow:"hidden"}}>
-            {[
-              ["/Cuarto_page.jpg", t.cuarto],
-              ["/Cocina_page.jpg", t.cocina],
-              ["/Bano_page.jpg", t.bano],
-            ].map(([src,label],i)=>(
-              <div key={i} style={{position:"relative"}}>
-                <img src={src} alt={label} style={{width:"100%",height:100,objectFit:"cover",display:"block"}}
-                  onError={e=>{e.target.style.display="none";}}/>
-                <p style={{margin:0,fontSize:10,fontWeight:700,textAlign:"center",padding:"4px 2px",background:"#F3F4F6",color:"#374151"}}>{label}</p>
-              </div>
-            ))}
-          </div>
+          <PhotoGallery cuarto={t.cuarto} cocina={t.cocina} bano={t.bano} />
           <p style={{margin:"0 0 4px",fontSize:12,color:"#6B7280"}}>⏱️ {t.min_nights} · {t.capacity}</p>
         </div>
 
@@ -3182,10 +3195,17 @@ export default function App() {
         <ResenaForm reservaId={resenaId} />
       )}
       {screen === "portal_preview" && (
-        <GuestPortal
-          reserva={{ huesped_nombre: "Admin", check_in: new Date().toISOString().split("T")[0], check_out: new Date(Date.now()+3*86400000).toISOString().split("T")[0], noches: 3 }}
-          content={content}
-        />
+        <div style={{ position: "relative" }}>
+          <div style={{ position: "fixed", top: 12, left: 12, zIndex: 999 }}>
+            <button onClick={() => setScreen("login")} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+              ← Volver
+            </button>
+          </div>
+          <GuestPortal
+            reserva={{ huesped_nombre: "Admin", check_in: new Date().toISOString().split("T")[0], check_out: new Date(Date.now()+3*86400000).toISOString().split("T")[0], noches: 3 }}
+            content={content}
+          />
+        </div>
       )}
       {screen === "resenas_publicas" && (
         <ResenasPublicas />
