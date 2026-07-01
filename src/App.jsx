@@ -398,7 +398,7 @@ ${JSON.stringify(toTranslate)}`
       ubicacion: "Ubicación", wifi: "Acceso WiFi", normas: "Normas del Apartamento",
       restaurantes: "Restaurantes cercanos", transporte: "Cómo moverse",
       tours: "Operadores de Tours", contacto: "Contacto de emergencia",
-      divisas: "Cambio de divisas", abrir_lugar: "🗺️ Abrir el lugar",
+      divisas: "Cambio de divisas", abrir_lugar: "🗺️ Abrir en Google Maps",
       direccion: "Dirección", escanea: "📱 Escanea para conectarte",
       escanea_sub: "Apunta la cámara de tu celular al código",
       red: "Red WiFi", clave: "Contraseña",
@@ -416,7 +416,7 @@ ${JSON.stringify(toTranslate)}`
       ubicacion: "Location", wifi: "WiFi Access", normas: "Apartment rules",
       restaurantes: "Nearby restaurants", transporte: "Getting around",
       tours: "Tour Operators", contacto: "Emergency contacts",
-      divisas: "Currency exchange", abrir_lugar: "🗺️ Open location",
+      divisas: "Currency exchange", abrir_lugar: "🗺️ Open in Google Maps",
       direccion: "Address", escanea: "📱 Scan to connect",
       escanea_sub: "Point your phone camera at the code",
       red: "WiFi Network", clave: "Password",
@@ -714,6 +714,7 @@ function ContenidoEditor({ content, onSave }) {
         restaurantes: { nombre: "Nuevo restaurante", tipo: "Tipo de comida", distancia: "0 min", distancia_m: 0, precio: "$$" },
         transporte: { icon: "🚗", titulo: "Nuevo medio", desc: "Descripción" },
         tours: { nombre: "", codigo_pais: "+57", telefono: "", privado: false, compartido: false, detalle: "" },
+        divisas: { nombre: "", maps_link: "" },
         emergencias: { icon: "📞", label: "Nuevo contacto", num: "000" },
       };
       if (section === "emergencias") next.contacto.emergencias.push(templates.emergencias);
@@ -744,6 +745,7 @@ function ContenidoEditor({ content, onSave }) {
     { id: "restaurantes", label: "🍽️ Restaurantes" },
     { id: "transporte", label: "🚇 Transporte" },
     { id: "tours", label: "🗺️ Operadores de Tours" },
+    { id: "divisas", label: "💱 Cambio de divisas" },
     { id: "contacto", label: "📞 Contacto" },
     { id: "mensajes", label: "💬 Mensajes" },
     { id: "contrato", label: "📄 Contrato" },
@@ -935,6 +937,26 @@ function ContenidoEditor({ content, onSave }) {
             </div>
           ))}
           <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); if (!next.tours) next.tours=[]; next.tours.push({ nombre:"", codigo_pais:"+57", telefono:"", privado:false, compartido:false, detalle:"" }); return next; }); }} style={{ background: "#F0FDF4", color: "#16A34A", border: "1px dashed #86EFAC", borderRadius: 12, padding: "10px 0", width: "100%", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Agregar operador</button>
+        </div>
+      )}
+
+      {/* Cambio de divisas */}
+      {tab === "divisas" && (
+        <div>
+          <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 16 }}>
+            Casas de cambio o puntos para cambiar divisas. Pega el link de Google Maps del lugar (botón "Compartir" → "Copiar enlace" en Google Maps).
+          </p>
+          {(local.divisas||[]).map((d, i) => (
+            <div key={i} style={cardStyle}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: "#374151" }}>{d.nombre || `Lugar ${i+1}`}</p>
+                <button onClick={() => removeItem("divisas", i)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 6, padding: "3px 8px", fontSize: 11, cursor: "pointer" }}>Eliminar</button>
+              </div>
+              <FieldInput label="Nombre del lugar" value={d.nombre||""} onChange={v => updArr("divisas", i, "nombre", v)} />
+              <FieldInput label="Link de Google Maps" value={d.maps_link||""} onChange={v => updArr("divisas", i, "maps_link", v)} />
+            </div>
+          ))}
+          <button onClick={() => { setLocal(prev => { const next = JSON.parse(JSON.stringify(prev)); if (!next.divisas) next.divisas=[]; next.divisas.push({ nombre:"", maps_link:"" }); return next; }); }} style={{ background: "#F0FDF4", color: "#16A34A", border: "1px dashed #86EFAC", borderRadius: 12, padding: "10px 0", width: "100%", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>+ Agregar casa de cambio</button>
         </div>
       )}
 
