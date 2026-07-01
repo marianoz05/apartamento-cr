@@ -1058,7 +1058,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
   const [view, setView] = useState("reservas");
   const [reservas, setReservas] = useState([]);
   const [limpiezas, setLimpiezas] = useState([]);
-  const [resenaIds, setResenaIds] = useState(new Set());
+  const [resenaCount, setResenaCount] = useState({});
   const [loading, setLoading] = useState(true);
   const [calendarDate, setCalendarDate] = useState({ year: new Date().getFullYear(), month: new Date().getMonth() });
   const [showForm, setShowForm] = useState(false);
@@ -1158,7 +1158,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
       if (Array.isArray(data)) setLimpiezas(data);
     });
     sb.getResenas(onLogoutToken).then(data => {
-      if (Array.isArray(data)) setResenaIds(new Set(data.map(r => String(r.reserva_id)).filter(Boolean)));
+      if (Array.isArray(data)) { const counts = {}; data.forEach(r => { const k = String(r.reserva_id); if (k && k !== "null") counts[k] = (counts[k]||0)+1; }); setResenaCount(counts); }
     });
     sb.getReservas(onLogoutToken).then(data => {
       if (Array.isArray(data)) {
@@ -1356,7 +1356,7 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     sb.getResenas(onLogoutToken).then(data => {
-      if (Array.isArray(data)) setResenaIds(new Set(data.map(r => String(r.reserva_id)).filter(Boolean)));
+      if (Array.isArray(data)) { const counts = {}; data.forEach(r => { const k = String(r.reserva_id); if (k && k !== "null") counts[k] = (counts[k]||0)+1; }); setResenaCount(counts); }
     });
   }, [view]);
 
@@ -1839,7 +1839,8 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                       </div>
                                                     )}
                                                   </div>
-                                                  {r.estado === "completada" && r.telefono && !resenaIds.has(String(r.id)) && (
+                                                  {r.estado === "completada" && r.telefono && (
+                                                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                                                     <button onClick={() => {
                                                       const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
                                                       const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
@@ -1848,6 +1849,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                     }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                                                       ⭐ Solicitar reseña
                                                     </button>
+                                                      {(resenaCount[String(r.id)]||0) > 0 && (
+                                                        <span style={{ background: "rgba(107,114,128,0.15)", color: "#6B7280", borderRadius: 6, padding: "3px 8px", fontSize: 11, fontWeight: 700 }}>+{resenaCount[String(r.id)]}</span>
+                                                      )}
+                                                    </div>
                                                   )}
                                                   <button onClick={() => setConfirmDelete(r)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
                                                 </div>
@@ -2001,7 +2006,8 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                             </div>
                                                           )}
                                                         </div>
-                                                        {r.estado === "completada" && r.telefono && !resenaIds.has(String(r.id)) && (
+                                                        {r.estado === "completada" && r.telefono && (
+                                                          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                                                           <button onClick={() => {
                                                             const link = `https://apartamento-cr.vercel.app/resena/${r.id}`;
                                                             const msg = `Hola ${r.huesped_nombre.split(" ")[0]}, gracias por tu estadía en Apartamento CR 🌿 Nos encantaría conocer tu opinión: ${link}`;
@@ -2010,6 +2016,10 @@ function AdminPanel({ onLogout, onLogoutToken, content, onContentSave }) {
                                                           }} style={{ background: "#FEF9C3", color: "#A16207", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
                                                             ⭐ Solicitar reseña
                                                           </button>
+                                                            {(resenaCount[String(r.id)]||0) > 0 && (
+                                                              <span style={{ background: "rgba(107,114,128,0.15)", color: "#6B7280", borderRadius: 6, padding: "3px 8px", fontSize: 11, fontWeight: 700 }}>+{resenaCount[String(r.id)]}</span>
+                                                            )}
+                                                          </div>
                                                         )}
                                                         <button onClick={() => setConfirmDelete(r)} style={{ background: "#FEF2F2", color: "#DC2626", border: "none", borderRadius: 8, padding: "6px 10px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️ Eliminar</button>
                                                       </div>
@@ -2096,10 +2106,6 @@ function ResenasAdminView({ token, reservas }) {
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
         <p style={{fontWeight:800,fontSize:18,margin:0,color:"#111827"}}>Reseñas</p>
-        <button onClick={()=>{navigator.clipboard?.writeText("https://apartamento-cr.vercel.app/apartamento-medellin");setCopied(true);setTimeout(()=>setCopied(false),2000);}}
-          style={{background:"#F0FDF4",color:"#166534",border:"1px solid #A7F3D0",borderRadius:10,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
-          {copied?"✓ Copiado":"🔗 Copiar link público"}
-        </button>
       </div>
       {resenas.length===0&&!loading&&(
         <div style={{background:"#fff",borderRadius:16,padding:32,textAlign:"center",color:"#9CA3AF"}}>
@@ -2190,12 +2196,9 @@ function ResenaForm({ reservaId }) {
   const [status, setStatus] = useState("loading");
 
   useEffect(() => {
-    fetch(`${SUPABASE_URL}/rest/v1/resenas?reserva_id=eq.${reservaId}&select=*`,{headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`}})
-      .then(r=>r.json()).then(rows=>{
-        if(Array.isArray(rows)&&rows.length>0){setStatus("already");return;}
-        fetch(`${SUPABASE_URL}/rest/v1/reservas?id=eq.${reservaId}&select=huesped_nombre,check_in,check_out`,{headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`}})
-          .then(r=>r.json()).then(rows=>{if(Array.isArray(rows)&&rows[0])setReserva(rows[0]);setStatus("form");});
-      }).catch(()=>setStatus("error"));
+    fetch(`${SUPABASE_URL}/rest/v1/reservas?id=eq.${reservaId}&select=huesped_nombre,check_in,check_out`,{headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${SUPABASE_ANON_KEY}`}})
+      .then(r=>r.json()).then(rows=>{if(Array.isArray(rows)&&rows[0])setReserva(rows[0]);setStatus("form");})
+      .catch(()=>setStatus("error"));
   },[reservaId]);
 
   async function submit() {
@@ -2208,7 +2211,6 @@ function ResenaForm({ reservaId }) {
   }
 
   if(status==="loading")return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F5F0",fontFamily:"Inter,sans-serif"}}><p style={{color:"#6B7280"}}>Cargando...</p></div>;
-  if(status==="already")return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F5F0",fontFamily:"Inter,sans-serif",padding:20}}><div style={{textAlign:"center"}}><p style={{fontSize:48,margin:"0 0 12px"}}>✅</p><p style={{fontWeight:800,fontSize:20,color:"#111827"}}>¡Gracias!</p><p style={{color:"#6B7280",fontSize:14}}>Ya enviaste tu reseña.</p></div></div>;
   if(status==="sent")return<div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F7F5F0",fontFamily:"Inter,sans-serif",padding:20}}><div style={{textAlign:"center"}}><p style={{fontSize:48,margin:"0 0 12px"}}>🌿</p><p style={{fontWeight:800,fontSize:22,color:"#111827",margin:"0 0 8px"}}>¡Muchas gracias!</p><p style={{color:"#6B7280",fontSize:15}}>Tu reseña fue enviada con éxito.</p></div></div>;
 
   return (
