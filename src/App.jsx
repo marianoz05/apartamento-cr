@@ -3149,13 +3149,13 @@ function Login({ onLogin, onPortalPreview }) {
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
       </div>
-    </div>
-    {/* Quick action buttons below card */}
-    <div style={{ display: "flex", gap: 10, marginTop: 12, width: "100%", maxWidth: 380, padding: "0 0px" }}>
-      <CopyLinkButton />
-      <button onClick={onPortalPreview} style={{ flex: 1, background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-        👤 Ver portal
-      </button>
+      {/* Quick action buttons below card */}
+      <div style={{ display: "flex", gap: 10, marginTop: 12, width: "100%", maxWidth: 380 }}>
+        <CopyLinkButton />
+        <button onClick={onPortalPreview} style={{ flex: 1, background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          👤 Ver portal
+        </button>
+      </div>
     </div>
   );
 }
