@@ -971,9 +971,7 @@ function ContenidoEditor({ content, onSave }) {
               <div style={{ display: "flex", gap: 8 }}>
                 <div style={{ width: 60 }}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Ícono</label>
-                  <input value={e.icon} onChange={ev => updArr("emergencias_contact", i, "icon", ev.target.value)}
-                    onChange={ev => { setLocal(p => { const n = JSON.parse(JSON.stringify(p)); n.contacto.emergencias[i].icon = ev.target.value; return n; }); }}
-                    style={{ ...inputStyle, textAlign: "center", fontSize: 18 }} />
+                  <input value={e.icon} onChange={ev => updArr("emergencias_contact", i, "icon", ev.target.value)} style={{ ...inputStyle, textAlign: "center", fontSize: 18 }} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#6B7280", marginBottom: 4 }}>Nombre</label>
@@ -3148,7 +3146,7 @@ function CopyLinkButton() {
   );
 }
 
-function App() {
+export default function App() {
   const path = window.location.pathname;
   const guestMatch = path.match(/^\/g\/(.+)$/);
   const guestToken = guestMatch ? guestMatch[1] : null;
