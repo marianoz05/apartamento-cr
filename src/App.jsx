@@ -3201,6 +3201,104 @@ function GuestScreen({ token, initialContent }) {
   return <GuestPortal reserva={reserva} content={content} />;
 }
 
+// ─── INFO BASICA (público · sin reserva · sin traducción) ─────────
+function InfoBasica() {
+  const [content, setContent] = useState(INITIAL_CONTENT);
+  const [status, setStatus] = useState("loading");
+  const [active, setActive] = useState(null);
+  const scrollRef = useRef(null);
+  function scrollTop() { if (scrollRef.current) scrollRef.current.scrollTop = 0; }
+
+  useEffect(() => {
+    sb.getContenido(null).then(c => {
+      if (c && typeof c === "object" && Object.keys(c).length > 0) setContent({ ...INITIAL_CONTENT, ...c });
+      setStatus("ok");
+    }).catch(() => setStatus("ok"));
+  }, []);
+
+  // Etiquetas fijas en español (sin traducción)
+  const tr = {
+    restaurantes: "Restaurantes cercanos", transporte: "Cómo moverse", tours: "Operadores de Tours",
+    no_tours: "No hay operadores registrados.",
+    recomendaciones: "Algunas recomendaciones son:",
+    tipo_tour: "Tipo de tour", caminando: "caminando",
+  };
+  const c = content;
+
+  const sections = [
+    {
+      id: "restaurantes", icon: "🍽️", title: tr.restaurantes,
+      render: () => <RestaurantesView restaurantes={c.restaurantes || []} lang="es" tr={tr} />
+    },
+    {
+      id: "transporte", icon: "🚇", title: tr.transporte,
+      render: () => (
+        <div>
+          {(c.transporte || []).map((t, i) => (
+            <div key={i} style={{ background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{t.icon} {t.titulo}</p>
+              <p style={{ margin: "6px 0 0", fontSize: 14, color: "#6B7280" }}>{t.desc}</p>
+            </div>
+          ))}
+        </div>
+      )
+    },
+    {
+      id: "tours", icon: "🗺️", title: tr.tours,
+      render: () => <ToursView tours={c.tours || []} tr={tr} />
+    },
+  ];
+
+  if (status === "loading") return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif", background: "#F7F5F0" }}>
+      <div style={{ textAlign: "center" }}>
+        <p style={{ fontSize: 32, margin: "0 0 12px" }}>🌿</p>
+        <p style={{ color: "#6B7280", fontSize: 14 }}>Cargando información...</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div ref={scrollRef} style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#1B4332", height: "100dvh", maxWidth: 430, margin: "0 auto", overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "env(safe-area-inset-top)" }}>
+      {active === null ? (
+        <>
+          <div style={{ background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)", padding: "20px 20px 16px", position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
+            <p style={{ color: "#95D5B2", fontSize: 12, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", margin: "0 0 6px" }}>Laureles · Medellín</p>
+            <h1 style={{ color: "#fff", fontSize: 34, fontWeight: 800, margin: "0 0 4px", lineHeight: 1.1 }}>Apartamento CR</h1>
+            <p style={{ color: "#B7E4C7", fontSize: 15, margin: 0 }}>Información de la zona 🌿</p>
+          </div>
+          <div style={{ background: "#E8F5EE", flex: 1, minHeight: "100%" }}>
+            <div style={{ padding: "14px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {sections.map((s) => (
+                <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 16, padding: "14px 12px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
+                  <span style={{ fontSize: 28 }}>{s.icon}</span>
+                  <p style={{ margin: "8px 0 2px", fontWeight: 700, fontSize: 15, color: "#1a1a1a", lineHeight: 1.3 }}>{s.title}</p>
+                </button>
+              ))}
+            </div>
+            <p style={{ textAlign: "center", color: "#6B7280", fontSize: 11, padding: "0 0 32px" }}>Apartamento CR · Laureles, Medellín</p>
+          </div>
+        </>
+      ) : (() => {
+        const sec = sections.find(s => s.id === active);
+        return (
+          <>
+            <div style={{ background: "#1B4332", padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 10 }}>
+              <button onClick={() => { setActive(null); scrollTop(); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
+              <div>
+                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" }}>Apartamento CR</p>
+                <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0 }}>{sec.icon} {sec.title}</h2>
+              </div>
+            </div>
+            <div style={{ padding: "20px 16px 40px", background: "#E8F5EE", minHeight: "100%" }}>{sec.render()}</div>
+          </>
+        );
+      })()}
+    </div>
+  );
+}
+
 // ─── LOGIN ────────────────────────────────────────────────────────
 function Login({ onLogin, onPortalPreview }) {
   const [email, setEmail] = useState("");
@@ -3248,9 +3346,12 @@ function Login({ onLogin, onPortalPreview }) {
         </button>
       </div>
       {/* Quick action buttons below card */}
-      <div style={{ display: "flex", gap: 10, marginTop: 12, width: "100%", maxWidth: 380 }}>
-        <CopyLinkButton />
-        <button onClick={onPortalPreview} style={{ flex: 1, background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12, width: "100%", maxWidth: 380 }}>
+        <div style={{ display: "flex", gap: 10 }}>
+          <CopyLinkButton />
+          <CopyBasicoButton />
+        </div>
+        <button onClick={onPortalPreview} style={{ width: "100%", background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
           👤 Ver portal
         </button>
       </div>
@@ -3268,8 +3369,23 @@ function CopyLinkButton() {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      style={{ flex: 1, background: copied ? "rgba(22,163,74,0.8)" : "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }}>
-      {copied ? "✓ ¡Copiado!" : "🔗 Copiar link"}
+      style={{ flex: 1, background: copied ? "rgba(22,163,74,0.8)" : "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 6px", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "background 0.2s", lineHeight: 1.2 }}>
+      {copied ? "✓ ¡Copiado!" : "🔗 Copiar Link Info Completa"}
+    </button>
+  );
+}
+
+function CopyBasicoButton() {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => {
+        navigator.clipboard?.writeText("https://apartamento-cr.vercel.app/info-basica");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      style={{ flex: 1, background: copied ? "rgba(22,163,74,0.8)" : "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 6px", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "background 0.2s", lineHeight: 1.2 }}>
+      {copied ? "✓ ¡Copiado!" : "📄 Info Básica"}
     </button>
   );
 }
@@ -3281,10 +3397,11 @@ export default function App() {
   const resenaMatch = path.match(/^\/resena\/(.+)$/);
   const resenaId = resenaMatch ? resenaMatch[1] : null;
   const isResenasPublicas = path === "/resenas" || path === "/apartamento-medellin";
+  const isInfoBasica = path === "/info-basica";
 
   const savedToken = localStorage.getItem("cr_token");
   const [screen, setScreen] = useState(
-    guestToken ? "guest" : resenaId ? "resena" : isResenasPublicas ? "resenas_publicas" : savedToken ? "admin" : "login"
+    guestToken ? "guest" : resenaId ? "resena" : isInfoBasica ? "info_basica" : isResenasPublicas ? "resenas_publicas" : savedToken ? "admin" : "login"
   );
   const [content, setContent] = useState(INITIAL_CONTENT);
   const [token, setToken] = useState(savedToken);
@@ -3347,6 +3464,9 @@ export default function App() {
       )}
       {screen === "resenas_publicas" && (
         <ResenasPublicas />
+      )}
+      {screen === "info_basica" && (
+        <InfoBasica />
       )}
     </div>
   );
