@@ -3186,8 +3186,10 @@ export default function App() {
       {screen === "login" && (
         <div>
           <Login onLogin={handleLogin} />
-          <div style={{ position: "fixed", bottom: 16, right: 16, display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", zIndex: 100 }}>
+          <div style={{ position: "fixed", bottom: 16, left: 16, zIndex: 100 }}>
             <CopyLinkButton />
+          </div>
+          <div style={{ position: "fixed", bottom: 16, right: 16, zIndex: 100 }}>
             <button onClick={() => setScreen("portal_preview")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
               👤 Ver portal huésped
             </button>
