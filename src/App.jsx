@@ -188,6 +188,9 @@ const INITIAL_CONTENT = {
   tours: [
     { nombre: "City Tours Medellín", codigo_pais: "+57", telefono: "3001234567", privado: true, compartido: true, detalle: "Tours por la ciudad, Pablo Escobar tour, tour de grafiti." },
   ],
+  divisas: [
+    { nombre: "Casa de Cambio en Hotel Prestige", maps_link: "https://maps.app.goo.gl/JpoNMmEMybeZ1MA38" },
+  ],
   contrato: "<h2 style=\"text-align:center;text-decoration:underline;font-size:13pt;font-family:Arial\">CONTRATO DE ALQUILER DE HOSPEDAJE TURÍSTICO</h2><p style=\"text-align:justify\">El presente contrato de alquiler turístico se regirá por las siguientes condiciones para las partes:</p><p style=\"text-align:justify\"><strong>Lugar del hospedaje turístico</strong>: Medellín, Colombia</p><p style=\"text-align:justify\"><strong>Dirección exacta del hospedaje:</strong> Edificio San Remo, apartamento #602, calle 45E #72-57, Laureles-Estadio.</p><p style=\"text-align:justify\"><strong>Persona que brindará el servicio de hospedaje</strong>: Yanina Mora Alvarado, cédula 1-1532-0201, con domicilio en San José, Costa Rica.</p><p style=\"text-align:justify\"><strong>Persona que recibirá el servicio de hospedaje</strong>: [nombre], cédula [cedula], con domicilio en [domicilio].</p><p style=\"text-align:justify\"><strong>Fechas del servicio de hospedaje</strong>: del [checkin] al [checkout] y que corresponde a [noches] noches de hospedaje.</p><p style=\"text-align:justify\"><strong>Monto total a pagar por el servicio de hospedaje</strong>: [moneda][monto], a razón de [moneda][monto_noche] por noche.</p><p style=\"text-align:justify\"><strong>Forma de pago</strong>: [forma_pago]</p><p style=\"text-align:justify\"><strong>Cantidad de personas que utilizarán el hospedaje</strong>: el hospedaje será brindado para un total de [personas] personas. En caso de que se requiera adicionar más huéspedes, la persona que contrata el servicio de hospedaje deberá coordinarlo previamente con la Sra. Mora con el fin de realizar el ajuste en el monto respectivo. En caso de que se requiera disminuir la cantidad de personas a utilizar el servicio, el monto total no será modificado.</p><p style=\"text-align:justify\"><strong>Condiciones del servicio de hospedaje</strong>: la Sra. Mora se compromete a brindar el servicio de hospedaje en buenas condiciones de aseo y con el menaje necesario durante los días requeridos. Entre los servicios que se proporcionarán a las personas que utilicen el hospedaje están: muebles de sala, televisores, muebles de comedor y cocina con su respectivo equipamiento, camas en sus dos habitaciones con su respectivo baño, servicio de internet, entre otras facilidades. Todo en excelentes condiciones.</p><p style=\"text-align:justify\">Por su parte, la persona que contrata el servicio de hospedaje se compromete a entregar el apartamento y su equipamiento y utensilios en las mismas condiciones en que fueron recibidos. Cualquier daño o pérdida causada por los huéspedes deberá ser informada inmediatamente a los propietarios. Los artículos dañados o deberán ser pagados en un máximo de dos días hábiles, de acuerdo con el monto indicado por los dueños.</p><p style=\"text-align:justify\"><strong>Hora de ingreso y salida final del hospedaje (check in y check out)</strong>: la hora de ingreso al hospedaje será el [checkin] a las [hora_checkin] y el check out se hará el [checkout] a las [hora_checkout]. Estas horas podrían ser modificadas, previo acuerdo de las partes.</p><p><strong>Otras condiciones acordadas:</strong></p><ol type=\"a\" style=\"text-align:justify\"><li>Las personas que utilizarán el servicio de hospedaje aquí definido se comprometen a no realizar ruidos excesivos que alteren la tranquilidad de los demás residentes del condominio.</li><li>No se permite el ingreso de visitantes o huéspedes no registrados.</li><li>Queda prohibido fumar o utilizar sustancias ilegales tanto en el apartamento como en el edificio.</li><li>No se permite realizar fiestas, reuniones o eventos en el apartamento.</li><li>Los huéspedes deberán mantener el inmueble en buenas condiciones de aseo durante todo el tiempo del hospedaje.</li><li>No se permite sacar de la propiedad o dañar cualquier mueble, utensilio, electrodoméstico o artículo facilitado por la Sra. Mora para la estadía.</li><li>No se permiten mascotas de ningún tipo durante la estancia.</li><li>La señora Mora no será responsable por las lesiones, daños o pérdidas que pudiese sufrir la/s persona/s que contrata/n el servicio de hospedaje, sus familiares o terceros dentro del inmueble, causados por accidentes, robos, fenómenos naturales o incendios.</li></ol><p style=\"text-align:justify\">Leído el presente documento por las partes interesadas, firmamos en San José, a los [dia] días del mes de [mes] de [anio].</p><br/><br/><br/><table style=\"width:100%\"><tr><td style=\"width:45%;border-top:1px solid #000;padding-top:6px;text-align:center\">Yanina Mora Alvarado</td><td style=\"width:10%\"></td><td style=\"width:45%;border-top:1px solid #000;padding-top:6px;text-align:center\">[nombre]</td></tr></table>",
   mensajes: {
     bienvenida: "Hola [nombre], te comparto toda la informacion para tu estadia en Apartamento CR.\n\nCheck-in: [checkin] a partir de las 3:00 PM\nCheck-out: [checkout] antes de las 12:00 PM\n\nAqui tu guia:\n[link]\n\nNos vemos pronto!",
@@ -395,6 +398,7 @@ ${JSON.stringify(toTranslate)}`
       ubicacion: "Ubicación", wifi: "Acceso WiFi", normas: "Normas del Apartamento",
       restaurantes: "Restaurantes cercanos", transporte: "Cómo moverse",
       tours: "Operadores de Tours", contacto: "Contacto de emergencia",
+      divisas: "Cambio de divisas", abrir_lugar: "🗺️ Abrir el lugar",
       direccion: "Dirección", escanea: "📱 Escanea para conectarte",
       escanea_sub: "Apunta la cámara de tu celular al código",
       red: "Red WiFi", clave: "Contraseña",
@@ -412,6 +416,7 @@ ${JSON.stringify(toTranslate)}`
       ubicacion: "Location", wifi: "WiFi Access", normas: "Apartment rules",
       restaurantes: "Nearby restaurants", transporte: "Getting around",
       tours: "Tour Operators", contacto: "Emergency contacts",
+      divisas: "Currency exchange", abrir_lugar: "🗺️ Open location",
       direccion: "Address", escanea: "📱 Scan to connect",
       escanea_sub: "Point your phone camera at the code",
       red: "WiFi Network", clave: "Password",
@@ -507,6 +512,24 @@ ${JSON.stringify(toTranslate)}`
     {
       id: "tours", icon: "🗺️", title: tr.tours, color: "#6B4C3B",
       render: () => <ToursView tours={c.tours||[]} tr={tr} />
+    },
+    {
+      id: "divisas", icon: "💱", title: tr.divisas, color: "#6B4C3B",
+      render: () => (
+        <div>
+          {(c.divisas || []).map((d, i) => (
+            <div key={i} style={{ background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>💱 {d.nombre}</p>
+              {d.maps_link && (
+                <a href={d.maps_link} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#2563EB", color: "#fff", padding: "12px 0", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none", marginTop: 12 }}>
+                  {tr.abrir_lugar}
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      )
     },
     {
       id: "contacto", icon: "📞", title: tr.contacto, color: "#6B4C3B",
@@ -2340,7 +2363,6 @@ function ResenasPublicas() {
   const [loading, setLoading] = useState(true);
   const [resenaPage, setResenaPage] = useState(10);
   const [lang, setLang] = useState("es");
-  const [showCal, setShowCal] = useState(false);
   useEffect(()=>{sb.getResenas(null).then(data=>{if(Array.isArray(data))setResenas(data.filter(r=>!r.oculta));setLoading(false);});},[]);
 
   const t = {
@@ -2426,18 +2448,13 @@ function ResenasPublicas() {
           <p style={{margin:"0 0 4px",fontSize:12,color:"#6B7280"}}>⏱️ {t.min_nights} · {t.capacity}</p>
         </div>
 
-        {/* WhatsApp CTA + Calendar */}
+        {/* WhatsApp CTA */}
         <div style={{background:"#fff",padding:"0 16px 0"}}>
-          <button onClick={() => setShowCal(true)}
-            style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#F0FDF4",color:"#166534",border:"1px solid #86EFAC",padding:"12px 0",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",marginBottom:10}}>
-            📅 {lang === "en" ? "Check availability" : "Ver disponibilidad"}
-          </button>
           <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
             style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
             {t.whatsapp}
           </a>
         </div>
-        {showCal && <AvailabilityCalendar onClose={() => setShowCal(false)} />}
         <div style={{background:"#fff",padding:"0 16px 16px"}}>
           <img
             src={lang === "en" ? "/Restrictions.PNG" : "/Restricciones.PNG"}
@@ -3171,7 +3188,7 @@ function GuestScreen({ token, initialContent }) {
     ]).then(([r, c]) => {
       if (r && r.id) {
         setReserva(r);
-        if (c && typeof c === "object" && Object.keys(c).length > 0) setContent(c);
+        if (c && typeof c === "object" && Object.keys(c).length > 0) setContent({ ...initialContent, ...c });
         setStatus("ok");
       } else {
         setStatus("error");
@@ -3339,7 +3356,7 @@ function Login({ onLogin, onPortalPreview }) {
           <CopyBasicoButton />
         </div>
         <button onClick={onPortalPreview} style={{ width: "100%", background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-          👤 Vista previa portal huésped
+          👤 Ver portal
         </button>
       </div>
     </div>
@@ -3372,7 +3389,7 @@ function CopyBasicoButton() {
         setTimeout(() => setCopied(false), 2000);
       }}
       style={{ flex: 1, background: copied ? "rgba(22,163,74,0.8)" : "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 6px", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "background 0.2s", lineHeight: 1.2 }}>
-      {copied ? "✓ ¡Copiado!" : "📄 Copiar link Info Básica"}
+      {copied ? "✓ ¡Copiado!" : "📄 Info Básica"}
     </button>
   );
 }
