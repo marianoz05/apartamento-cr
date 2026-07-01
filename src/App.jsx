@@ -2194,6 +2194,98 @@ function ResenaForm({ reservaId }) {
   );
 }
 
+// ─── AVAILABILITY CALENDAR ───────────────────────────────────────
+function AvailabilityCalendar({ onClose }) {
+  const [reservas, setReservas] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [calDate, setCalDate] = useState(() => { const d = new Date(); return { month: d.getMonth(), year: d.getFullYear() }; });
+
+  useEffect(() => {
+    sb.getReservas(null).then(data => {
+      if (Array.isArray(data)) {
+        setReservas(data.filter(r => ["activa","confirmada","pendiente"].includes(r.estado)));
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  function isOccupied(dateStr) {
+    return reservas.some(r => r.check_in && r.check_out && dateStr >= r.check_in && dateStr < r.check_out);
+  }
+
+  const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  const { month, year } = calDate;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date().toISOString().split("T")[0];
+
+  const cells = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={onClose}>
+      <div style={{ background: "#fff", borderRadius: 20, padding: 20, width: "100%", maxWidth: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <p style={{ margin: 0, fontWeight: 800, fontSize: 16, color: "#111827" }}>📅 Disponibilidad</p>
+          <button onClick={onClose} style={{ background: "#F3F4F6", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 16 }}>✕</button>
+        </div>
+        {/* Month nav */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <button onClick={() => setCalDate(d => { const m = d.month === 0 ? 11 : d.month-1; return { month: m, year: m === 11 ? d.year-1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", fontSize: 16 }}>‹</button>
+          <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{monthNames[month]} {year}</p>
+          <button onClick={() => setCalDate(d => { const m = d.month === 11 ? 0 : d.month+1; return { month: m, year: m === 0 ? d.year+1 : d.year }; })} style={{ background: "#F3F4F6", border: "none", borderRadius: 8, width: 32, height: 32, cursor: "pointer", fontSize: 16 }}>›</button>
+        </div>
+        {/* Day headers */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2, marginBottom: 4 }}>
+          {["Do","Lu","Ma","Mi","Ju","Vi","Sá"].map(d => (
+            <p key={d} style={{ margin: 0, textAlign: "center", fontSize: 11, fontWeight: 700, color: "#9CA3AF", padding: "4px 0" }}>{d}</p>
+          ))}
+        </div>
+        {/* Days grid */}
+        {loading ? <p style={{ textAlign: "center", color: "#9CA3AF", padding: 20 }}>Cargando...</p> : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 2 }}>
+            {cells.map((day, i) => {
+              if (!day) return <div key={"e"+i} />;
+              const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+              const occupied = isOccupied(dateStr);
+              const isPast = dateStr < today;
+              const isToday = dateStr === today;
+              return (
+                <div key={dateStr} style={{
+                  textAlign: "center", padding: "6px 2px", borderRadius: 8, fontSize: 13, fontWeight: isToday ? 800 : 500,
+                  background: occupied ? "#FEE2E2" : isPast ? "#F9FAFB" : "#F0FDF4",
+                  color: occupied ? "#DC2626" : isPast ? "#D1D5DB" : "#166534",
+                  border: isToday ? "2px solid #1B4332" : "none",
+                }}>
+                  {day}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {/* Legend */}
+        <div style={{ display: "flex", gap: 16, marginTop: 16, justifyContent: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 14, height: 14, borderRadius: 4, background: "#F0FDF4", border: "1px solid #86EFAC" }} />
+            <p style={{ margin: 0, fontSize: 11, color: "#374151" }}>Disponible</p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 14, height: 14, borderRadius: 4, background: "#FEE2E2", border: "1px solid #FCA5A5" }} />
+            <p style={{ margin: 0, fontSize: 11, color: "#374151" }}>Ocupado</p>
+          </div>
+        </div>
+        {/* CTA */}
+        <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#25D366", color: "#fff", padding: "12px 0", borderRadius: 12, fontWeight: 700, fontSize: 14, textDecoration: "none", marginTop: 16 }}>
+          💬 Consultar disponibilidad
+        </a>
+      </div>
+    </div>
+  );
+}
+
 // ─── PHOTO GALLERY ───────────────────────────────────────────────
 function PhotoGallery({ cuarto, cocina, bano, t }) {
   const [lightboxIdx, setLightboxIdx] = useState(null);
@@ -2248,6 +2340,7 @@ function ResenasPublicas() {
   const [loading, setLoading] = useState(true);
   const [resenaPage, setResenaPage] = useState(10);
   const [lang, setLang] = useState("es");
+  const [showCal, setShowCal] = useState(false);
   useEffect(()=>{sb.getResenas(null).then(data=>{if(Array.isArray(data))setResenas(data.filter(r=>!r.oculta));setLoading(false);});},[]);
 
   const t = {
@@ -2333,13 +2426,18 @@ function ResenasPublicas() {
           <p style={{margin:"0 0 4px",fontSize:12,color:"#6B7280"}}>⏱️ {t.min_nights} · {t.capacity}</p>
         </div>
 
-        {/* WhatsApp CTA */}
+        {/* WhatsApp CTA + Calendar */}
         <div style={{background:"#fff",padding:"0 16px 0"}}>
           <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
-            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
+            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none",marginBottom:10}}>
             {t.whatsapp}
           </a>
+          <button onClick={() => setShowCal(true)}
+            style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#F0FDF4",color:"#166534",border:"1px solid #86EFAC",padding:"12px 0",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer"}}>
+            📅 {lang === "en" ? "Check availability" : "Ver disponibilidad"}
+          </button>
         </div>
+        {showCal && <AvailabilityCalendar onClose={() => setShowCal(false)} />}
         <div style={{background:"#fff",padding:"0 16px 16px"}}>
           <img
             src={lang === "en" ? "/Restrictions.PNG" : "/Restricciones.PNG"}
