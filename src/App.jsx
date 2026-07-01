@@ -3196,7 +3196,7 @@ export default function App() {
       )}
       {screen === "portal_preview" && (
         <div style={{ position: "relative" }}>
-          <div style={{ position: "fixed", top: 12, left: 12, zIndex: 999 }}>
+          <div style={{ position: "fixed", top: "max(12px, env(safe-area-inset-top))", left: 12, zIndex: 999 }}>
             <button onClick={() => setScreen("login")} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
               ← Volver
             </button>
