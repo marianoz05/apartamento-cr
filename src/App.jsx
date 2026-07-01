@@ -2196,23 +2196,39 @@ function ResenaForm({ reservaId }) {
 
 // ─── PHOTO GALLERY ───────────────────────────────────────────────
 function PhotoGallery({ cuarto, cocina, bano }) {
-  const [lightbox, setLightbox] = useState(null);
+  const [lightboxIdx, setLightboxIdx] = useState(null);
   const photos = [["/Cuarto_page.jpg", cuarto],["/Cocina_page.jpg", cocina],["/Bano_page.jpg", bano]];
+  const prev = () => setLightboxIdx(i => (i === 0 ? photos.length - 1 : i - 1));
+  const next = () => setLightboxIdx(i => (i === photos.length - 1 ? 0 : i + 1));
   return (
     <>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:16,borderRadius:12,overflow:"hidden"}}>
         {photos.map(([src,label],i)=>(
-          <div key={i} style={{cursor:"pointer"}} onClick={()=>setLightbox(src)}>
+          <div key={i} style={{cursor:"pointer"}} onClick={()=>setLightboxIdx(i)}>
             <img src={src} alt={label} style={{width:"100%",height:100,objectFit:"cover",display:"block"}}
               onError={e=>{e.target.style.display="none";}}/>
             <p style={{margin:0,fontSize:10,fontWeight:700,textAlign:"center",padding:"4px 2px",background:"#F3F4F6",color:"#374151"}}>{label}</p>
           </div>
         ))}
       </div>
-      {lightbox && (
-        <div onClick={()=>setLightbox(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-          <button onClick={()=>setLightbox(null)} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:40,height:40,fontSize:20,cursor:"pointer",fontWeight:700}}>✕</button>
-          <img src={lightbox} alt="" style={{maxWidth:"100%",maxHeight:"90vh",borderRadius:12,objectFit:"contain"}} onClick={e=>e.stopPropagation()}/>
+      {lightboxIdx !== null && (
+        <div onClick={()=>setLightboxIdx(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.93)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}}>
+          {/* Close */}
+          <button onClick={()=>setLightboxIdx(null)} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:40,height:40,fontSize:20,cursor:"pointer",fontWeight:700,zIndex:1}}>✕</button>
+          {/* Label */}
+          <p style={{position:"absolute",bottom:24,left:0,right:0,textAlign:"center",color:"#fff",fontSize:13,fontWeight:600,margin:0}}>{photos[lightboxIdx][1]}</p>
+          {/* Dots */}
+          <div style={{position:"absolute",bottom:8,left:0,right:0,display:"flex",justifyContent:"center",gap:6}}>
+            {photos.map((_,i)=>(
+              <div key={i} onClick={e=>{e.stopPropagation();setLightboxIdx(i);}} style={{width:7,height:7,borderRadius:"50%",background:i===lightboxIdx?"#fff":"rgba(255,255,255,0.35)",cursor:"pointer"}}/>
+            ))}
+          </div>
+          {/* Prev */}
+          <button onClick={e=>{e.stopPropagation();prev();}} style={{position:"absolute",left:12,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:44,height:44,fontSize:22,cursor:"pointer",fontWeight:700}}>‹</button>
+          {/* Image */}
+          <img src={photos[lightboxIdx][0]} alt={photos[lightboxIdx][1]} style={{maxWidth:"90%",maxHeight:"80vh",borderRadius:12,objectFit:"contain"}} onClick={e=>e.stopPropagation()}/>
+          {/* Next */}
+          <button onClick={e=>{e.stopPropagation();next();}} style={{position:"absolute",right:12,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:44,height:44,fontSize:22,cursor:"pointer",fontWeight:700}}>›</button>
         </div>
       )}
     </>
