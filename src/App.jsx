@@ -3129,7 +3129,7 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 100%)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px 20px" }}>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 100%)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px 20px", paddingTop: "max(60px, calc(env(safe-area-inset-top) + 20px))" }}>
       <div style={{ background: "#fff", borderRadius: 24, padding: 32, width: "100%", maxWidth: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <p style={{ fontSize: 36, margin: "0 0 8px" }}>🌿</p>
