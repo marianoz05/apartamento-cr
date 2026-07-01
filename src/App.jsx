@@ -3231,19 +3231,6 @@ function InfoBasica() {
       render: () => <RestaurantesView restaurantes={c.restaurantes || []} lang="es" tr={tr} />
     },
     {
-      id: "transporte", icon: "🚇", title: tr.transporte,
-      render: () => (
-        <div>
-          {(c.transporte || []).map((t, i) => (
-            <div key={i} style={{ background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 16 }}>{t.icon} {t.titulo}</p>
-              <p style={{ margin: "6px 0 0", fontSize: 14, color: "#6B7280" }}>{t.desc}</p>
-            </div>
-          ))}
-        </div>
-      )
-    },
-    {
       id: "tours", icon: "🗺️", title: tr.tours,
       render: () => <ToursView tours={c.tours || []} tr={tr} />
     },
@@ -3352,7 +3339,7 @@ function Login({ onLogin, onPortalPreview }) {
           <CopyBasicoButton />
         </div>
         <button onClick={onPortalPreview} style={{ width: "100%", background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-          👤 Ver portal
+          👤 Vista previa portal huésped
         </button>
       </div>
     </div>
@@ -3385,7 +3372,7 @@ function CopyBasicoButton() {
         setTimeout(() => setCopied(false), 2000);
       }}
       style={{ flex: 1, background: copied ? "rgba(22,163,74,0.8)" : "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 6px", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "background 0.2s", lineHeight: 1.2 }}>
-      {copied ? "✓ ¡Copiado!" : "📄 Info Básica"}
+      {copied ? "✓ ¡Copiado!" : "📄 Copiar link Info Básica"}
     </button>
   );
 }
