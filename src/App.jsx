@@ -2195,40 +2195,47 @@ function ResenaForm({ reservaId }) {
 }
 
 // ─── PHOTO GALLERY ───────────────────────────────────────────────
-function PhotoGallery({ cuarto, cocina, bano }) {
+function PhotoGallery({ cuarto, cocina, bano, t }) {
   const [lightboxIdx, setLightboxIdx] = useState(null);
-  const photos = [["/Cuarto_page.jpg", cuarto],["/Cocina_page.jpg", cocina],["/Bano_page.jpg", bano]];
+  const photos = [
+    ["/Comedor_page.jpg",  t?.sala    || "Comedor"],
+    ["/Sala_page.jpg",     t?.living  || "Sala"],
+    ["/Balcon_page.jpg",   t?.balcon  || "Balcón"],
+    ["/Cuarto_page.jpg",   t?.cuarto  || "Cuarto principal"],
+    ["/Cuarto2_page.jpg",  t?.cuarto2 || "Cuarto 2"],
+    ["/Cocina_page.jpg",   t?.cocina  || "Cocina"],
+    ["/Bano1_page.jpg",    t?.bano1   || "Baño 1"],
+    ["/Bano_page.jpg",     t?.bano    || "Baño 2"],
+  ];
   const prev = () => setLightboxIdx(i => (i === 0 ? photos.length - 1 : i - 1));
   const next = () => setLightboxIdx(i => (i === photos.length - 1 ? 0 : i + 1));
   return (
     <>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:16,borderRadius:12,overflow:"hidden"}}>
-        {photos.map(([src,label],i)=>(
-          <div key={i} style={{cursor:"pointer"}} onClick={()=>setLightboxIdx(i)}>
-            <img src={src} alt={label} style={{width:"100%",height:100,objectFit:"cover",display:"block"}}
-              onError={e=>{e.target.style.display="none";}}/>
-            <p style={{margin:0,fontSize:10,fontWeight:700,textAlign:"center",padding:"4px 2px",background:"#F3F4F6",color:"#374151"}}>{label}</p>
-          </div>
-        ))}
+      {/* Horizontal scrollable carousel */}
+      <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch",marginBottom:16,paddingBottom:4}}>
+        <div style={{display:"flex",gap:8,width:"max-content",padding:"0 2px"}}>
+          {photos.map(([src,label],i)=>(
+            <div key={i} style={{cursor:"pointer",flexShrink:0}} onClick={()=>setLightboxIdx(i)}>
+              <img src={src} alt={label} style={{width:140,height:100,objectFit:"cover",display:"block",borderRadius:10}}
+                onError={e=>{e.target.parentNode.style.display="none";}}/>
+              <p style={{margin:"4px 0 0",fontSize:10,fontWeight:700,textAlign:"center",color:"#374151",width:140}}>{label}</p>
+            </div>
+          ))}
+        </div>
       </div>
+      {/* Lightbox */}
       {lightboxIdx !== null && (
         <div onClick={()=>setLightboxIdx(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.93)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center"}}>
-          {/* Close */}
           <button onClick={()=>setLightboxIdx(null)} style={{position:"absolute",top:16,right:16,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:40,height:40,fontSize:20,cursor:"pointer",fontWeight:700,zIndex:1}}>✕</button>
-          {/* Label */}
-          <p style={{position:"absolute",bottom:24,left:0,right:0,textAlign:"center",color:"#fff",fontSize:13,fontWeight:600,margin:0}}>{photos[lightboxIdx][1]}</p>
-          {/* Dots */}
-          <div style={{position:"absolute",bottom:8,left:0,right:0,display:"flex",justifyContent:"center",gap:6}}>
+          <p style={{position:"absolute",top:16,left:0,right:0,textAlign:"center",color:"#fff",fontSize:13,fontWeight:600,margin:0}}>{photos[lightboxIdx][1]}</p>
+          <div style={{position:"absolute",bottom:16,left:0,right:0,display:"flex",justifyContent:"center",gap:5,flexWrap:"wrap",padding:"0 16px"}}>
             {photos.map((_,i)=>(
-              <div key={i} onClick={e=>{e.stopPropagation();setLightboxIdx(i);}} style={{width:7,height:7,borderRadius:"50%",background:i===lightboxIdx?"#fff":"rgba(255,255,255,0.35)",cursor:"pointer"}}/>
+              <div key={i} onClick={e=>{e.stopPropagation();setLightboxIdx(i);}} style={{width:6,height:6,borderRadius:"50%",background:i===lightboxIdx?"#fff":"rgba(255,255,255,0.35)",cursor:"pointer"}}/>
             ))}
           </div>
-          {/* Prev */}
-          <button onClick={e=>{e.stopPropagation();prev();}} style={{position:"absolute",left:12,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:44,height:44,fontSize:22,cursor:"pointer",fontWeight:700}}>‹</button>
-          {/* Image */}
-          <img src={photos[lightboxIdx][0]} alt={photos[lightboxIdx][1]} style={{maxWidth:"90%",maxHeight:"80vh",borderRadius:12,objectFit:"contain"}} onClick={e=>e.stopPropagation()}/>
-          {/* Next */}
-          <button onClick={e=>{e.stopPropagation();next();}} style={{position:"absolute",right:12,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:44,height:44,fontSize:22,cursor:"pointer",fontWeight:700}}>›</button>
+          <button onClick={e=>{e.stopPropagation();prev();}} style={{position:"absolute",left:8,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:44,height:44,fontSize:24,cursor:"pointer",fontWeight:700}}>‹</button>
+          <img src={photos[lightboxIdx][0]} alt={photos[lightboxIdx][1]} style={{maxWidth:"88%",maxHeight:"80vh",borderRadius:12,objectFit:"contain"}} onClick={e=>e.stopPropagation()}/>
+          <button onClick={e=>{e.stopPropagation();next();}} style={{position:"absolute",right:8,background:"rgba(255,255,255,0.15)",color:"#fff",border:"none",borderRadius:"50%",width:44,height:44,fontSize:24,cursor:"pointer",fontWeight:700}}>›</button>
         </div>
       )}
     </>
@@ -2250,7 +2257,7 @@ function ResenasPublicas() {
       tagline: "Moderno · Fresco · Central",
       desc: "Estancia exclusiva y cómoda en Medellín, a solo 5 minutos a pie de gimnasios, restaurantes, supermercados y transporte público. Un equilibrio perfecto entre comodidad, seguridad y estilo.",
       features: [["🛏️","2 cuartos"],["🚿","2 baños"],["📐","91 m²"],["👥","1 a 6 personas"],["📶","Internet alta velocidad"],["📍","Laureles, Medellín"]],
-      sala: "Sala y Comedor", cuarto: "Cuarto", cocina: "Cocina", bano: "Baño",
+      sala: "Comedor", living: "Sala", balcon: "Balcón", cuarto: "Cuarto principal", cuarto2: "Cuarto 2", cocina: "Cocina", bano1: "Baño 1", bano: "Baño 2",
       min_nights: "Estadía mínima: 3 noches", capacity: "Capacidad: 1 a 6 personas",
       whatsapp: "💬 Consultar disponibilidad por WhatsApp",
       rules_title: "Reglas de la casa",
@@ -2269,7 +2276,7 @@ function ResenasPublicas() {
       tagline: "Modern · Fresh · Central",
       desc: "Exclusive and comfortable stay in Medellín, just 5 minutes walk from gyms, restaurants, supermarkets and public transport. A perfect balance of comfort, safety and style.",
       features: [["🛏️","2 bedrooms"],["🚿","2 bathrooms"],["📐","91 m²"],["👥","1 to 6 guests"],["📶","High-speed internet"],["📍","Laureles, Medellín"]],
-      sala: "Living & Dining Room", cuarto: "Bedroom", cocina: "Kitchen", bano: "Bathroom",
+      sala: "Dining Room", living: "Living Room", balcon: "Balcony", cuarto: "Master Bedroom", cuarto2: "Bedroom 2", cocina: "Kitchen", bano1: "Bathroom 1", bano: "Bathroom 2",
       min_nights: "Minimum stay: 3 nights", capacity: "Capacity: 1 to 6 guests",
       whatsapp: "💬 Check availability on WhatsApp",
       rules_title: "House rules",
@@ -2322,7 +2329,7 @@ function ResenasPublicas() {
             ))}
           </div>
           {/* Photo gallery */}
-          <PhotoGallery cuarto={t.cuarto} cocina={t.cocina} bano={t.bano} />
+          <PhotoGallery cuarto={t.cuarto} cocina={t.cocina} bano={t.bano} t={t} />
           <p style={{margin:"0 0 4px",fontSize:12,color:"#6B7280"}}>⏱️ {t.min_nights} · {t.capacity}</p>
         </div>
 
