@@ -2428,14 +2428,14 @@ function ResenasPublicas() {
 
         {/* WhatsApp CTA + Calendar */}
         <div style={{background:"#fff",padding:"0 16px 0"}}>
-          <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
-            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none",marginBottom:10}}>
-            {t.whatsapp}
-          </a>
           <button onClick={() => setShowCal(true)}
-            style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#F0FDF4",color:"#166534",border:"1px solid #86EFAC",padding:"12px 0",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer"}}>
+            style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#F0FDF4",color:"#166534",border:"1px solid #86EFAC",padding:"12px 0",borderRadius:14,fontWeight:700,fontSize:14,cursor:"pointer",marginBottom:10}}>
             📅 {lang === "en" ? "Check availability" : "Ver disponibilidad"}
           </button>
+          <a href="https://wa.me/50688911513" target="_blank" rel="noopener noreferrer"
+            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,background:"#25D366",color:"#fff",padding:"14px 0",borderRadius:14,fontWeight:700,fontSize:15,textDecoration:"none"}}>
+            {t.whatsapp}
+          </a>
         </div>
         {showCal && <AvailabilityCalendar onClose={() => setShowCal(false)} />}
         <div style={{background:"#fff",padding:"0 16px 16px"}}>
