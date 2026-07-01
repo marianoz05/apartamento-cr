@@ -3104,7 +3104,7 @@ function GuestScreen({ token, initialContent }) {
 }
 
 // ─── LOGIN ────────────────────────────────────────────────────────
-function Login({ onLogin }) {
+function Login({ onLogin, onPortalPreview }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -3129,7 +3129,7 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 100%)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px 20px", paddingTop: "max(60px, calc(env(safe-area-inset-top) + 20px))" }}>
+    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "40px 20px 20px", paddingTop: "max(60px, calc(env(safe-area-inset-top) + 20px))" }}>
       <div style={{ background: "#fff", borderRadius: 24, padding: 32, width: "100%", maxWidth: 380, boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <p style={{ fontSize: 36, margin: "0 0 8px" }}>🌿</p>
@@ -3150,6 +3150,13 @@ function Login({ onLogin }) {
         </button>
       </div>
     </div>
+    {/* Quick action buttons below card */}
+    <div style={{ display: "flex", gap: 10, marginTop: 12, width: "100%", maxWidth: 380, padding: "0 0px" }}>
+      <CopyLinkButton />
+      <button onClick={onPortalPreview} style={{ flex: 1, background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+        👤 Ver portal
+      </button>
+    </div>
   );
 }
 
@@ -3163,8 +3170,8 @@ function CopyLinkButton() {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      style={{ background: copied ? "#16A34A" : "#1B4332", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)", transition: "background 0.2s" }}>
-      {copied ? "✓ ¡Copiado!" : "🔗 Copiar link apartamento"}
+      style={{ flex: 1, background: copied ? "rgba(22,163,74,0.8)" : "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 12, padding: "10px 0", fontSize: 12, fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }}>
+      {copied ? "✓ ¡Copiado!" : "🔗 Copiar link"}
     </button>
   );
 }
@@ -3208,15 +3215,8 @@ export default function App() {
     <div>
       {screen === "login" && (
         <div>
-          <Login onLogin={handleLogin} />
-          <div style={{ position: "fixed", bottom: 16, left: 16, zIndex: 100 }}>
-            <CopyLinkButton />
-          </div>
-          <div style={{ position: "fixed", bottom: 16, right: 16, zIndex: 100 }}>
-            <button onClick={() => setScreen("portal_preview")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
-              👤 Ver portal huésped
-            </button>
-          </div>
+          <Login onLogin={handleLogin} onPortalPreview={() => setScreen("portal_preview")} />
+
         </div>
       )}
       {screen === "admin" && (
