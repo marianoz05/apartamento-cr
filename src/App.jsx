@@ -3133,7 +3133,22 @@ function Login({ onLogin }) {
 }
 
 // ─── ROOT ─────────────────────────────────────────────────────────
-export default function App() {
+export default function CopyLinkButton() {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => {
+        navigator.clipboard?.writeText("https://apartamento-cr.vercel.app/apartamento-medellin");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      style={{ background: copied ? "#16A34A" : "#1B4332", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)", transition: "background 0.2s" }}>
+      {copied ? "✓ ¡Copiado!" : "🔗 Copiar link apartamento"}
+    </button>
+  );
+}
+
+function App() {
   const path = window.location.pathname;
   const guestMatch = path.match(/^\/g\/(.+)$/);
   const guestToken = guestMatch ? guestMatch[1] : null;
@@ -3173,7 +3188,8 @@ export default function App() {
       {screen === "login" && (
         <div>
           <Login onLogin={handleLogin} />
-          <div style={{ position: "fixed", bottom: 16, right: 16 }}>
+          <div style={{ position: "fixed", bottom: 16, right: 16, display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
+            <CopyLinkButton />
             <button onClick={() => setScreen("portal_preview")} style={{ background: "#2563EB", color: "#fff", border: "none", borderRadius: 12, padding: "8px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(37,99,235,0.4)" }}>
               👤 Ver portal huésped
             </button>
@@ -3195,11 +3211,12 @@ export default function App() {
         <ResenaForm reservaId={resenaId} />
       )}
       {screen === "portal_preview" && (
-        <div style={{ position: "relative" }}>
-          <div style={{ position: "fixed", top: "max(12px, env(safe-area-inset-top))", left: 12, zIndex: 999 }}>
-            <button onClick={() => setScreen("login")} style={{ background: "#1B4332", color: "#fff", border: "none", borderRadius: 10, padding: "8px 14px", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.3)" }}>
+        <div>
+          <div style={{ background: "#111827", padding: "10px 16px", paddingTop: "max(10px, env(safe-area-inset-top))", display: "flex", alignItems: "center", gap: 10 }}>
+            <button onClick={() => setScreen("login")} style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
               ← Volver
             </button>
+            <p style={{ margin: 0, fontSize: 11, color: "#9CA3AF", fontWeight: 600 }}>Vista previa del portal huésped</p>
           </div>
           <GuestPortal
             reserva={{ huesped_nombre: "Admin", check_in: new Date().toISOString().split("T")[0], check_out: new Date(Date.now()+3*86400000).toISOString().split("T")[0], noches: 3 }}
