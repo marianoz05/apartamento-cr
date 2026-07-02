@@ -339,6 +339,27 @@ function RestaurantesView({ restaurantes, lang, tr: trProp }) {
 }
 
 // ─── GUEST PORTAL ────────────────────────────────────────────────
+// ─── ICONOS SVG (sin dependencias) ───────────────────
+function Icon({ name, size = 24, color = "currentColor", strokeWidth = 2, style }) {
+  const icons = {
+    "map-pin": <><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></>,
+    "wifi": <><path d="M5 13a10 10 0 0 1 14 0" /><path d="M8.5 16.5a5 5 0 0 1 7 0" /><path d="M2 8.82a15 15 0 0 1 20 0" /><line x1="12" y1="20" x2="12.01" y2="20" /></>,
+    "clipboard-list": <><rect x="8" y="2" width="8" height="4" rx="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><path d="M8 11h.01" /><path d="M12 11h4" /><path d="M8 15h.01" /><path d="M12 15h4" /></>,
+    "utensils": <><path d="M3 2v7c0 1.1.9 2 2 2h1a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></>,
+    "bus": <><path d="M8 6v6" /><path d="M15 6v6" /><path d="M2 12h19.6" /><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" /><circle cx="7" cy="18" r="2" /><path d="M9 18h5" /><circle cx="16" cy="18" r="2" /></>,
+    "map": <><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /><path d="M15 5.764v15" /><path d="M9 3.236v15" /></>,
+    "exchange": <><path d="M8 3 4 7l4 4" /><path d="M4 7h16" /><path d="M16 21l4-4-4-4" /><path d="M20 17H4" /></>,
+    "phone": <><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></>,
+  };
+  const g = icons[name];
+  if (!g) return null;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style} aria-hidden="true">
+      {g}
+    </svg>
+  );
+}
+
 function GuestPortal({ reserva, content }) {
   const [active, setActive] = useState(null);
   const [lang, setLang] = useState("es");
@@ -432,7 +453,7 @@ ${JSON.stringify(toTranslate)}`
 
   const sections = [
     {
-      id: "ubicacion", icon: "📍", title: tr.ubicacion, color: "#6B4C3B",
+      id: "ubicacion", icon: "map-pin", title: tr.ubicacion, color: "#6B4C3B",
       render: () => (
         <div>
           {c.ubicacion?.direccion && (
@@ -453,7 +474,7 @@ ${JSON.stringify(toTranslate)}`
       )
     },
     {
-      id: "wifi", icon: "📶", title: tr.wifi, color: "#6B4C3B",
+      id: "wifi", icon: "wifi", title: tr.wifi, color: "#6B4C3B",
       render: () => {
         const qrData = `WIFI:T:WPA;S:${c.wifi.nombre};P:${c.wifi.clave};;`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=1B4332&margin=10`;
@@ -477,7 +498,7 @@ ${JSON.stringify(toTranslate)}`
       }
     },
     {
-      id: "normas", icon: "📋", title: tr.normas, color: "#6B4C3B",
+      id: "normas", icon: "clipboard-list", title: tr.normas, color: "#6B4C3B",
       render: () => (
         <div>
           {c.normas.map((n, i) => (
@@ -493,11 +514,11 @@ ${JSON.stringify(toTranslate)}`
       )
     },
     {
-      id: "restaurantes", icon: "🍽️", title: tr.restaurantes, color: "#6B4C3B",
+      id: "restaurantes", icon: "utensils", title: tr.restaurantes, color: "#6B4C3B",
       render: () => <RestaurantesView restaurantes={c.restaurantes} lang={lang} tr={tr} />
     },
     {
-      id: "transporte", icon: "🚇", title: tr.transporte, color: "#6B4C3B",
+      id: "transporte", icon: "bus", title: tr.transporte, color: "#6B4C3B",
       render: () => (
         <div>
           {c.transporte.map((t, i) => (
@@ -510,11 +531,11 @@ ${JSON.stringify(toTranslate)}`
       )
     },
     {
-      id: "tours", icon: "🗺️", title: tr.tours, color: "#6B4C3B",
+      id: "tours", icon: "map", title: tr.tours, color: "#6B4C3B",
       render: () => <ToursView tours={c.tours||[]} tr={tr} />
     },
     {
-      id: "divisas", icon: "💱", title: tr.divisas, color: "#6B4C3B",
+      id: "divisas", icon: "exchange", title: tr.divisas, color: "#6B4C3B",
       render: () => (
         <div>
           {(c.divisas || []).map((d, i) => (
@@ -532,7 +553,7 @@ ${JSON.stringify(toTranslate)}`
       )
     },
     {
-      id: "contacto", icon: "📞", title: tr.contacto, color: "#6B4C3B",
+      id: "contacto", icon: "phone", title: tr.contacto, color: "#6B4C3B",
       render: () => (
         <div>
           <div style={{ background: "#fff", border: "1px solid #FECACA", borderRadius: 14, padding: 16, marginBottom: 12 }}>
@@ -594,7 +615,7 @@ ${JSON.stringify(toTranslate)}`
           <div style={{ padding: "14px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {sections.map((s) => (
               <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 16, padding: "14px 12px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
-                <span style={{ fontSize: 28 }}>{s.icon}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 44, height: 44, borderRadius: 13, background: "#DCEFE4", color: "#1B4332" }}><Icon name={s.icon} size={22} /></span>
                 <p style={{ margin: "8px 0 2px", fontWeight: 700, fontSize: 15, color: "#1a1a1a", lineHeight: 1.3 }}>{s.title}</p>
                 
               </button>
@@ -611,7 +632,7 @@ ${JSON.stringify(toTranslate)}`
               <button onClick={() => { setActive(null); scrollTop(); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" }}>Apartamento CR</p>
-                <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0 }}>{sec.icon} {sec.title}</h2>
+                <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0, display: "flex", alignItems: "center", gap: 8 }}><Icon name={sec.icon} size={20} color="#fff" /> {sec.title}</h2>
               </div>
             </div>
             <div style={{ padding: "20px 16px 40px", background: "#E8F5EE", minHeight: "100%" }}>{sec.render()}</div>
@@ -3268,11 +3289,11 @@ function InfoBasica() {
 
   const sections = [
     {
-      id: "restaurantes", icon: "🍽️", title: tr.restaurantes,
+      id: "restaurantes", icon: "utensils", title: tr.restaurantes,
       render: () => <RestaurantesView restaurantes={c.restaurantes || []} lang="es" tr={tr} />
     },
     {
-      id: "tours", icon: "🗺️", title: tr.tours,
+      id: "tours", icon: "map", title: tr.tours,
       render: () => <ToursView tours={c.tours || []} tr={tr} />
     },
   ];
@@ -3300,7 +3321,7 @@ function InfoBasica() {
             <div style={{ padding: "14px 12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               {sections.map((s) => (
                 <button key={s.id} onClick={() => { setActive(s.id); scrollTop(); }} style={{ background: "#fff", border: "none", borderRadius: 16, padding: "14px 12px", textAlign: "left", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
-                  <span style={{ fontSize: 28 }}>{s.icon}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 44, height: 44, borderRadius: 13, background: "#DCEFE4", color: "#1B4332" }}><Icon name={s.icon} size={22} /></span>
                   <p style={{ margin: "8px 0 2px", fontWeight: 700, fontSize: 15, color: "#1a1a1a", lineHeight: 1.3 }}>{s.title}</p>
                 </button>
               ))}
@@ -3316,7 +3337,7 @@ function InfoBasica() {
               <button onClick={() => { setActive(null); scrollTop(); }} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 10, width: 34, height: 34, cursor: "pointer", color: "#fff", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>‹</button>
               <div>
                 <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 10, margin: 0, textTransform: "uppercase", letterSpacing: "0.1em" }}>Apartamento CR</p>
-                <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0 }}>{sec.icon} {sec.title}</h2>
+                <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: 0, display: "flex", alignItems: "center", gap: 8 }}><Icon name={sec.icon} size={20} color="#fff" /> {sec.title}</h2>
               </div>
             </div>
             <div style={{ padding: "20px 16px 40px", background: "#E8F5EE", minHeight: "100%" }}>{sec.render()}</div>
