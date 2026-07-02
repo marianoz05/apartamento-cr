@@ -265,7 +265,7 @@ function TourItem({ t, tr }) {
   ].filter(Boolean).join(" · ");
   return (
     <div style={{ background: "#fff", borderRadius: 14, padding: 16, marginBottom: 10 }}>
-      <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 17 }}>🗺️ {t.nombre}</p>
+      <p style={{ margin: "0 0 2px", fontWeight: 700, fontSize: 17, display: "flex", alignItems: "center", gap: 7 }}><Icon name="map" size={18} color="#1B4332" /> {t.nombre}</p>
       {tipoLabel && (
         <p style={{ margin: "0 0 8px", fontSize: 12, color: "#5C3D2E", fontWeight: 600 }}>
           {tr?.tipo_tour||"Tipo de tour"}: {tipoLabel}
@@ -274,10 +274,10 @@ function TourItem({ t, tr }) {
       {t.detalle && <p style={{ margin: "0 0 10px", fontSize: 13, color: "#6B7280", lineHeight: 1.5 }}>{t.detalle}</p>}
       {numFormateado && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#F9FAFB", borderRadius: 10, padding: "8px 12px" }}>
-          <span style={{ fontSize: 13, color: "#374151", flex: 1, fontWeight: 600 }}>📞 {numFormateado}</span>
+          <span style={{ fontSize: 13, color: "#374151", flex: 1, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6 }}><Icon name="phone" size={15} color="#1B4332" /> {numFormateado}</span>
           <button onClick={() => { navigator.clipboard?.writeText(numFormateado); setCopied(true); setTimeout(()=>setCopied(false),2000); }}
             style={{ background: copied?"#DCFCE7":"#E5E7EB", color: copied?"#166534":"#374151", border: "none", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
-            {copied ? (tr?.copiado||"✓ Copiado") : (tr?.copiar||"📋 Copiar")}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><Icon name={copied ? "check" : "copy"} size={13} /> {copied ? (tr?.copiado||"Copiado") : (tr?.copiar||"Copiar")}</span>
           </button>
         </div>
       )}
@@ -316,10 +316,10 @@ function RestaurantesView({ restaurantes, lang, tr: trProp }) {
   return (
     <div>
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        {[["distancia","📍 Distancia"],["precio","💰 Precio"]].map(([key, label]) => (
+        {[["distancia","Distancia","walk"],["precio","Precio","coin"]].map(([key, label, ic]) => (
           <button key={key} onClick={() => { if (sortR === key) setSortDir(d => d === "asc" ? "desc" : "asc"); else { setSortR(key); setSortDir("asc"); } }}
             style={{ display: "flex", alignItems: "center", gap: 4, background: sortR === key ? "#7F1D1D" : "#F3F4F6", color: sortR === key ? "#fff" : "#374151", border: "none", borderRadius: 20, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-            {label} {sortR === key ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+            <Icon name={ic} size={15} color={sortR === key ? "#fff" : "#374151"} /> {label} {sortR === key ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
           </button>
         ))}
       </div>
@@ -328,8 +328,8 @@ function RestaurantesView({ restaurantes, lang, tr: trProp }) {
           <div>
             <p style={{ margin: 0, fontWeight: 700, fontSize: 14 }}>{r.nombre}</p>
             <p style={{ margin: "2px 0", fontSize: 12, color: "#6B7280" }}>{r.tipo}</p>
-            {fmtDist(r.distancia_m) && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {fmtDist(r.distancia_m)} {trProp?.caminando||"caminando"}</p>}
-            {!r.distancia_m && r.distancia && <p style={{ margin: 0, fontSize: 12, color: "#DC2626" }}>📍 {r.distancia} {trProp?.caminando||"caminando"}</p>}
+            {fmtDist(r.distancia_m) && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "#DCEFE4", color: "#1B4332", borderRadius: 8, padding: "3px 8px", fontSize: 12, fontWeight: 600, marginTop: 2 }}><Icon name="walk" size={13} /> {fmtDist(r.distancia_m)} {trProp?.caminando||"caminando"}</span>}
+            {!r.distancia_m && r.distancia && <span style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "#DCEFE4", color: "#1B4332", borderRadius: 8, padding: "3px 8px", fontSize: 12, fontWeight: 600, marginTop: 2 }}><Icon name="walk" size={13} /> {r.distancia} {trProp?.caminando||"caminando"}</span>}
           </div>
           <span style={{ fontSize: 12, fontWeight: 700, color: "#D97706" }}>{r.precio || r.estrellas}</span>
         </div>
@@ -349,6 +349,10 @@ function Icon({ name, size = 24, color = "currentColor", strokeWidth = 2, style 
     "bus": <><path d="M8 6v6" /><path d="M15 6v6" /><path d="M2 12h19.6" /><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" /><circle cx="7" cy="18" r="2" /><path d="M9 18h5" /><circle cx="16" cy="18" r="2" /></>,
     "map": <><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /><path d="M15 5.764v15" /><path d="M9 3.236v15" /></>,
     "exchange": <><path d="M8 3 4 7l4 4" /><path d="M4 7h16" /><path d="M16 21l4-4-4-4" /><path d="M20 17H4" /></>,
+    "walk": <><circle cx="13" cy="4" r="1" /><path d="M7 21l3-4" /><path d="M16 21l-2-4l-3-3l1-6" /><path d="M6 12l2-3l4-1l3 3l3 1" /></>,
+    "coin": <><circle cx="12" cy="12" r="9" /><path d="M14.8 9a2 2 0 0 0-1.8-1h-2a1.5 1.5 0 0 0 0 3h2a1.5 1.5 0 0 1 0 3h-2a2 2 0 0 1-1.8-1" /><path d="M12 6v2m0 8v2" /></>,
+    "copy": <><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></>,
+    "check": <><path d="M20 6 9 17l-5-5" /></>,
     "phone": <><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" /></>,
   };
   const g = icons[name];
@@ -425,7 +429,7 @@ ${JSON.stringify(toTranslate)}`
       red: "Red WiFi", clave: "Contraseña",
       anfitron: "Anfitrión", escribir_wa: "💬 Escribir por WhatsApp",
       privado: "Privado", compartido: "Compartido",
-      copiar: "📋 Copiar", copiado: "✓ Copiado",
+      copiar: "Copiar", copiado: "Copiado",
       no_tours: "No hay operadores registrados.",
       recomendaciones: "Algunas recomendaciones son:",
       tipo_tour: "Tipo de tour",
@@ -443,7 +447,7 @@ ${JSON.stringify(toTranslate)}`
       red: "WiFi Network", clave: "Password",
       anfitron: "Host", escribir_wa: "💬 Message on WhatsApp",
       privado: "Private", compartido: "Shared",
-      copiar: "📋 Copy", copiado: "✓ Copied",
+      copiar: "Copy", copiado: "Copied",
       no_tours: "No operators registered.",
       recomendaciones: "Some recommendations are:",
       tipo_tour: "Tour type",
